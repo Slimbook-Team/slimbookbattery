@@ -13,7 +13,7 @@ The energy save applications like TLP are based on "If I i'm not using it consum
 
 You can download Slimbook Battery from our application download center for Linux with our repositories in Launchpad. You can do it too if you introduce this in a Terminal (Ctrl+Alt+T):
 
-``sudo add-apt-repository ppa:slimbook/slimbook`
+``sudo add-apt-repository ppa:slimbook/slimbook
 sudo apt-get update``
 
 By doing this we will have added the Slimbook repositories. Now we will execute the next command to install the application:
