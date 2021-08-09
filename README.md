@@ -22,6 +22,5 @@ By doing this we will have added the Slimbook repositories. Now we will execute 
 
 `sudo apt-get install slimbookbattery`
 
-Now, you can start the application, and select a "energy profile" in the trayicon.
 
-This app work with desktops: Unity, GNOME, KDE Plasma, Cinnamon, Mate...
+This app works with: Unity, GNOME, KDE Plasma, Cinnamon, Mate...
