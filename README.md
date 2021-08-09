@@ -7,7 +7,7 @@ This means that this application it's not only compatible with SLIMBOOK computer
 
 The application implements three different energy modes: «energy saving», «balanced» and «maximum performance». Each energy mode comes with default values but the user is allowed to change the most important values, to adjust or avoid errors in their hardware.
 
-The energy save applications like TLP are based on "If I i'm not using it consumes and consumes, I better turn it off". In this way the consumption of resources is reduced when the computer uses the battery. Slimbook Battery 4 uses this premise as a source of energy saving.
+The energy save applications like TLP are based on "If I i'm not using it and consumes, I better turn it off". In this way the consumption of resources is reduced when the computer uses the battery. Slimbook Battery 4 uses this premise as a source of energy saving.
 
 # Install
 
