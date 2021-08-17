@@ -45,6 +45,7 @@ except:
 user = getpass.getuser()
 user_home = expanduser("~")
 currpath = os.path.dirname(os.path.realpath(__file__))
+imagespath = os.path.normpath(os.path.join(currpath, '..', 'images'))
 config_file = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
 
 t = gettext.translation('preferences',
@@ -82,7 +83,7 @@ class Preferences(Gtk.ApplicationWindow):
         #self.connect("close", self.close_ok)
 
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename = os.path.normpath(currpath+'/../images/normal.png'),
+            filename = os.path.join(imagespath, 'normal.png'),
             width = 825,
             height = 225,
             preserve_aspect_ratio=True)
@@ -163,7 +164,7 @@ class Preferences(Gtk.ApplicationWindow):
         notebook.set_tab_pos(Gtk.PositionType.TOP)
 
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename = os.path.normpath(currpath+'/../images/slimbookbattery.png'),
+            filename = os.path.join(imagespath, 'slimbookbattery.png'),
             width = 825,
             height = 225,
             preserve_aspect_ratio=True)
@@ -257,7 +258,7 @@ class Preferences(Gtk.ApplicationWindow):
         label11 = Gtk.Label(label=_('Icon on the taskbar (require restart app):'))
                 
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: If you have the autostart activated and the icon hide, the app will be executed with the icon hide (once you restart the system)'))
 
@@ -302,7 +303,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # IMG LOW
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename = os.path.normpath(currpath+'/../images/normal.png'),
+            filename = os.path.join(imagespath, 'normal.png'),
             width = 100,
             height = 100,
             preserve_aspect_ratio=True)
@@ -315,7 +316,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # IMG MEDIUM
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename = os.path.normpath(currpath+'/../images/balanced_normal.png'),
+            filename = os.path.join(imagespath, 'balanced_normal.png'),
             width = 100,
             height = 100,
             preserve_aspect_ratio=True)
@@ -328,7 +329,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # IMG HIGH
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename = os.path.normpath(currpath+'/../images/performance_normal.png'),
+            filename = os.path.join(imagespath, 'performance_normal.png'),
             width = 100,
             height = 100,
             preserve_aspect_ratio=True)
@@ -400,7 +401,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/warning.png'
+        icon_path = os.path.join(imagespath, 'warning.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: this setting affect to performance'))
         icon.set_halign(Gtk.Align.START)
@@ -482,7 +483,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: this setting can cause slight clicks in sound output'))
         icon.set_halign(Gtk.Align.START)
@@ -512,7 +513,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: power save can cause an unstable wifi link.'))
         icon.set_halign(Gtk.Align.START)
@@ -659,7 +660,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: this option reduces the battery consumption considerably'))
         icon.set_halign(Gtk.Align.START)
@@ -768,7 +769,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. Input devices like mice and keyboards as well as scanners are excluded by default'))
         icon.set_halign(Gtk.Align.START)
@@ -798,7 +799,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         #Se leen los diferentes USB que hay disponibles y se almacenan en un archivo temporalmente
         
@@ -969,7 +970,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/warning.png'
+        icon_path = os.path.join(imagespath, 'warging.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: this setting affect to performance'))
         icon.set_halign(Gtk.Align.START)
@@ -1056,7 +1057,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: this setting can cause slight clicks in sound output'))
         icon.set_halign(Gtk.Align.START)
@@ -1085,7 +1086,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: power save can cause an unstable wifi link.'))
         icon.set_halign(Gtk.Align.START)
@@ -1219,7 +1220,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: this option reduces the battery consumption considerably'))
         icon.set_halign(Gtk.Align.START)
@@ -1318,7 +1319,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. Input devices like mice and keyboards as well as scanners are excluded by default'))
         icon.set_halign(Gtk.Align.START)
@@ -1349,7 +1350,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         #Se leen los diferentes USB que hay disponibles y se almacenan en un archivo temporalmente
         
@@ -1521,7 +1522,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/warning.png'
+        icon_path = os.path.join(imagespath, 'warning.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: this setting affect to performance'))
         icon.set_halign(Gtk.Align.START)
@@ -1607,7 +1608,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: this setting can cause slight clicks in sound output'))
         icon.set_halign(Gtk.Align.START)
@@ -1636,7 +1637,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: power save can cause an unstable wifi link.'))
         icon.set_halign(Gtk.Align.START)
@@ -1768,7 +1769,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: this option reduces the battery consumption considerably'))
         icon.set_halign(Gtk.Align.START)
@@ -1867,7 +1868,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(_('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. Input devices like mice and keyboards as well as scanners are excluded by default'))
         icon.set_halign(Gtk.Align.START)
@@ -1899,7 +1900,7 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = '/usr/share/slimbookbattery/images/help.png'
+        icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         #Se leen los diferentes USB que hay disponibles y se almacenan en un archivo temporalmente
         
@@ -2355,7 +2356,7 @@ class Preferences(Gtk.ApplicationWindow):
         hbox.set_halign(Gtk.Align.CENTER)
         # Icon
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/normal.png',
+            filename= os.path.join(imagespath, 'normal.png'),
             width=60,
             height=60,
             preserve_aspect_ratio=True)
@@ -2396,7 +2397,7 @@ class Preferences(Gtk.ApplicationWindow):
         hbox = Gtk.HBox(spacing=5)
         
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/twitter.png',
+            filename= os.path.join(imagespath, 'twitter.png'),
             width=25,
             height=25,
             preserve_aspect_ratio=True)
@@ -2412,7 +2413,7 @@ class Preferences(Gtk.ApplicationWindow):
         hbox.pack_start(label77, False, False, 0)
 
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/facebook.png',
+            filename= os.path.join(imagespath, 'facebook.png'),
             width=25,
             height=25,
             preserve_aspect_ratio=True)
@@ -2428,7 +2429,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         try:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename='/usr/share/slimbookbattery/images/insta.png',
+                filename= os.path.join(imagespath, 'insta.png'),
                 width=25,
                 height=25,
                 preserve_aspect_ratio=True)
@@ -2454,7 +2455,7 @@ class Preferences(Gtk.ApplicationWindow):
        
         # (7, 0)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/logo.png',
+            filename= os.path.join(imagespath, 'logo.png'),
             width=299,
             height=180,
             preserve_aspect_ratio=True)
@@ -2486,7 +2487,7 @@ class Preferences(Gtk.ApplicationWindow):
         info_grid.attach(hbox, 0, 10, 5, 1)
 
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/GitHub_Logo_White.png',
+            filename= os.path.join(imagespath, 'GitHub_Logo_White.png'),
             width=150,
             height=30,
             preserve_aspect_ratio=True)
@@ -2544,7 +2545,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # (14, 0)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/cc.png',
+            filename= os.path.join(imagespath, 'cc.png'),
             width=100,
             height=200,
             preserve_aspect_ratio=True)
