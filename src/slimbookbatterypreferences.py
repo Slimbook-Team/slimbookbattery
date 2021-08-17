@@ -24,6 +24,7 @@ import getpass
 import configparser
 import subprocess
 import time
+import math
 import gettext, locale
 
 gi.require_version('Gtk', '3.0')
@@ -76,12 +77,62 @@ class Preferences(Gtk.ApplicationWindow):
         Gtk.Window.__init__(self, title =(_('Slimbook Battery Preferences')))    
         #self.set_size_request(900,400) #anchoxalto
         self.set_resizable(False)
-        self.set_position(Gtk.WindowPosition.CENTER)
+        #self.set_position(Gtk.WindowPosition.CENTER) // Allow movement
         self.get_style_context().add_class("bg-image")  
         
-        self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
+        #self.set_position(Gtk.WindowPosition.CENTER_ALWAYS) // Allow movement
         #self.connect("close", self.close_ok)
 
+
+        ### Movement
+        self.is_in_drag = False
+        self.x_in_drag = 0
+        self.y_in_drag = 0
+        self.connect('button-press-event', self.on_mouse_button_pressed)
+        self.connect('button-release-event', self.on_mouse_button_released)
+        self.connect('motion-notify-event', self.on_mouse_moved)
+
+        ### Center
+        self.connect('realize', self.on_realize)
+
+        self.set_ui()
+
+
+    def on_realize(self, widget):
+        monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
+        scale = monitor.get_scale_factor()
+        monitor_width = monitor.get_geometry().width / scale
+        monitor_height = monitor.get_geometry().height / scale
+        width = self.get_preferred_width()[0]
+        height = self.get_preferred_height()[0]
+        self.move((monitor_width - width)/2, (monitor_height - height)/2)
+
+    def on_mouse_moved(self, widget, event):
+        if self.is_in_drag:
+            xi, yi = self.get_position()
+            xf = int(xi + event.x_root - self.x_in_drag)
+            yf = int(yi + event.y_root - self.y_in_drag)
+            if math.sqrt(math.pow(xf-xi, 2) + math.pow(yf-yi, 2)) > 10:
+                self.x_in_drag = event.x_root
+                self.y_in_drag = event.y_root
+                self.move(xf, yf)
+
+    def on_mouse_button_released(self, widget, event):
+        if event.button == 1:
+            self.is_in_drag = False
+            self.x_in_drag = event.x_root
+            self.y_in_drag = event.y_root
+
+    def on_mouse_button_pressed(self, widget, event):
+        if event.button == 1:
+            self.is_in_drag = True
+            self.x_in_drag, self.y_in_drag = self.get_position()
+            self.x_in_drag = event.x_root
+            self.y_in_drag = event.y_root
+            return True
+        return False
+
+    def set_ui(self):
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename = os.path.join(imagespath, 'normal.png'),
             width = 825,
