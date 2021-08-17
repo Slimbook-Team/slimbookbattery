@@ -47,12 +47,7 @@ else:
 print('Slimbook Battery Indicator, executed as: '+str(subprocess.getoutput('whoami')))
 print('Language: ', entorno_usu)
 
-t = gettext.translation('slimbookbattery',
-                        '/usr/share/slimbookbattery/locale',
-                        languages=idiomas,
-                        fallback=True,)
 
-_ = t.gettext
 
 #Ruta del usuario actual
 user_home = expanduser("~")
@@ -77,6 +72,13 @@ proceso = None
 alert = None
 
 currpath = os.path.dirname(os.path.realpath(__file__))
+
+t = gettext.translation('slimbookbattery',
+                        currpath+'/locale',
+                        languages=idiomas,
+                        fallback=True,)
+
+_ = t.gettext
 
 if config['CONFIGURATION']['alerts'] == '1':
     if not os.path.isfile('/lib/systemd/system/slimbookbattery.service'):
