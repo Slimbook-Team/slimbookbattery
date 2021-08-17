@@ -2478,7 +2478,7 @@ class Preferences(Gtk.ApplicationWindow):
         label77.set_halign(Gtk.Align.CENTER)
         hbox.add(label77)
         
-        label77 = Gtk.LinkButton(uri="https://github.com/slimbook/slimbookbattery-translations", label = (_('Help us with translations!')))
+        label77 = Gtk.LinkButton(uri="https://github.com/slimbook/slimbookbattery/tree/main/src/locale", label = (_('Help us with translations!')))
         label77.set_name('link')
         label77.set_halign(Gtk.Align.CENTER)
         hbox.add(label77)
