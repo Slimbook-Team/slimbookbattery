@@ -1,4 +1,5 @@
 # Slimbookbattery
+
 Slimbook Battery 4 is the new version with new features that improves battery control and increases battery duration in laptops.
 
 This update offers new possibilities to the users, thanks to the integration with other applications, services and drivers like TLP, intel_pstate, AMD and NVIDIA.
