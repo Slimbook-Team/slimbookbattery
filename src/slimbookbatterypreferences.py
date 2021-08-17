@@ -2924,7 +2924,7 @@ class Preferences(Gtk.ApplicationWindow):
 
     def load_cycles_components(self):
 
-    # SWITCH ALERTS
+        # SWITCH ALERTS
         stat = str(int(config['CONFIGURATION']['alerts']))
         active = None
 
@@ -3091,6 +3091,17 @@ class Preferences(Gtk.ApplicationWindow):
                     ''')
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
                 config.set('SETTINGS', 'limit_cpu_ahorro', '3')
+
+        
+        statGovernor = self.comboBoxGovernor.get_active_iter() # .conf file && Tlp custom file*
+        # Test pending
+        if statGovernor is not None:
+            model = self.comboBoxGovernor.get_model()
+            row_id, name = model[statGovernor][:2]
+            mode = self.comboBoxGovernor.get_name()
+
+            subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
+
 
         statGraphics = self.switchGraphics.get_active() # .conf file *
         if statGraphics:
@@ -3334,6 +3345,15 @@ class Preferences(Gtk.ApplicationWindow):
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
                 config.set('SETTINGS', 'limit_cpu_ahorro', '3')
 
+        statGovernor = self.comboBoxGovernor2.get_active_iter() # .conf file && Tlp custom file*
+        # Test pending
+        if statGovernor is not None:
+            model = self.comboBoxGovernor2.get_model()
+            row_id, name = model[statGovernor][:2]
+            mode = self.comboBoxGovernor2.get_name()
+
+            subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
+
         statGraphics = self.switchGraphics2.get_active() # .conf file *
         if statGraphics:
             config.set('SETTINGS', 'graphics_equilibrado', str(1))
@@ -3573,6 +3593,15 @@ class Preferences(Gtk.ApplicationWindow):
                     ''')
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
                 config.set('SETTINGS', 'limit_cpu_ahorro', '3')
+
+        statGovernor = self.comboBoxGovernor3.get_active_iter() # .conf file && Tlp custom file*
+        # Test pending
+        if statGovernor is not None:
+            model = self.comboBoxGovernor3.get_model()
+            row_id, name = model[statGovernor][:2]
+            mode = self.comboBoxGovernor3.get_name()
+
+            subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
 
 
         statSound = self.switchSound3.get_active() # Tlp custom file *
