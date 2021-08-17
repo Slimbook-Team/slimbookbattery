@@ -52,8 +52,9 @@ print('Language: ', entorno_usu)
 #Ruta del usuario actual
 user_home = expanduser("~")
 
+fichero_conf = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
 config = configparser.ConfigParser()
-config.read(user_home + '/.config/slimbookbattery/slimbookbattery.conf')
+config.read(fichero_conf)
 
 ENERGY_SAVING = '/usr/share/slimbookbattery/images/battery.png'
 EQUILIBRADO = '/usr/share/slimbookbattery/images/equilibrado.png'
@@ -92,7 +93,6 @@ if config['CONFIGURATION']['alerts'] == '1':
 tdpcontroller = config['TDP']['tdpcontroller']
 
 class Indicator():
-
     
     modo_actual = config['CONFIGURATION']['modo_actual']
 
@@ -389,16 +389,12 @@ def rebootNvidia():
     #GLib.timeout_add(60000, change_label, indicator)
 
 def update_config(section, variable, value):
-
-    fichero = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
-    config = configparser.ConfigParser()
-    config.read(fichero)
     
     # We change our variable: config.set(section, variable, value)
     config.set(str(section), str(variable), str(value))
 
     # Writing our configuration file 
-    with open(fichero, 'w') as configfile:
+    with open(fichero_conf, 'w') as configfile:
         config.write(configfile)
 
     print("\n- Variable |"+variable+"| updated in .conf, actual value: "+value)

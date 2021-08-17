@@ -1,2 +1,0 @@
-#!/bin/bash
-python3 /usr/share/slimbookbattery/src/sudocommands.py $@

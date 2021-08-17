@@ -72,7 +72,7 @@ class Preferences(Gtk.ApplicationWindow):
     def __init__(self):
     # Init Window
 
-        Gtk.Window.__init__(self, title =(_('Alert!')))    
+        Gtk.Window.__init__(self, title =(_('Slimbook Battery Preferences')))    
         #self.set_size_request(900,400) #anchoxalto
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -2556,7 +2556,7 @@ class Preferences(Gtk.ApplicationWindow):
  
 # FUNCTIONS ***********************************
     def brightness_switch_changed(self, switchBrightness, state, scale):
-        print(str(state))
+        #print(str(state))
         if state:
             scale.set_sensitive(True)
         else:
@@ -2599,7 +2599,7 @@ class Preferences(Gtk.ApplicationWindow):
         mode = switchUSBSuspend.get_name()
         if subprocess.getstatusoutput("cat "+ user_home +"/.config/slimbookbattery/custom/"+mode+" | grep 'USB_AUTOSUSPEND=0'")[0] == 0:
             switchUSBSuspend.set_active(False)
-            print('Disabling autosuspend switch')
+            #print('Disabling autosuspend switch')
         elif subprocess.getstatusoutput("cat "+  user_home +"/.config/slimbookbattery/custom/"+mode+" | grep 'USB_AUTOSUSPEND=1'")[0] == 0:
             switchUSBSuspend.set_active(True)
     
@@ -2982,7 +2982,7 @@ class Preferences(Gtk.ApplicationWindow):
 
     #Work Mode (custom conf avocado)
 
-        """ #Se mirará el archivo original de tlp para poder comprobar que modo tiene activo.
+        #Se mirará el archivo original de tlp para poder comprobar que modo tiene activo.
         #Esto se comprueba para poder devolver 0 o 1 y en el combobox poder mostrar como seleccionado el que esta activo actualmente.
         #print('Loading workmode...')
         if subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_DEFAULT_MODE=AC'")[0] == 0:
@@ -2994,7 +2994,7 @@ class Preferences(Gtk.ApplicationWindow):
             self.comboBoxWorkMode.set_active(1)
 
         else:
-            print('\tWorkMode: Not found') """
+            print('\tWorkMode: Not found')
 
     #Icon (.conf)
 
@@ -3098,7 +3098,6 @@ class Preferences(Gtk.ApplicationWindow):
         if statGovernor is not None:
             model = self.comboBoxGovernor.get_model()
             row_id, name = model[statGovernor][:2]
-            mode = self.comboBoxGovernor.get_name()
 
             subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
 
@@ -3110,13 +3109,14 @@ class Preferences(Gtk.ApplicationWindow):
             config.set('SETTINGS', 'graphics_ahorro', str(0))
 
         statSound = self.switchSound.get_active() # Tlp custom file *
+        
         if statSound:
             exec = subprocess.getstatusoutput('sed -i "/SOUND_POWER_SAVE_ON_BAT=/ cSOUND_POWER_SAVE_ON_BAT=1" ~/.config/slimbookbattery/custom/'+mode)
             print('Setting sound sving to '+str(statSound)+' --> Exit: '+str(exec[0]))
         else:
             exec = subprocess.getstatusoutput('sed -i "/SOUND_POWER_SAVE_ON_BAT=/ cSOUND_POWER_SAVE_ON_BAT=0" ~/.config/slimbookbattery/custom/'+mode)
             print('Setting sound sving to '+str(statSound)+' --> Exit: '+str(exec[0]))
-
+        print(mode, str(exec), )
 
         statWifiPower = self.switchWifiPower.get_active() # Tlp custom file *
         if statWifiPower:
@@ -3224,14 +3224,6 @@ class Preferences(Gtk.ApplicationWindow):
             exec = subprocess.getstatusoutput('sed -i "/USB_BLACKLIST_BTUSB=/ cUSB_BLACKLIST_BTUSB=0" ~/.config/slimbookbattery/custom/'+mode)
             print('Setting bluetooth exclusion from USB Suspension to off --> Exit:'+str(exec[0]))
 
-        """ statBlacklistPUSB = self.switchBlacklistPUSB.get_active()
-        if statBlacklistPUSB:
-            exec = subprocess.getstatusoutput('/USB_BLACKLIST_PHONE=/ cUSB_BLACKLIST_PHONE=1" ~/.config/slimbookbattery/custom/'+mode)
-            print('Setting phone exclusion from USB Suspension to on --> Exit:'+str(exec[0]))
-        else:
-            exec = subprocess.getstatusoutput('/USB_BLACKLIST_PHONE=/ cUSB_BLACKLIST_PHONE=0" ~/.config/slimbookbattery/custom/'+mode)
-            print('Setting phone exclusion from USB Suspension to off --> Exit:'+str(exec[0]))
-        """
         statBlacklistPrintUSB = self.switchBlacklistPrintUSB.get_active()
         if statBlacklistPrintUSB:
             exec = subprocess.getstatusoutput('sed -i "/USB_BLACKLIST_PRINTER=/ cUSB_BLACKLIST_PRINTER=1" ~/.config/slimbookbattery/custom/'+mode)
@@ -3350,7 +3342,6 @@ class Preferences(Gtk.ApplicationWindow):
         if statGovernor is not None:
             model = self.comboBoxGovernor2.get_model()
             row_id, name = model[statGovernor][:2]
-            mode = self.comboBoxGovernor2.get_name()
 
             subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
 
@@ -3473,14 +3464,6 @@ class Preferences(Gtk.ApplicationWindow):
             exec = subprocess.getstatusoutput('sed -i "/USB_BLACKLIST_BTUSB=/ cUSB_BLACKLIST_BTUSB=0" ~/.config/slimbookbattery/custom/'+mode)
             print('Setting bluetooth exclusion from USB Suspension to off --> Exit:'+str(exec[0]))
 
-        """ statBlacklistPUSB = self.switchBlacklistPUSB.get_active()
-        if statBlacklistPUSB:
-            exec = subprocess.getstatusoutput('/USB_BLACKLIST_PHONE=/ cUSB_BLACKLIST_PHONE=1" ~/.config/slimbookbattery/custom/'+mode)
-            print('Setting phone exclusion from USB Suspension to on --> Exit:'+str(exec[0]))
-        else:
-            exec = subprocess.getstatusoutput('/USB_BLACKLIST_PHONE=/ cUSB_BLACKLIST_PHONE=0" ~/.config/slimbookbattery/custom/'+mode)
-            print('Setting phone exclusion from USB Suspension to off --> Exit:'+str(exec[0]))
-        """
         statBlacklistPrintUSB = self.switchBlacklistPrintUSB2.get_active()
         if statBlacklistPrintUSB:
             exec = subprocess.getstatusoutput('sed -i "/USB_BLACKLIST_PRINTER=/ cUSB_BLACKLIST_PRINTER=1" ~/.config/slimbookbattery/custom/'+mode)
@@ -3599,7 +3582,6 @@ class Preferences(Gtk.ApplicationWindow):
         if statGovernor is not None:
             model = self.comboBoxGovernor3.get_model()
             row_id, name = model[statGovernor][:2]
-            mode = self.comboBoxGovernor3.get_name()
 
             subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
 
@@ -3721,14 +3703,6 @@ class Preferences(Gtk.ApplicationWindow):
             exec = subprocess.getstatusoutput('sed -i "/USB_BLACKLIST_BTUSB=/ cUSB_BLACKLIST_BTUSB=0" ~/.config/slimbookbattery/custom/'+mode)
             print('Setting bluetooth exclusion from USB Suspension to off --> Exit:'+str(exec[0]))
 
-        """ statBlacklistPUSB = self.switchBlacklistPUSB.get_active()
-        if statBlacklistPUSB:
-            exec = subprocess.getstatusoutput('/USB_BLACKLIST_PHONE=/ cUSB_BLACKLIST_PHONE=1" ~/.config/slimbookbattery/custom/'+mode)
-            print('Setting phone exclusion from USB Suspension to on --> Exit:'+str(exec[0]))
-        else:
-            exec = subprocess.getstatusoutput('/USB_BLACKLIST_PHONE=/ cUSB_BLACKLIST_PHONE=0" ~/.config/slimbookbattery/custom/'+mode)
-            print('Setting phone exclusion from USB Suspension to off --> Exit:'+str(exec[0]))
-        """
         statBlacklistPrintUSB = self.switchBlacklistPrintUSB3.get_active()
         if statBlacklistPrintUSB:
             exec = subprocess.getstatusoutput('sed -i "/USB_BLACKLIST_PRINTER=/ cUSB_BLACKLIST_PRINTER=1" ~/.config/slimbookbattery/custom/'+mode)
@@ -3881,7 +3855,10 @@ class Preferences(Gtk.ApplicationWindow):
                 workMode = 'AC'
 
             print('Setting workmode '+workMode+'...')
-            print('Exit: '+str(subprocess.getstatusoutput('pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE '+workMode)[0]))
+
+            #exec = subprocess.getstatusoutput("sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' /etc/tlp.conf")
+            exec = subprocess.getstatusoutput('pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE '+workMode)
+            print('Exit: '+str(exec[0]), exec[1])
 
         # Icon
         if self.switchIcon.get_state():
@@ -3951,15 +3928,12 @@ class Preferences(Gtk.ApplicationWindow):
         self.animations(config['CONFIGURATION']['modo_actual'])
 
         # Settings application
-        command = 'pkexec slimbookbattery-pkexec apply conf'
-        os.system(command)
-        command = 'pkexec slimbookbattery-pkexec apply graphics'
+        command = 'pkexec slimbookbattery-pkexec apply'
         subprocess.Popen(command.split(' '))
 
         reboot_process('slimbookbatteryindicator.py', currpath+'/slimbookbatteryindicator.py', True)
-      
 
-        # This process wil only reboot if is running
+        # This process wil only reboot if is running if not, and option is on, it will be launched
         actual_mode = config['CONFIGURATION']['modo_actual']
 
         tdpcontroller = config['TDP']['tdpcontroller']
@@ -4009,7 +3983,6 @@ class Preferences(Gtk.ApplicationWindow):
             config.write(configfile)
 
         print("\n- Variable |"+variable+"| updated in .conf, actual value: "+value)
-
     
 
 def governorIsCompatible():
@@ -4057,7 +4030,6 @@ def reboot_process(process_name, path, start):
             else:
                 print("Couldn't launch process")
             
-
     print()
 
 

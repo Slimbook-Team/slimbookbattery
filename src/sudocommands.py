@@ -28,6 +28,7 @@ import re
 import gettext
 import locale
 
+#gi.require_version('Notify', '0.7')
 gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk, GdkPixbuf
@@ -46,8 +47,8 @@ HOMEDIR = subprocess.getoutput("echo ~"+USER_NAME)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 currpath = os.path.dirname(os.path.realpath(__file__))
 
-print("Username: "+USER_NAME)
-print("Homedir: "+HOMEDIR+"")
+print("Username: "+USER_NAME+" - Homedir: "+HOMEDIR+"")
+
 
 config_file = HOMEDIR+'/.config/slimbookbattery/slimbookbattery.conf'
 
@@ -80,6 +81,9 @@ t = gettext.translation('slimbookbattery',
 _ = t.gettext
 
 def main(args): # Args will be like --> command_name value
+    # notification = Notify.Notification.new('ssssss', 'aaaaaaaaaaaaa', None)
+    # Notify.init('Slimbook Battery')
+    # Notify.Notification.new('ssssss', 'aaaaaaaaaaaaa', None).show()
 
     arguments = ''
 
@@ -88,15 +92,13 @@ def main(args): # Args will be like --> command_name value
             arguments = arguments+' '+(args[argument])
 
     print("Arguments: "+ arguments+"\n")
-
+    
     if (len(args)) > 1:
-
+        battery_mode = config.get('CONFIGURATION', 'modo_actual')
         # Applies selected mode conf and turns on/off tlp  
         if args[1] == "apply": 
             
             # Copies selected custom mode conf to /etc/tlp.conf
-            battery_mode = config.get('CONFIGURATION', 'modo_actual')
-
             if battery_mode == '1':
                 print('Power saving mode')
                 subprocess.getstatusoutput("sudo cp "+HOMEDIR+"/.config/slimbookbattery/custom/ahorrodeenergia /etc/tlp.conf")
@@ -138,11 +140,7 @@ def main(args): # Args will be like --> command_name value
 
             if required_reboot == 1:
                 print('Sudo notify')
-                os.system('''display=":$(ls /tmp/.X11-unix/* | sed 's#/tmp/.X11-unix/X##' | head -n 1)"
-                            user=$(who | grep '('$display')' | awk '{print $1}' | head -n 1)
-                            uid=$(id -u $user)
-                            sudo -u $user DISPLAY=$display DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$uid/bus notify-send "The changes have been applied, \nbut it is necessary to restart so that some of them may take effect.\nDo you want to restart?"
-                            ''')
+                notify(_('Graphics settingshabe been modified,\nthe changes will be applied on restart.'))
 
             #print(str(os.system(command)))
 
@@ -152,27 +150,24 @@ def main(args): # Args will be like --> command_name value
         if args[1] == "restore": 
 
             # Copies selected DEFAULT conf to CUSTOM conf (also slimbookbattery.conf)
-
-            battery_mode = config.get('CONFIGURATION', 'modo_actual')
-
             print(str(subprocess.getstatusoutput("sudo cp /usr/share/slimbookbattery/src/slimbookbattery.conf "+ HOMEDIR+"/.config/slimbookbattery/slimbookbattery.conf")[0]))
             print(str(subprocess.getstatusoutput("sudo cp "+HOMEDIR+"/.config/slimbookbattery/default/ahorrodeenergia "+ HOMEDIR+"/.config/slimbookbattery/custom/ahorrodeenergia")[0]))
             print(str(subprocess.getstatusoutput("sudo cp "+HOMEDIR+"/.config/slimbookbattery/default/equilibrado "+ HOMEDIR+"/.config/slimbookbattery/custom/equilibrado")[0]))
             print(str(subprocess.getstatusoutput("sudo cp "+HOMEDIR+"/.config/slimbookbattery/default/maximorendimiento "+ HOMEDIR+"/.config/slimbookbattery/custom/maximorendimiento")[0]))
 
-            """ #
-            if mode == '1':
+            #
+            if battery_mode == '1':
                 print('Power saving mode selected')
                 subprocess.getstatusoutput("sudo cp "+HOMEDIR+"/.config/slimbookbattery/custom/ahorrodeenergia /etc/tlp.conf")
 
-            elif mode == '2':
+            elif battery_mode == '2':
                 print('Normal power mode selected')
                 os.system("sudo cp "+HOMEDIR+"/.config/slimbookbattery/custom/equilibrado /etc/tlp.conf")
 
-            elif mode == '3':
+            elif battery_mode == '3':
                 print('Full power mode selected')
                 os.system("sudo cp "+HOMEDIR+"/.config/slimbookbattery/custom/maximorendimiento /etc/tlp.conf")
-            """
+           
         
         if args[1] == "autostart":  # Sets brigthnes and enables tdp
             battery_mode = config.get('CONFIGURATION', 'modo_actual')
@@ -199,8 +194,14 @@ def main(args): # Args will be like --> command_name value
         if args[1] == "change_config": 
             change_config(args)
 
-    print('******************************************************************************\n')   
+    print('******************************************************************************\n')  
 
+def notify(msg):
+    os.system('''display=":$(ls /tmp/.X11-unix/* | sed 's#/tmp/.X11-unix/X##' | head -n 1)"
+                            user=$(who | grep '('$display')' | awk '{print $1}' | head -n 1)
+                            uid=$(id -u $user)
+                            sudo -u $user DISPLAY=$display DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$uid/bus notify-send "Slimbook Battery" "'''+msg+'''"
+                            ''')
 def set_tdp(mode):
     # This function enables tdpcontroller autostart an changes it's mode if battery application, 
     # battery autostart and sync tdp switch of the selected mode is on.
@@ -275,7 +276,6 @@ def change_config(args): # For general page options
             update_config(file_equilibrado, 'TLP_DEFAULT_MODE', 'BAT')
             update_config(file_max, 'TLP_DEFAULT_MODE', 'BAT')
             
-
         elif args[3]=='AC':
             print('Selecting AC')
             update_config(file, 'TLP_DEFAULT_MODE', 'AC')
@@ -680,7 +680,8 @@ def update_config(file, variable, value):
             print("\n- Variable |"+variable+"| updated in "+file+", actual value: "+value)
         else:
             print('\n Sed command failed')
-    
+    else:
+        print('Already set')
 
 
 

@@ -1,0 +1,57 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2021-08-17 13:45+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: slimbookbatteryindicator.py:143
+msgid "strappstatus4"
+msgstr ""
+
+#: slimbookbatteryindicator.py:196
+msgid "Energy Saving"
+msgstr ""
+
+#: slimbookbatteryindicator.py:202
+msgid "Balanced"
+msgstr ""
+
+#: slimbookbatteryindicator.py:208
+msgid "Maximum Performance"
+msgstr ""
+
+#: slimbookbatteryindicator.py:214
+msgid "Off"
+msgstr ""
+
+#: slimbookbatteryindicator.py:220
+msgid "Advanced mode"
+msgstr ""
+
+#: slimbookbatteryindicator.py:224
+msgid "Exit"
+msgstr ""
+
+#: slimbookbatteryindicator.py:376
+msgid "Slimbook Battery"
+msgstr ""
+
+#: slimbookbatteryindicator.py:378
+msgid "The changes have been applied, but it is necessary to restart so that some of them may take effect."
+msgstr ""
+
+#: slimbookbatteryindicator.py:383
+msgid "System will not restart"
+msgstr ""
+
