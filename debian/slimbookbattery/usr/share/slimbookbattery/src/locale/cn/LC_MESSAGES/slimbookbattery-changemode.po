@@ -1,0 +1,86 @@
+# SLIMBOOK BATTERY
+# Copyright (C) 2019
+# This file is distributed under the same license as the SLIMBOOK BATTERY package.
+# SLIMBOOK <dev@slimbook.es>, 2019.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: SLIMBOOK BATTERY 3.2beta\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-09-29 14:00+0800\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Jeffer <zzugyl@hotmail.com>\n"
+"Language-Team: none \n"
+"Language: Chinese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: slimbookbattery-changemode.py:34
+msgid "strhasnvidia"
+msgstr "本机有NVIDIA显卡"
+
+#: slimbookbattery-changemode.py:39
+msgid "strchangesnvidiapoweroff"
+msgstr "NVIDIA显卡设置为：关闭模式"
+
+#: slimbookbattery-changemode.py:44
+msgid "strnvidiachangestointelenergysaving"
+msgstr "Intel显卡设置为：节能模式"
+
+#: slimbookbattery-changemode.py:47
+msgid "strnvidiaalredyuseintelenergysaving"
+msgstr "已经设置Intel显卡为：节能模式"
+
+#: slimbookbattery-changemode.py:51
+msgid "strchangestonvidiaenergysaving"
+msgstr "NVIDIA显卡设置为：节能模式"
+
+#: slimbookbattery-changemode.py:54
+msgid "stralredyusenvidiaenergysaving"
+msgstr "已经设置NVIDIA显卡为：节能模式"
+
+#: slimbookbattery-changemode.py:58
+msgid "strchangetointelbalanced"
+msgstr "Intel显卡设置为：均衡模式"
+
+#: slimbookbattery-changemode.py:61
+msgid "stralredyuseintelbalanced"
+msgstr "已经设置Intel显卡为：均衡模式"
+
+#: slimbookbattery-changemode.py:65
+msgid "strchangetonvidiabalanced"
+msgstr "NVIDIA显卡设置为：均衡模式"
+
+#: slimbookbattery-changemode.py:68
+msgid "stralredyusenvidiabalanced"
+msgstr "已经设置NVIDIA显卡为：均衡模式"
+
+#: slimbookbattery-changemode.py:73
+msgid "strchangestonvidiamaximumperformance"
+msgstr "NVIDIA显卡设置为：性能模式"
+
+#: slimbookbattery-changemode.py:76
+msgid "stralredyusenvidiamaximumperformance"
+msgstr "已经设置NVIDIA显卡为：性能模式"
+
+#: slimbookbattery-changemode.py:80
+msgid "strmodificationtoamdintelenergysaving"
+msgstr "将对AMD和Intel显卡设置为：节能模式"
+
+#: slimbookbattery-changemode.py:142
+msgid "stramdintelbacktodefaultenergysaving"
+msgstr "AMD和Intel显卡恢复默认：节能模式"
+
+#: slimbookbattery-changemode.py:147
+msgid "strmodificationsamdintel"
+msgstr "将对AMD和Intel显卡设置为：均衡模式"
+
+#: slimbookbattery-changemode.py:207
+msgid "stramdintelbacktodefaultbalanced"
+msgstr "AMD和Intel显卡恢复默认：均衡模式"
+
+#: slimbookbattery-changemode.py:230
+msgid "Set screen brightness:"
+msgstr "亮度值改为： "

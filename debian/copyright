@@ -1,0 +1,27 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: slimbookbattery
+Source: <sat@slimbook.es>
+
+Files: *
+Copyright: 2016, Slimbook <sat@slimbook.es>
+License: Creative Commons BY-NC-ND
+ .
+ <Including paragraphs>
+
+# If you want to use GPL v2 or later for the /debian/* files use 
+# the following clauses, or change it to suit. Delete these two lines
+Files: debian/*
+Copyright: 2016 slimbook <slimbook@unknown>
+License: Creative Commons BY-NC-ND
+ You are free to:
+ Share — copy and redistribute the material in any medium or format
+ The licensor cannot revoke these freedoms as long as you follow the license terms.
+ .
+ The software is provided "as is", without warranty of any kind.
+ .
+ See <https://creativecommons.org/>
+
+# Please also look if there are files or directories which have a
+# different copyright/license attached and list them here.
+# Please avoid picking licenses with terms that are more restrictive than the
+# packaged work, as it may make Debian's contributions unacceptable upstream.

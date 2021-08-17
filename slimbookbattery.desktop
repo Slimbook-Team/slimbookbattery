@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Slimbook Battery
+Version=3.0beta
+Exec=slimbookbattery
+Comment=Show notifications of your battery states and manage energy!
+Icon=/usr/share/pixmaps/slimbookbattery.png
+Type=Application
+Terminal=false
+StartupNotify=true
+Encoding=UTF-8
+Categories=Utility;
+Name[es_ES]=Slimbook Battery
+Name=Slimbook Battery

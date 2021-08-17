@@ -1,0 +1,166 @@
+# SLIMBOOK BATTERY
+# Copyright (C) 2019
+# This file is distributed under the same license as the SLIMBOOK BATTERY package.
+# SLIMBOOK <dev@slimbook.es>, 2019.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: SLIMBOOK BATTERY 3.2beta\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-05-09 14:08+0200\n"
+"PO-Revision-Date: 2019-05-13 20:30+0100\n"
+"Last-Translator: Albano Battistella <>\n"
+"Language-Team: Italian <LL@li.org>\n"
+"Language: Italian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: slimbookbattery.py:47
+msgid "File ahorrodeenergia exists in custom"
+msgstr "Il file esistente personalizzato e' di risparmio energetico"
+
+#: slimbookbattery.py:56
+msgid "File equilibrado exists in custom"
+msgstr "Il file esitente personalizzato e' bilanciato"
+
+#: slimbookbattery.py:64
+msgid "File maximorendimiento exists in custom"
+msgstr "Il file esistente personalizzato e' di massime prestazioni"
+
+#: slimbookbattery.py:80
+msgid "File ahorrodeenergia exists in default"
+msgstr "Il file esistente di default e' risparmio energetico"
+
+#: slimbookbattery.py:88
+msgid "File equilibrado exists in default"
+msgstr "Il file esistente di default e' bilanciato"
+
+#: slimbookbattery.py:96
+msgid "File maximorendimiento exists in default"
+msgstr "Il file esistente di default è di  massime prestazioni"
+
+#: slimbookbattery.py:114
+msgid "strconfigfilecheck"
+msgstr "Il file di configurazione e' corretto"
+
+#: slimbookbattery.py:146
+msgid "The user introduces password correctly"
+msgstr "L'utente ha introdotto la password correttamente"
+
+#: slimbookbattery.py:148 slimbookbattery.py:453 slimbookbattery.py:482
+#: slimbookbattery.py:508 slimbookbattery.py:533 slimbookbattery.py:634
+msgid "Wrong password"
+msgstr "Password errata"
+
+#: slimbookbattery.py:196
+msgid "strappstatus1"
+msgstr "Avvisi di ciclo abilitati e applicazione attiva"
+
+#: slimbookbattery.py:208
+msgid "strappstatus2"
+msgstr "Avvisi di ciclo disabilitati e applicazione attiva"
+
+#: slimbookbattery.py:217
+msgid "strappstatus3"
+msgstr "Gli avvisi di ciclo sono abilitati e l'applicazione è disattivata"
+
+#: slimbookbattery.py:220
+msgid "strappstatus4"
+msgstr "Gli avvisi di ciclo sono disabilitati e l'applicazione è disattivata"
+
+#: slimbookbattery.py:255
+msgid "Energy Saving"
+msgstr "Risparmio Energetico"
+
+#: slimbookbattery.py:260
+msgid "Balanced"
+msgstr "Bilanciato"
+
+#: slimbookbattery.py:265
+msgid "Maximum Performance"
+msgstr "Massime Prestazioni"
+
+#: slimbookbattery.py:270
+msgid "Off"
+msgstr "Spento"
+
+#: slimbookbattery.py:275
+msgid "Advanced mode"
+msgstr "Modalità avanzata"
+
+#: slimbookbattery.py:278
+msgid "Exit"
+msgstr "Esci"
+
+#: slimbookbattery.py:361
+msgid "Max battery: "
+msgstr "Batteria massima: "
+
+#: slimbookbattery.py:362
+msgid "Min battery: "
+msgstr "Batteria minima: "
+
+#: slimbookbattery.py:363
+msgid "Max times: "
+msgstr "Massimo volte: "
+
+#: slimbookbattery.py:364
+msgid "Time between warnings: "
+msgstr "Tempo tra gli avvisi: "
+
+#: slimbookbattery.py:376
+msgid "Current battery: "
+msgstr "Batteria attuale: "
+
+#: slimbookbattery.py:382
+msgid "Alerts disabled"
+msgstr "Avvisi disabilitati"
+
+#: slimbookbattery.py:388
+msgid "High battery level (Remaining "
+msgstr "Livello batteria alto (rimanente"
+
+#: slimbookbattery.py:388 slimbookbattery.py:396
+msgid " Warning "
+msgstr " Avvertimento "
+
+#: slimbookbattery.py:388 slimbookbattery.py:396
+msgid " Time until the next warning "
+msgstr " Tempo fino al prossimo avvertimento "
+
+#: slimbookbattery.py:351 slimbookbattery.py:359
+msgid " seconds"
+msgstr "secondi"
+
+#: slimbookbattery.py:391
+msgid "High battery. Disconnect your power supply."
+msgstr "Batteria alta.Disconnetti il tuo alimentatore."
+
+#: slimbookbattery.py:396
+msgid "Critical battery level (Remaining "
+msgstr "Livello critico della batteria (rimanente "
+
+#: slimbookbattery.py:399
+msgid "Low battery. Connect your power supply."
+msgstr "Batteria scarica. Collega il tuo alimentatore."
+
+#: slimbookbattery.py:444 slimbookbattery.py:458 slimbookbattery.py:472
+#: slimbookbattery.py:498 slimbookbattery.py:524 slimbookbattery.py:550
+#: slimbookbattery.py:557 slimbookbattery.py:564 slimbookbattery.py:576
+#: slimbookbattery.py:593 slimbookbattery.py:600 slimbookbattery.py:627
+msgid "not process"
+msgstr "nessun processo"
+
+#: slimbookbattery.py:692
+msgid "Alert!"
+msgstr "Allarme!"
+
+#: slimbookbattery.py:694
+msgid "The changes have been applied, but it is necessary to restart so that some of them may take effect."
+msgstr "Le modifiche sono state applicate, ma è necessario riavviare in modo che alcune di loro abbiano effetto.\nVuoi riavviare?"
+
+#: slimbookbattery.py:663
+msgid "System will not restart"
+msgstr "Il sistema non si riavvierà"

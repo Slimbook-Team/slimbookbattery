@@ -1,0 +1,89 @@
+# SLIMBOOK BATTERY
+# Copyright (C) 2019
+# This file is distributed under the same license as the SLIMBOOK BATTERY package.
+#
+# SLIMBOOK <dev@slimbook.es>, 2019.
+# Heimen Stoffels <vistausss@fastmail.com>, 2021.
+msgid ""
+msgstr ""
+"Project-Id-Version: SLIMBOOK BATTERY 3.2beta\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-05-09 14:08+0200\n"
+"PO-Revision-Date: 2021-05-30 13:44+0100\n"
+"Last-Translator: Heimen Stoffels <vistausss@fastmail.com>\n"
+"Language-Team: English <>\n"
+"Language: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 2.0\n"
+
+#: slimbookbattery-changemode.py:34
+msgid "strhasnvidia"
+msgstr "Er is een Nvidia-videokaart aangetroffen"
+
+#: slimbookbattery-changemode.py:39
+msgid "strchangesnvidiapoweroff"
+msgstr "De Nvidia-kaart is uitgeschakeld"
+
+#: slimbookbattery-changemode.py:44
+msgid "strnvidiachangestointelenergysaving"
+msgstr "Energiebesparing van de Intel-kaart is ingeschakeld"
+
+#: slimbookbattery-changemode.py:47
+msgid "strnvidiaalredyuseintelenergysaving"
+msgstr "Energiebesparing van de Intel-kaart is al ingeschakeld"
+
+#: slimbookbattery-changemode.py:51
+msgid "strchangestonvidiaenergysaving"
+msgstr "Energiebesparing van de Nvidia-kaart is ingeschakeld"
+
+#: slimbookbattery-changemode.py:54
+msgid "stralredyusenvidiaenergysaving"
+msgstr "Energiebesparing van de Nvidia-kaart is al ingeschakeld"
+
+#: slimbookbattery-changemode.py:58
+msgid "strchangetointelbalanced"
+msgstr "Gebalanceerde modus van de Intel-kaart is ingeschakeld"
+
+#: slimbookbattery-changemode.py:61
+msgid "stralredyuseintelbalanced"
+msgstr "Gebalanceerde modus van de Intel-kaart is al ingeschakeld"
+
+#: slimbookbattery-changemode.py:65
+msgid "strchangetonvidiabalanced"
+msgstr "Gebalanceerde modus van de Nvidia-kaart is ingeschakeld"
+
+#: slimbookbattery-changemode.py:68
+msgid "stralredyusenvidiabalanced"
+msgstr "Gebalanceerde modus van de Nvidia-kaart is al ingeschakeld"
+
+#: slimbookbattery-changemode.py:73
+msgid "strchangestonvidiamaximumperformance"
+msgstr "Maximale prestaties van de Nvidia-kaart zijn ingeschakeld"
+
+#: slimbookbattery-changemode.py:76
+msgid "stralredyusenvidiamaximumperformance"
+msgstr "Maximale prestaties van de Nvidia-kaart zijn al ingeschakeld"
+
+#: slimbookbattery-changemode.py:80
+msgid "strmodificationtoamdintelenergysaving"
+msgstr "Energiebesparing van de Intel- en AMD-kaarten is ingeschakeld"
+
+#: slimbookbattery-changemode.py:142
+msgid "stramdintelbacktodefaultenergysaving"
+msgstr "Energiebesparing van de Intel- en AMD-kaarten wordt ingeschakeld"
+
+#: slimbookbattery-changemode.py:147
+msgid "strmodificationsamdintel"
+msgstr "Gebalanceerde modus van de Intel- en AMD-kaarten is ingeschakeld"
+
+#: slimbookbattery-changemode.py:207
+msgid "stramdintelbacktodefaultbalanced"
+msgstr "Gebalanceerde modus van de Intel- en AMD-kaarten wordt ingeschakeld"
+
+#: slimbookbattery-changemode.py:230
+msgid "Set screen brightness:"
+msgstr "De helderheid is ingesteld op "
+

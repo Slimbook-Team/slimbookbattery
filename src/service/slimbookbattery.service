@@ -1,0 +1,10 @@
+[Unit]
+Description=Slimbook Battery Notification Service
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/share/slimbookbattery/src/service/
+ExecStart=/usr/share/slimbookbattery/src/service/slimbookbatteryservice.sh
+
+[Install]
+WantedBy=multi-user.target
