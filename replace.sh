@@ -1,5 +1,7 @@
 #!/bin/bash
 # This file must be executed from out of src
+# This file replaces the english msgid in all files which contain it, 
+# by the english msgstr (Useful when you have declarated a string like 'strname' everywhere)
 oldvalue=''
 newvalue=''
 
@@ -24,8 +26,6 @@ egrep 'msgid|msgstr' ./locale/en/LC_MESSAGES/$file.po | while read -r line ; do
   else # Si la linea es impar (msgid + msgstr)...
     echo $line
     newvalue=$(echo $line | grep -oP '\"\K[^"]+')
-
-    
     
     #grep -rl "'$oldvalue'" . | xargs sed -i "'s/$oldvalue/$newvalue/g"
 
@@ -34,8 +34,8 @@ egrep 'msgid|msgstr' ./locale/en/LC_MESSAGES/$file.po | while read -r line ; do
 
 
     if [ $i -gt 2 ] && [ "$oldvalue" != "$newvalue" ]; then
-      #echo "eval $cmd1"
-
+      
+      # Lets check that values don't contain special characters
       esc=true
 
       if echo "$oldvalue" | grep -q "/"; then
