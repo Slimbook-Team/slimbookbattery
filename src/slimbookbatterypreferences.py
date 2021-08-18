@@ -61,6 +61,15 @@ if not os.path.isfile(config_file):
 config = configparser.ConfigParser()
 config.read(config_file)
 
+class colors: # You may need to change color settings
+    RED = '\033[31m'
+    ENDC = '\033[m'
+    GREEN = '\033[32m'
+    CYAN = "\033[1;36m"
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    BOLD = "\033[;1m"
+
 class Preferences(Gtk.ApplicationWindow):
 
     state_actual = ''
@@ -2729,7 +2738,7 @@ class Preferences(Gtk.ApplicationWindow):
 
             USBBlacklist = self.gen_blacklist(mode)            
 
-            switch1.set_text(str(USBBlacklist))
+            #switch1.set_text(str(USBBlacklist))
             switch1.set_sensitive(True)
             
             switch2.set_sensitive(True)
@@ -2741,7 +2750,7 @@ class Preferences(Gtk.ApplicationWindow):
             switch5.set_sensitive(True)
         else:
             # Deactivates all device USB switches
-            switch1.set_text('')
+            switch1.set_sensitive(False)
             switch1.set_sensitive(False)
             switch2.set_sensitive(False)
             switch3.set_sensitive(False)
@@ -3011,8 +3020,10 @@ class Preferences(Gtk.ApplicationWindow):
         print()
 
     def write_modes_conf(self):
-        print('\n\n*** MODES CONFIGURATION ***\n')
+        
         mode = 'ahorrodeenergia'
+        #print('\n\n*** '+mode.upper()+' CONFIGURATION ***\n')
+        print(colors.GREEN + "\n['"+mode.upper()+"' CONFIGURATION]" + colors.ENDC)
 
         statLimitCPU = self.comboBoxLimitCPU.get_active_iter() # .conf file && Tlp custom file*
         # Test pending
@@ -3256,8 +3267,10 @@ class Preferences(Gtk.ApplicationWindow):
         configfile.close()
 
     def write_modes2_conf(self):
-        print('\n\n*** MODES CONFIGURATION ***\n')
+        
         mode = 'equilibrado'
+        #print('\n\n*** '+mode.capitalize()+' CONFIGURATION ***\n')
+        print(colors.GREEN + "\n['"+mode.upper()+"' CONFIGURATION]" + colors.ENDC)
 
         statLimitCPU = self.comboBoxLimitCPU2.get_active_iter() # .conf file && Tlp custom file*
         # Test pending
@@ -3496,8 +3509,9 @@ class Preferences(Gtk.ApplicationWindow):
         configfile.close()
 
     def write_modes3_conf(self):
-        print('\n\n*** MODES CONFIGURATION ***\n')
         mode = 'maximorendimiento'
+        #print('\n\n*** '+mode.capitalize()+' CONFIGURATION ***\n')
+        print(colors.GREEN + "\n['"+mode.upper()+"' CONFIGURATION]" + colors.ENDC)
 
         statLimitCPU = self.comboBoxLimitCPU3.get_active_iter() # .conf file && Tlp custom file*
         # Test pending
@@ -3845,20 +3859,14 @@ class Preferences(Gtk.ApplicationWindow):
             model = self.comboBoxWorkMode.get_model()
             row_id, name = model[iter][:2]
 
-            if name == 'BAT' and name != self.workMode:
+            if name != self.workMode:
                 print('\n\n')
-                workMode = 'BAT'
+                workMode = name
 
-
-            elif name == 'AC' and name != self.workMode:
-                print('\n')
-                workMode = 'AC'
-
-            print('Setting workmode '+workMode+'...')
-
-            #exec = subprocess.getstatusoutput("sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' /etc/tlp.conf")
-            exec = subprocess.getstatusoutput('pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE '+workMode)
-            print('Exit: '+str(exec[0]), exec[1])
+            if not workMode == '':
+                print('Setting workmode '+workMode+'...')
+                #exec = subprocess.getstatusoutput("sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' /etc/tlp.conf")
+                exec = subprocess.getstatusoutput('pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE '+workMode)           
 
         # Icon
         if self.switchIcon.get_state():

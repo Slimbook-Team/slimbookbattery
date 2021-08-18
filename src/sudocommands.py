@@ -51,8 +51,6 @@ print("Username: "+USER_NAME+" - Homedir: "+HOMEDIR+"")
 
 
 config_file = HOMEDIR+'/.config/slimbookbattery/slimbookbattery.conf'
-
-
 config = ConfigParser()
 config.read(config_file)
 
@@ -61,7 +59,6 @@ tdp_config_file = HOMEDIR+'/.config/'+tdpcontroller+'/'+tdpcontroller+'.conf'
 
 config_tdp = ConfigParser()
 config_tdp.read(tdp_config_file)
-
 
 try:
     entorno_usu = locale.getlocale()[0]
@@ -72,71 +69,73 @@ try:
     print('Language: ', entorno_usu)
 except:
     idiomas = ['en']
-
 t = gettext.translation('slimbookbattery',
                         currpath+'/locale',
                         languages=idiomas,
                         fallback=True)
-
 _ = t.gettext
 
-def main(args): # Args will be like --> command_name value
-    # notification = Notify.Notification.new('ssssss', 'aaaaaaaaaaaaa', None)
-    # Notify.init('Slimbook Battery')
-    # Notify.Notification.new('ssssss', 'aaaaaaaaaaaaa', None).show()
+class colors: # You may need to change color settings
+    RED = '\033[31m'
+    ENDC = '\033[m'
+    GREEN = '\033[32m'
+    CYAN = "\033[1;36m"
+    YELLOW = '\033[33m'
+    BLUE = '\033[34m'
+    BOLD = "\033[;1m"
 
+def main(args): # Args will be like --> command_name value
+    
     arguments = ''
 
     for argument in range(len(args)):
         if argument != 0:
             arguments = arguments+' '+(args[argument])
-
     print("Arguments: "+ arguments+"\n")
     
     if (len(args)) > 1:
         battery_mode = config.get('CONFIGURATION', 'modo_actual')
-        # Applies selected mode conf and turns on/off tlp  
-        if args[1] == "apply": 
-            
+         
+        if args[1] == "apply": # Applies selected mode conf and turns on/off tlp 
+            mode_name = ''
             # Copies selected custom mode conf to /etc/tlp.conf
+            #print('Passing Custom Configuration '+battery_mode+' to tlp.conf')
+            
             if battery_mode == '1':
                 print('Power saving mode')
-                subprocess.getstatusoutput("sudo cp "+HOMEDIR+"/.config/slimbookbattery/custom/ahorrodeenergia /etc/tlp.conf")
-                
+                mode_name = 'ahorrodeenergia'
+            
             elif battery_mode == '2':
                 print('Normal power mode')
-                os.system("sudo cp "+HOMEDIR+"/.config/slimbookbattery/custom/equilibrado /etc/tlp.conf")
+                mode_name = 'equilibrado'
 
             elif battery_mode == '3':
                 print('Full power mode')
-                os.system("sudo cp "+HOMEDIR+"/.config/slimbookbattery/custom/maximorendimiento /etc/tlp.conf")
+                mode_name = 'maxrendimiento'
 
-            # Sets brightness
-            print()
-            brightness_settings(battery_mode)
-            print()
+            brightness_settings(battery_mode) # Executed by indicator
             set_tdp(battery_mode)
+            required_reboot = mode_settings(battery_mode)
 
-            
+            #print('\n[COPY TDP CUSTOM SETTINGS]')
+            print(colors.GREEN + "\n[COPY TDP CUSTOM SETTINGS]" + colors.ENDC)
+            exec = subprocess.getstatusoutput("sudo cp "+HOMEDIR+"/.config/slimbookbattery/custom/"+mode_name+" /etc/tlp.conf")
+            if exec[0] == 0:
+                print('File copied succesfully!')
+            else:
+                print('Execution failed '+exec[1])
+
             if config.get('CONFIGURATION', 'application_on') == '1':    # Sets mode changes and enables/disables TLP according to conf
-                # Extra configuration
-                required_reboot = mode_settings(battery_mode)
-             
-                print('\nApplication is on ...')
-
-                # If it's not active in config, we activate it
-                if subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_ENABLE=0'")[0] == 0:
-                    os.system("sed -i 's/TLP_ENABLE=0/ cTLP_ENABLE=1/' /etc/tlp.conf")                  
-            
-            else:   # Disablig TLP in conf
-                
-                if subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_ENABLE=1'")[0] == 0:
-                    os.system("sed -i 's/TLP_ENABLE=1/ cTLP_ENABLE=0/' /etc/tlp.conf")
-
-                print('\tDisabled')
+                # Extra configuration               
+                if update_config('/etc/tlp.conf','TLP_ENABLE', '1') == 0:
+                    print('TLP is enabled')       
+                                
+            else:   # Disablig TLP in conf 
+                if update_config('/etc/tlp.conf','TLP_ENABLE', '0') == 0:
+                    print('TLP is disabled')
 
             # Restarting TLP
-            os.system("sudo tlp start")
+            subprocess.getoutput("sudo tlp start")
 
             if required_reboot == 1:
                 print('Sudo notify')
@@ -144,7 +143,6 @@ def main(args): # Args will be like --> command_name value
 
             #print(str(os.system(command)))
 
-            print('Required reboot --> Exit should be: '+str(required_reboot))
             exit(required_reboot)
 
         if args[1] == "restore": 
@@ -167,9 +165,8 @@ def main(args): # Args will be like --> command_name value
             elif battery_mode == '3':
                 print('Full power mode selected')
                 os.system("sudo cp "+HOMEDIR+"/.config/slimbookbattery/custom/maximorendimiento /etc/tlp.conf")
-           
-        
-        if args[1] == "autostart":  # Sets brigthnes and enables tdp
+             
+        if args[1] == "autostart":  # Sets brightness and enables tdp
             battery_mode = config.get('CONFIGURATION', 'modo_actual')
             brightness_settings(battery_mode)
         
@@ -184,6 +181,9 @@ def main(args): # Args will be like --> command_name value
             if args[2]=="start":
                 os.system('sudo systemctl start slimbookbattery.service')
 
+            elif args[2]=="restart":
+                os.system('sudo systemctl restart slimbookbattery.service')
+                
             elif args[2]=="stop":
                 os.system('sudo systemctl stop slimbookbattery.service')
 
@@ -202,11 +202,13 @@ def notify(msg):
                             uid=$(id -u $user)
                             sudo -u $user DISPLAY=$display DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$uid/bus notify-send "Slimbook Battery" "'''+msg+'''"
                             ''')
+
 def set_tdp(mode):
     # This function enables tdpcontroller autostart an changes it's mode if battery application, 
     # battery autostart and sync tdp switch of the selected mode is on.
     
-    print('[TDP SETTINGS]')
+    #print('\n[TDP SETTINGS]')
+    print(colors.GREEN + '\n[TDP SETTINGS]' + colors.ENDC)
     print('Battery Mode: '+mode)
 
     # Mode settings
@@ -260,37 +262,20 @@ def set_tdp(mode):
     print('Actual TDP Mode: '+config_tdp['CONFIGURATION']['mode'])    
 
 def change_config(args): # For general page options
-    
-    file = '/etc/tlp.conf'
-    file_ahorro = '/usr/share/slimbookbattery/custom/ahorrodeenergia'
-    file_equilibrado = '/usr/share/slimbookbattery/custom/equilibrado'
-    file_max = '/usr/share/slimbookbattery/custom/maximorendimiento'
+    #print('[CHANGE CONFIGURATION]')
+    print(colors.GREEN + '\n[CHANGE CONFIGURATION]' + colors.ENDC)
+    files = ['/etc/tlp.conf', 
+            HOMEDIR+'/.config/slimbookbattery/custom/ahorrodeenergia', 
+            HOMEDIR+'/.config/slimbookbattery/custom/equilibrado', 
+            HOMEDIR+'/.config/slimbookbattery/custom/maximorendimiento']
 
-    # TLP_DEFAULT_MODE      
-    if args[2] == "TLP_DEFAULT_MODE":
-        #Lo editamos en tlp.conf?
-        if args[3]=='BAT':
-            print('Selecting BAT')
-            update_config(file, 'TLP_DEFAULT_MODE', 'BAT')
-            update_config(file_ahorro, 'TLP_DEFAULT_MODE', 'BAT')
-            update_config(file_equilibrado, 'TLP_DEFAULT_MODE', 'BAT')
-            update_config(file_max, 'TLP_DEFAULT_MODE', 'BAT')
-            
-        elif args[3]=='AC':
-            print('Selecting AC')
-            update_config(file, 'TLP_DEFAULT_MODE', 'AC')
-            update_config(file_ahorro, 'TLP_DEFAULT_MODE', 'AC')
-            update_config(file_equilibrado, 'TLP_DEFAULT_MODE', 'AC')
-            update_config(file_max, 'TLP_DEFAULT_MODE', 'AC')
-
-        else:
-            print("Err: Couldn't find 2nd parameter")
-
-        print()
-    
+    for file in files:
+        update_config(file, args[2], args[3])
+  
 def mode_settings(mode):
     required_reboot = 0
-    print('\n[MODE SETTINGS]')
+    #print('\n[MODE SETTINGS]')
+    print(colors.GREEN + '\n[MODE SETTINGS]' + colors.ENDC)
     file_ahorro = HOMEDIR+'/.config/slimbookbattery/custom/ahorrodeenergia'
     file_equilibrado = HOMEDIR+'/.config/slimbookbattery/custom/equilibrado'
     file_max = HOMEDIR+'/.config/slimbookbattery/custom/maximorendimiento'
@@ -386,9 +371,9 @@ def mode_settings(mode):
                 if subprocess.getstatusoutput('lscpu | grep -i model | grep  -i Radeon')[0]==0 :
                     print('Radeon graphics power profile: low')
                     RADEON_POWER_PROFILE_ON_BAT='low'
-                    os.system('sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ c'+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_ahorro)
-                    os.system('sed -i "/RADEON_DPM_STATE_ON_BAT=/ c'+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_ahorro)
-                    os.system('sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ c'+RADEON_DPM_PERF_LEVEL_ON_BAT+'" '+ file_ahorro)
+                    os.system('sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT='+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_equilibrado)
+                    os.system('sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT='+RADEON_DPM_STATE_ON_BAT+'" '+ file_equilibrado)
+                    os.system('sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT='+RADEON_DPM_PERF_LEVEL_ON_BAT+'" '+ file_ahorro)
                 
                 # Intel integrated
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep -i Intel')[0] == 0 : 
@@ -449,15 +434,15 @@ def mode_settings(mode):
             else:
                 # Radeon integrated
                 if subprocess.getstatusoutput('lscpu | grep -i model | grep -i Radeon')[0]== 0:
-                    print('Radeon graphics power profile: low')
+                    print('Radeon graphics power profile: default')
                     RADEON_POWER_PROFILE_ON_BAT='default'
-                    os.system('sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ c'+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_ahorro)
-                    os.system('sed -i "/RADEON_DPM_STATE_ON_BAT=/ c'+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_ahorro)
-                    os.system('sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ c'+RADEON_DPM_PERF_LEVEL_ON_BAT+'" '+ file_ahorro)
+                    os.system('sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT='+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_ahorro)
+                    os.system('sed -i "/RADEON_DPM_STATE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT='+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_ahorro)
+                    os.system('sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT='+RADEON_DPM_PERF_LEVEL_ON_BAT+'" '+ file_ahorro)
                 
                 # Intel integrated
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep Intel')[0]== 0:
-                    print('Intel graphics power profile: low')
+                    print('Intel graphics power profile: #low')
                     os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_BAT=/ c#INTEL_GPU_MIN_FREQ_ON_BAT=0" '+ file_ahorro)
                     os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_AC=/ c#INTEL_GPU_MIN_FREQ_ON_AC=0" '+ file_ahorro)
                     os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_BAT=/ c#INTEL_GPU_MAX_FREQ_ON_BAT=0" '+ file_ahorro)
@@ -474,10 +459,14 @@ def mode_settings(mode):
                 if subprocess.getstatusoutput('lscpu | grep -i model | grep  -i Radeon')[0]==0 :
                     print('Radeon graphics power profile: mid')
                     RADEON_POWER_PROFILE_ON_BAT='mid'
+                    # Radeon changes
+                    os.system('sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT='+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_equilibrado)
+                    os.system('sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT='+RADEON_DPM_STATE_ON_BAT+'" '+ file_equilibrado)
+                    os.system('sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT='+RADEON_DPM_PERF_LEVEL_ON_BAT+'" '+ file_ahorro)
                 
                 # Intel integrated
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep -i Intel')[0]==0 :
-                    print('Intel graphics power profile: low')
+                    print('Intel graphics power profile: mid')
                     for i in range(len(freq_available)):
                         if(int(freq_available[i]) > 0 and int(freq_available[i]) < 600):
                             min_bat = int(freq_available[i])
@@ -536,7 +525,7 @@ def mode_settings(mode):
             else:
                 # Radeon integrated
                 if subprocess.getstatusoutput('lscpu | grep -i model | grep -i Radeon')[0]== 0:
-                    print('Radeon graphics power profile: mid')
+                    print('Radeon graphics power profile: #default')
                     RADEON_POWER_PROFILE_ON_BAT='default'
                     os.system('sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT='+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_equilibrado)
                     os.system('sed -i "/RADEON_DPM_STATE_ON_BAT=/ c#RADEON_DPM_STATE_ON_BAT=0'+RADEON_DPM_STATE_ON_BAT+'" '+ file_equilibrado)
@@ -544,7 +533,7 @@ def mode_settings(mode):
                           
                 # Intel integrated
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep Intel')[0]== 0:
-                    print('Intel graphics power profile: mid')
+                    print('Intel graphics power profile: #mid')
                     os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_BAT=/ c#INTEL_GPU_MIN_FREQ_ON_BAT=0" '+ file_equilibrado)
                     os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_AC=/ c#INTEL_GPU_MIN_FREQ_ON_AC=0" '+ file_equilibrado)
                     os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_BAT=/ c#INTEL_GPU_MAX_FREQ_ON_BAT=0" '+ file_equilibrado)
@@ -558,9 +547,9 @@ def mode_settings(mode):
                 print('Radeon graphics power profile: high')
                 RADEON_POWER_PROFILE_ON_BAT='high'
                 # Radeon changes
-                os.system('sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT='+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_equilibrado)
-                os.system('sed -i "/RADEON_DPM_STATE_ON_BAT=/ c#RADEON_DPM_STATE_ON_BAT=0'+RADEON_DPM_STATE_ON_BAT+'" '+ file_equilibrado)
-                os.system('sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ c#RADEON_DPM_PERF_LEVEL_ON_BAT='+RADEON_DPM_PERF_LEVEL_ON_BAT+'" '+ file_ahorro)
+                os.system('sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT='+RADEON_POWER_PROFILE_ON_BAT+'" '+ file_equilibrado)
+                os.system('sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT='+RADEON_DPM_STATE_ON_BAT+'" '+ file_equilibrado)
+                os.system('sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT='+RADEON_DPM_PERF_LEVEL_ON_BAT+'" '+ file_ahorro)
             
             # Intel integrated
             elif subprocess.getstatusoutput('lspci | grep VGA | grep Intel')== 0:
@@ -605,7 +594,8 @@ def mode_settings(mode):
 
 def brightness_settings(mode):
     
-    print('[BRIGTHNESS SETTINS]')
+    #print('\n[BRIGTHNESS SETTINS]')
+    print(colors.GREEN + '\n[BRIGTNESS SETTINGS]' + colors.ENDC)
     set_brightness = ''
 
     if mode == '1':
@@ -665,23 +655,27 @@ def brightness_settings(mode):
             
 def update_config(file, variable, value):
     
-    # We change our variable: config.set(section, variable, value)
-    call = subprocess.getoutput('cat '+file)
-    patron = re.compile(variable+'\=(.*)')
-    var_value = patron.search(call)[0]
-    last_value = patron.search(call)[1]
-
+    try:
+        call = subprocess.getoutput('cat '+file)
+        patron = re.compile(variable+'\=(.*)')
+        var_value = patron.search(call)[0]
+        last_value = patron.search(call)[1]
+    except:
+        last_value  = ''
     #print(last_value, value)
 
     if last_value != value:
         command = "sudo sed -i '/"+variable+"/ c"+variable+"="+value+"' "+file
         #print(command)
         if os.system(command) == 0:
-            print("\n- Variable |"+variable+"| updated in "+file+", actual value: "+value)
+            print("\nInfo: "+variable+" updated in "+file+", value: "+value)
         else:
             print('\n Sed command failed')
+            return 1
     else:
-        print('Already set')
+        print('Already set in '+file)
+    
+    return 0
 
 
 

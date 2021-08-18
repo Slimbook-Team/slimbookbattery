@@ -87,8 +87,8 @@ if config['CONFIGURATION']['alerts'] == '1':
         os.system('pkexec slimbookbattery-pkexec service create')
 
     print('Opening notification service')
-    os.system('pkexec slimbookbattery-pkexec service stop') #(avocado no hace falta?)
-    os.system('pkexec slimbookbattery-pkexec service start')
+
+    os.system('pkexec slimbookbattery-pkexec service restart')
 
 tdpcontroller = config['TDP']['tdpcontroller']
 
@@ -132,9 +132,6 @@ class Indicator():
         elif int(config['CONFIGURATION']['application_on']) == 0 :
             print()
 
-            if os.system("pkexec slimbookbattery-pkexec apply") == 0:
-                print('Done! TLP is disabled')
-
             indicator.set_icon_full(DISABLED, 'Icon energy saving')
                 
             #print(_("strappstatus3"))
@@ -144,13 +141,6 @@ class Indicator():
 
         print()
 
-        #Ahora que la aplicación ya se habrá iniciado si el valor de los gráficos que esta usando ahora (intel o nvidia) es distinto al valor anteriormente guardado pedirá al usuario si desea reiniciar
-        """ if os.system('prime-select query') == 0:
-            graphicsAfter = subprocess.getoutput('prime-select query')
-            if graphicsBefore != graphicsAfter:
-                rebootNvidia()
-        Gtk.main()
-        """
 
 def build_menu():
     menu = Gtk.Menu()
@@ -239,6 +229,7 @@ def build_menu():
     
     return menu
 
+
 def modo_ahorro(self):
     indicator.set_icon_full(ENERGY_SAVING, 'Icon energy saving')
     print('Battery Saving Mode')
@@ -269,6 +260,7 @@ def modo_max_rendimiento(self):
     child = subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
     reboot_process(tdpcontroller, '/usr/share/'+tdpcontroller+'/src/'+tdpcontroller+'indicator.py') # Only if it's running
     animations(self.modo_actual)
+
 
 def modo_avanzado(self):
     print('preferencias')
