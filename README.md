@@ -21,7 +21,7 @@ sudo apt-get update
 
 By doing this we will have added the Slimbook repositories. Now we will execute the next command to install the application:
 
-`sudo apt-get install slimbookbattery`
+`sudo apt-get install slimbookbattery`(Not avalible yet)
 
 
 This app works with: Unity, GNOME, KDE Plasma, Cinnamon, Mate...
