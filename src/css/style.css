@@ -41,20 +41,15 @@ notebook stack{
     margin-top: 20px;
 }
 
-#win_bttns button {
-    margin: 10px;
-}
-
-/* header > tabs > tab {
-    background: green;
-    color: white;
-    border-image: none;
-    border: 1px solid rgba(0,0,0,0.4);
-    border-radius: 8px 8px 0px 0px;
-    border-bottom: none;
-
+/* #close_button{
+    border-color: tomato;
+    border-width: 2px;
+    border-style: solid;
 } */
 
+#win_bttns button, #close_button {
+    margin: 10px;
+}
 
 combobox, entry {
     background-color: white;
@@ -62,12 +57,6 @@ combobox, entry {
     color: black;
     border-radius: 0px;
 }
-
-/* switch {
-    background: red;
-    background-color: green;
-    color: white;
-} */
 
 #modes {
     font-size: x-large;
@@ -110,7 +99,7 @@ button{
 
 
 header > tabs > tab:hover, header > tabs > tab:checked, button:hover, button:checked {
-    background: rgb(1, 68, 1);
+    background: rgb(1, 77, 1);
     border-image: none;
 }
 
