@@ -82,16 +82,22 @@ class Preferences(Gtk.ApplicationWindow):
 
     def __init__(self):
     # Init Window
+        
+        #response = dialog.run()
 
         Gtk.Window.__init__(self, title =(_('Slimbook Battery Preferences')))    
-        #self.set_size_request(900,400) #anchoxalto
-        self.set_resizable(False)
-        #self.set_position(Gtk.WindowPosition.CENTER) // Allow movement
-        self.get_style_context().add_class("bg-image")  
         
-        self.set_position(Gtk.WindowPosition.CENTER) #// Allow movement
-        #self.connect("close", self.close_ok)
+        self.get_style_context().add_class("bg-image") 
 
+        self.set_position(Gtk.WindowPosition.CENTER) #// Allow movement
+
+        self.set_resizable(False)
+
+        self.set_decorated(False)
+
+        #self.set_position(Gtk.WindowPosition.CENTER) // Allow movement
+        #self.set_size_request(900,400) #anchoxalto
+        #self.connect("close", self.close_ok)
 
         ### Movement
         self.is_in_drag = False
@@ -103,7 +109,15 @@ class Preferences(Gtk.ApplicationWindow):
 
         ### Center
         #self.connect('realize', self.on_realize)
-        self.set_ui()
+
+        self.child_process = subprocess.Popen(currpath+'/splash.py', stdout=subprocess.PIPE)
+
+        try:
+            self.set_ui()
+        except Exception as e:
+            print(e)
+            self.child_process.terminate()
+
 
 
     def on_realize(self, widget):
@@ -231,8 +245,24 @@ class Preferences(Gtk.ApplicationWindow):
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
         logo.set_valign(Gtk.Align.START)
-       
         win_grid.attach(logo, 0, 0, 1, 4)
+
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename = os.path.join(imagespath, 'cross.png'),
+            width = 20,
+            height = 20,
+            preserve_aspect_ratio=True)
+
+        close = Gtk.Image.new_from_pixbuf(pixbuf)   
+        close.set_name('close_button')  
+
+        evnt_close = Gtk.EventBox()
+        evnt_close.add(close)
+        evnt_close.set_halign(Gtk.Align.END)
+        evnt_close.set_valign(Gtk.Align.START)
+        evnt_close.connect('button-press-event', self.close)
+
+        win_grid.attach(evnt_close, 0, 0, 1, 4)
 
         #win_box.pack_start(mid_img, True, True, 0)
         win_grid.attach(notebook, 0, 3, 1, 1)
@@ -2610,7 +2640,9 @@ class Preferences(Gtk.ApplicationWindow):
             preserve_aspect_ratio=True)
         CCIcon = Gtk.Image.new_from_pixbuf(pixbuf)
         #CCIcon.set_alignment(0.5, 0)
-
+        
+# END
+        self.child_process.terminate()
         #SHOW
         self.show_all()
  
@@ -4026,7 +4058,9 @@ class Preferences(Gtk.ApplicationWindow):
             print(_('Report file canceled'))
         saveDialog.destroy()    
 
-    def close(self, button):
+    def close(self, button, state):
+        print('Button Close Clicked')
+        Gtk.main_quit()
         exit(0)
 
     def update_config(self, section, variable, value):
