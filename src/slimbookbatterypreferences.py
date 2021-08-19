@@ -89,7 +89,7 @@ class Preferences(Gtk.ApplicationWindow):
         #self.set_position(Gtk.WindowPosition.CENTER) // Allow movement
         self.get_style_context().add_class("bg-image")  
         
-        #self.set_position(Gtk.WindowPosition.CENTER_ALWAYS) // Allow movement
+        self.set_position(Gtk.WindowPosition.CENTER) #// Allow movement
         #self.connect("close", self.close_ok)
 
 
@@ -102,8 +102,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.connect('motion-notify-event', self.on_mouse_moved)
 
         ### Center
-        self.connect('realize', self.on_realize)
-
+        #self.connect('realize', self.on_realize)
         self.set_ui()
 
 
