@@ -56,9 +56,10 @@ fichero_conf = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
 config = configparser.ConfigParser()
 config.read(fichero_conf)
 
-ENERGY_SAVING = '/usr/share/slimbookbattery/images/battery.png'
-EQUILIBRADO = '/usr/share/slimbookbattery/images/equilibrado.png'
-MAX_PERFORMANCE = '/usr/share/slimbookbattery/images/battery_high.png'
+ENERGY_SAVING = '/usr/share/slimbookbattery/images/normal.png'
+EQUILIBRADO = '/usr/share/slimbookbattery/images/balanced_normal.png'
+MAX_PERFORMANCE = '/usr/share/slimbookbattery/images/performance_normal.png'
+
 DISABLED = '/usr/share/slimbookbattery/images/disabled.png'
 STATUS_NORMAL = '/usr/share/slimbookbattery/images/normal.png'
 STATUS_HIGH = '/usr/share/slimbookbattery/images/high.png'
