@@ -82,16 +82,22 @@ class Preferences(Gtk.ApplicationWindow):
 
     def __init__(self):
     # Init Window
+        
+        #response = dialog.run()
 
         Gtk.Window.__init__(self, title =(_('Slimbook Battery Preferences')))    
-        #self.set_size_request(900,400) #anchoxalto
-        self.set_resizable(False)
-        #self.set_position(Gtk.WindowPosition.CENTER) // Allow movement
-        self.get_style_context().add_class("bg-image")  
         
-        #self.set_position(Gtk.WindowPosition.CENTER_ALWAYS) // Allow movement
-        #self.connect("close", self.close_ok)
+        self.get_style_context().add_class("bg-image") 
 
+        self.set_position(Gtk.WindowPosition.CENTER) #// Allow movement
+
+        self.set_resizable(False)
+
+        self.set_decorated(False)
+
+        #self.set_position(Gtk.WindowPosition.CENTER) // Allow movement
+        #self.set_size_request(900,400) #anchoxalto
+        #self.connect("close", self.close_ok)
 
         ### Movement
         self.is_in_drag = False
@@ -102,9 +108,16 @@ class Preferences(Gtk.ApplicationWindow):
         self.connect('motion-notify-event', self.on_mouse_moved)
 
         ### Center
-        self.connect('realize', self.on_realize)
+        #self.connect('realize', self.on_realize)
 
-        self.set_ui()
+        self.child_process = subprocess.Popen(currpath+'/splash.py', stdout=subprocess.PIPE)
+
+        try:
+            self.set_ui()
+        except Exception as e:
+            print(e)
+            self.child_process.terminate()
+
 
 
     def on_realize(self, widget):
@@ -183,7 +196,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.RestoreValues.set_halign(Gtk.Align.END)
    
         self.btnCancel = Gtk.Button(label=(_('Cancel')))
-        self.btnCancel.connect("clicked", self.close)
+        self.btnCancel.connect("clicked", self.close, 'x')
         self.btnCancel.set_halign(Gtk.Align.END)
    
         self.btnAccept = Gtk.Button(label=(_('Accept')))
@@ -232,8 +245,24 @@ class Preferences(Gtk.ApplicationWindow):
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
         logo.set_valign(Gtk.Align.START)
-       
         win_grid.attach(logo, 0, 0, 1, 4)
+
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename = os.path.join(imagespath, 'cross.png'),
+            width = 20,
+            height = 20,
+            preserve_aspect_ratio=True)
+
+        close = Gtk.Image.new_from_pixbuf(pixbuf)   
+        close.set_name('close_button')  
+
+        evnt_close = Gtk.EventBox()
+        evnt_close.add(close)
+        evnt_close.set_halign(Gtk.Align.END)
+        evnt_close.set_valign(Gtk.Align.START)
+        evnt_close.connect('button-press-event', self.close)
+
+        win_grid.attach(evnt_close, 0, 0, 1, 4)
 
         #win_box.pack_start(mid_img, True, True, 0)
         win_grid.attach(notebook, 0, 3, 1, 1)
@@ -616,6 +645,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchWifiNIU = Gtk.Switch()
         self.switchWifiNIU.set_name('ahorrodeenergia')
         self.switchWifiNIU.set_halign(Gtk.Align.END)
+        self.switchWifiNIU.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU)
         low_grid.attach(self.switchWifiNIU, button_col, row, 1, 1)      
     # 8 ------------- TDP ADJUST
@@ -900,11 +930,11 @@ class Preferences(Gtk.ApplicationWindow):
         # BUTTON 7
         self.entryBlacklistUSBIDs = Gtk.Entry()
         if self.switchUSBSuspend.get_active():
-            self.entryBlacklistUSBIDs.set_text(str(self.gen_blacklist('ahorrodeenergia')))
             self.entryBlacklistUSBIDs.set_sensitive(True)         
         else:
-            self.entryBlacklistUSBIDs.set_text('')
             self.entryBlacklistUSBIDs.set_sensitive(False)
+        self.entryBlacklistUSBIDs.set_text(str(self.gen_blacklist('ahorrodeenergia')))
+
         low_grid.attach(self.entryBlacklistUSBIDs, button_col2, row, 1, 1)
 
 
@@ -1030,9 +1060,9 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = os.path.join(imagespath, 'warging.png')
+        icon_path = os.path.join(imagespath, 'warning.png')
         icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: this setting affect to performance'))
+        icon.set_tooltip_text(_('Note: this setting affects to performance'))
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1, 
             xpadding=10,
@@ -1301,7 +1331,10 @@ class Preferences(Gtk.ApplicationWindow):
         self.brightness_switch2.set_name('balanced_brightness_switch')
         self.brightness_switch2.set_halign(Gtk.Align.END)
         self.brightness_switch2.set_valign(Gtk.Align.END)
+
+        self.brightness_switch2.connect("state-set", self.brightness_switch_changed, self.scaleBrightness2)
         self.check_autostart_switchBrightness(self.brightness_switch2, self.scaleBrightness2)
+        
         low_grid.attach(self.scaleBrightness2, button_col2-1, row, 1, 1)
         low_grid.attach(self.brightness_switch2, button_col2, row, 1, 1)
 
@@ -1451,11 +1484,10 @@ class Preferences(Gtk.ApplicationWindow):
         # BUTTON 7
         self.entryBlacklistUSBIDs2 = Gtk.Entry()
         if self.switchUSBSuspend2.get_active():
-            self.entryBlacklistUSBIDs2.set_text(str(self.gen_blacklist('equilibrado')))
             self.entryBlacklistUSBIDs2.set_sensitive(True)         
         else:
-            self.entryBlacklistUSBIDs2.set_text('')
             self.entryBlacklistUSBIDs2.set_sensitive(False)
+        self.entryBlacklistUSBIDs2.set_text(str(self.gen_blacklist('equilibrado')))
         low_grid.attach(self.entryBlacklistUSBIDs2, button_col2, row, 1, 1)
 
 
@@ -1738,6 +1770,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchWifiNIU3 = Gtk.Switch()
         self.switchWifiNIU3.set_name('maximorendimiento')
         self.switchWifiNIU3.set_halign(Gtk.Align.END)
+        self.switchWifiNIU3.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU3)
         low_grid.attach(self.switchWifiNIU3, button_col, row, 1, 1)
     # 8 ------------- TDP ADJUST
@@ -2001,11 +2034,10 @@ class Preferences(Gtk.ApplicationWindow):
         # BUTTON 7
         self.entryBlacklistUSBIDs3 = Gtk.Entry()
         if self.switchUSBSuspend3.get_active():
-            self.entryBlacklistUSBIDs3.set_text(str(self.gen_blacklist('maximorendimiento')))
             self.entryBlacklistUSBIDs3.set_sensitive(True)         
         else:
-            self.entryBlacklistUSBIDs3.set_text('')
             self.entryBlacklistUSBIDs3.set_sensitive(False)
+        self.entryBlacklistUSBIDs3.set_text(str(self.gen_blacklist('maximorendimiento')))
 
         low_grid.attach(self.entryBlacklistUSBIDs3, button_col2, row, 1, 1)
 
@@ -2611,7 +2643,9 @@ class Preferences(Gtk.ApplicationWindow):
             preserve_aspect_ratio=True)
         CCIcon = Gtk.Image.new_from_pixbuf(pixbuf)
         #CCIcon.set_alignment(0.5, 0)
-
+        
+# END
+        self.child_process.terminate()
         #SHOW
         self.show_all()
  
@@ -3104,7 +3138,6 @@ class Preferences(Gtk.ApplicationWindow):
                     ''')
                 
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
-
                 config.set('SETTINGS', 'limit_cpu_ahorro', '1')
 
             elif name == (_('medium')):
@@ -3313,6 +3346,8 @@ class Preferences(Gtk.ApplicationWindow):
 
         print('\n')
 
+        print('COnfig: '+config['SETTINGS']['limit_cpu_ahorro'])
+
         # This step is done at the end of function
         configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
         config.write(configfile)
@@ -3352,7 +3387,7 @@ class Preferences(Gtk.ApplicationWindow):
                 
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
 
-                config.set('SETTINGS', 'limit_cpu_ahorro', '1')
+                config.set('SETTINGS', 'limit_cpu_equilibrado', '1')
 
             elif name == (_('medium')):
                 #os.system('/usr/share/slimbookbattery/bin/limitcpu.x 2')
@@ -3376,7 +3411,7 @@ class Preferences(Gtk.ApplicationWindow):
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     ''')
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
-                config.set('SETTINGS', 'limit_cpu_ahorro', '2')
+                config.set('SETTINGS', 'limit_cpu_equilibrado', '2')
             
             elif name == (_('none')):
                 #os.system('/usr/share/slimbookbattery/bin/limitcpu.x 3')
@@ -3400,7 +3435,7 @@ class Preferences(Gtk.ApplicationWindow):
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     ''')
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
-                config.set('SETTINGS', 'limit_cpu_ahorro', '3')
+                config.set('SETTINGS', 'limit_cpu_equilibrado', '3')
 
         statGovernor = self.comboBoxGovernor2.get_active_iter() # .conf file && Tlp custom file*
         # Test pending
@@ -3593,7 +3628,7 @@ class Preferences(Gtk.ApplicationWindow):
                 
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
 
-                config.set('SETTINGS', 'limit_cpu_ahorro', '1')
+                config.set('SETTINGS', 'limit_cpu_maximorendimiento', '1')
 
             elif name == (_('medium')):
                 #os.system('/usr/share/slimbookbattery/bin/limitcpu.x 2')
@@ -3617,7 +3652,7 @@ class Preferences(Gtk.ApplicationWindow):
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     ''')
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
-                config.set('SETTINGS', 'limit_cpu_ahorro', '2')
+                config.set('SETTINGS', 'limit_cpu_maximorendimiento', '2')
             
             elif name == (_('none')):
                 #os.system('/usr/share/slimbookbattery/bin/limitcpu.x 3')
@@ -3641,7 +3676,7 @@ class Preferences(Gtk.ApplicationWindow):
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     ''')
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
-                config.set('SETTINGS', 'limit_cpu_ahorro', '3')
+                config.set('SETTINGS', 'limit_cpu_maximorendimiento', '3')
 
         statGovernor = self.comboBoxGovernor3.get_active_iter() # .conf file && Tlp custom file*
         # Test pending
@@ -4014,20 +4049,22 @@ class Preferences(Gtk.ApplicationWindow):
     def on_buttonReportFile_clicked(self, buttonReportFile):
         #Se abrirá un dialogo para el usuario para que elija donde desea guardar el archivo del reporte que se va a generar
         saveDialog = Gtk.FileChooserDialog("Please select a folder to save the file", self, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
-        saveDialog.set_name()
         response = saveDialog.run()
+        saveDialog.set_name('save_dialog')
         if response == Gtk.ResponseType.OK:
             ruta = saveDialog.get_filename() + '/report_'+ time.strftime("%d-%m-%y_%H:%M") +'.txt'
             escritorio = subprocess.getoutput("echo $XDG_CURRENT_DESKTOP")
             if subprocess.getstatusoutput("pkexec slimbookbattery-pkexec report "+ ruta +' '+ escritorio +' '+ user_home)[0] == 0:
                 print(_('Report file generated'))
             else:
-                print(_('Report file canceled, wrong password'))
+                print(_('Report file canceled'))
         elif response == Gtk.ResponseType.CANCEL:
             print(_('Report file canceled'))
         saveDialog.destroy()    
 
-    def close(self, button):
+    def close(self, button, state):
+        print('Button Close Clicked')
+        Gtk.main_quit()
         exit(0)
 
     def update_config(self, section, variable, value):
@@ -4061,7 +4098,7 @@ def governorIsCompatible():
 def reboot_process(process_name, path, start):
     
     print('Rebooting '+process_name+' ...')
-
+    print(path)
     process = subprocess.getoutput('pgrep -f '+process_name)
     #print(process)
 

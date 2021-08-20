@@ -3,15 +3,17 @@
 #TIME_BETWEEN=$(cat /sys/class/power_supply/BAT0/uevent | grep -i capacity | cut -d'=' -f2)
 
 user=$(last -wn1 | head -n 1 | cut -f 1 -d " ")
+home=$(cat /etc/passwd | grep "$user" | cut -d":" -f6)
 
 
-MAX_BAT=$(cat /home/$user/.config/slimbookbattery/slimbookbattery.conf | grep 'max_battery_value' | cut -d'=' -f2)
 
-MIN_BAT=$(cat /home/$user/.config/slimbookbattery/slimbookbattery.conf | grep 'min_battery_value' | cut -d'=' -f2)
+MAX_BAT=$(cat $home/.config/slimbookbattery/slimbookbattery.conf | grep 'max_battery_value' | cut -d'=' -f2)
 
-TIME_BETWEEN=$(cat /home/$user/.config/slimbookbattery/slimbookbattery.conf | grep 'time_between_warnings' | cut -d'=' -f2)
+MIN_BAT=$(cat $home/.config/slimbookbattery/slimbookbattery.conf | grep 'min_battery_value' | cut -d'=' -f2)
 
-TIMES=$(cat /home/$user/.config/slimbookbattery/slimbookbattery.conf | grep 'max_battery_times' | cut -d'=' -f2)
+TIME_BETWEEN=$(cat $home/.config/slimbookbattery/slimbookbattery.conf | grep 'time_between_warnings' | cut -d'=' -f2)
+
+TIMES=$(cat $home/.config/slimbookbattery/slimbookbattery.conf | grep 'max_battery_times' | cut -d'=' -f2)
 
 last_value=-1
 

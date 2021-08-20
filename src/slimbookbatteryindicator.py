@@ -56,15 +56,16 @@ fichero_conf = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
 config = configparser.ConfigParser()
 config.read(fichero_conf)
 
-ENERGY_SAVING = '/usr/share/slimbookbattery/images/battery.png'
-EQUILIBRADO = '/usr/share/slimbookbattery/images/equilibrado.png'
-MAX_PERFORMANCE = '/usr/share/slimbookbattery/images/battery_high.png'
+ENERGY_SAVING = '/usr/share/slimbookbattery/images/normal.png'
+EQUILIBRADO = '/usr/share/slimbookbattery/images/balanced_normal.png'
+MAX_PERFORMANCE = '/usr/share/slimbookbattery/images/performance_normal.png'
+
 DISABLED = '/usr/share/slimbookbattery/images/disabled.png'
 STATUS_NORMAL = '/usr/share/slimbookbattery/images/normal.png'
 STATUS_HIGH = '/usr/share/slimbookbattery/images/high.png'
 STATUS_CRITICAL = '/usr/share/slimbookbattery/images/critical.png'
 
-APPINDICATOR_ID = 'myapp-indicator'
+APPINDICATOR_ID = 'Slimbook Battery Indicator'
 
 indicator = AppIndicator3.Indicator.new(APPINDICATOR_ID, '', AppIndicator3.IndicatorCategory.SYSTEM_SERVICES)
 indicator.set_icon_full(DISABLED, 'Icon disabled')
@@ -228,7 +229,6 @@ def build_menu():
     menu.show_all()
     
     return menu
-
 
 def modo_ahorro(self):
     indicator.set_icon_full(ENERGY_SAVING, 'Icon energy saving')
