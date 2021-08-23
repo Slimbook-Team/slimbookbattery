@@ -4034,7 +4034,13 @@ class Preferences(Gtk.ApplicationWindow):
 
     def on_buttonReportFile_clicked(self, buttonReportFile):
         #Se abrirá un dialogo para el usuario para que elija donde desea guardar el archivo del reporte que se va a generar
-        saveDialog = Gtk.FileChooserDialog("Please select a folder to save the file", self, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        saveDialog = Gtk.FileChooserDialog(title = "Please select a folder to save the file", 
+                                            parent = self,
+                                            action = Gtk.FileChooserAction.SELECT_FOLDER)
+                                            
+        saveDialog.add_button(Gtk.STOCK_CANCEL, 0)
+        saveDialog.add_button(Gtk.STOCK_SAVE, 1)
+
         response = saveDialog.run()
         saveDialog.set_name('save_dialog')
         if response == Gtk.ResponseType.OK:
