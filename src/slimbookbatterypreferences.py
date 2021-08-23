@@ -2616,7 +2616,7 @@ class Preferences(Gtk.ApplicationWindow):
         
         # (12, 0)
         self.buttonReportFile = Gtk.Button(label=(_('Generate report file')))
-        self.buttonReportFile.connect("clicked", self.on_buttonReportFile_clicked)
+        self.buttonReportFile.connect("clicked", self.on_buttonReportFile_clicked, 'x')
         self.buttonReportFile.set_halign(Gtk.Align.CENTER)
         info_grid.attach(self.buttonReportFile, 0, 15, 5, 1)
 
@@ -4042,10 +4042,9 @@ class Preferences(Gtk.ApplicationWindow):
             print('Mode not setting TDP')
 
 
-    def on_buttonReportFile_clicked(self, buttonReportFile):
+    def on_buttonReportFile_clicked(self, buttonReportFile, x):
         #Se abrirá un dialogo para el usuario para que elija donde desea guardar el archivo del reporte que se va a generar
         saveDialog = Gtk.FileChooserDialog("Please select a folder to save the file", self, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
-        saveDialog.set_name()
         response = saveDialog.run()
         if response == Gtk.ResponseType.OK:
             ruta = saveDialog.get_filename() + '/report_'+ time.strftime("%d-%m-%y_%H:%M") +'.txt'
