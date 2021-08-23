@@ -22,24 +22,21 @@
 import os
 import sys
 import subprocess
-import gi
 from configparser import ConfigParser
 import re
 import gettext
 import locale
 
-#gi.require_version('Notify', '0.7')
-gi.require_version('Gtk', '3.0')
-
-from gi.repository import Gtk, GdkPixbuf
 
 print('******************************************************************************')
 
 
 print('\x1b[6;30;42m'+'SlimbookBattery-Commandline, executed as: '+str(subprocess.getoutput('whoami'))+'\x1b[0m')
 
-if subprocess.getstatusoutput("logname")[0]==0:
-    USER_NAME = subprocess.getoutput("logname")
+USERNAME = subprocess.getstatusoutput("logname")
+
+if USERNAME[0] == 0 and USERNAME[1] != 'root':
+    USER_NAME = USERNAME[1]
 else:
     USER_NAME = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
 

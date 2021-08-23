@@ -95,9 +95,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.set_decorated(False)
 
-        #self.set_position(Gtk.WindowPosition.CENTER) // Allow movement
-        #self.set_size_request(900,400) #anchoxalto
-        #self.connect("close", self.close_ok)
 
         ### Movement
         self.is_in_drag = False
@@ -196,7 +193,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.RestoreValues.set_halign(Gtk.Align.END)
    
         self.btnCancel = Gtk.Button(label=(_('Cancel')))
-        self.btnCancel.connect("clicked", self.close)
+        self.btnCancel.connect("clicked", self.close, 'state')
         self.btnCancel.set_halign(Gtk.Align.END)
    
         self.btnAccept = Gtk.Button(label=(_('Accept')))
