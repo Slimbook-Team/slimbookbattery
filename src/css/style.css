@@ -12,9 +12,9 @@ window notebook > *{
     background-color: transparent;
 }
 
-dialog button {
+/* dialog button {
     border-radius: 10px;
-}
+} */
 
 window label, scale *{
     color: white;
