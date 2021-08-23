@@ -8,6 +8,9 @@ python3 /usr/share/slimbookbattery/src/check_config.py
 chmod -R 777 /usr/share/slimbookbattery/src/*.py
 chmod -R 777 /usr/share/slimbookbattery/src/*.sh
 
+# Enabling tlp.service
+sudo systemctl enable tlp.service
+
 #Autostar file changed
 FILE=/home/*/.config/autostart/slimbookbattery-autostart.desktop
 
