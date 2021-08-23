@@ -193,7 +193,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.RestoreValues.set_halign(Gtk.Align.END)
    
         self.btnCancel = Gtk.Button(label=(_('Cancel')))
-        self.btnCancel.connect("clicked", self.close, 'state')
+        self.btnCancel.connect("clicked", self.close, 'x')
         self.btnCancel.set_halign(Gtk.Align.END)
    
         self.btnAccept = Gtk.Button(label=(_('Accept')))
@@ -642,6 +642,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchWifiNIU = Gtk.Switch()
         self.switchWifiNIU.set_name('ahorrodeenergia')
         self.switchWifiNIU.set_halign(Gtk.Align.END)
+        self.switchWifiNIU.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU)
         low_grid.attach(self.switchWifiNIU, button_col, row, 1, 1)      
     # 8 ------------- TDP ADJUST
@@ -926,11 +927,11 @@ class Preferences(Gtk.ApplicationWindow):
         # BUTTON 7
         self.entryBlacklistUSBIDs = Gtk.Entry()
         if self.switchUSBSuspend.get_active():
-            self.entryBlacklistUSBIDs.set_text(str(self.gen_blacklist('ahorrodeenergia')))
             self.entryBlacklistUSBIDs.set_sensitive(True)         
         else:
-            self.entryBlacklistUSBIDs.set_text('')
             self.entryBlacklistUSBIDs.set_sensitive(False)
+        self.entryBlacklistUSBIDs.set_text(str(self.gen_blacklist('ahorrodeenergia')))
+
         low_grid.attach(self.entryBlacklistUSBIDs, button_col2, row, 1, 1)
 
 
@@ -1056,9 +1057,9 @@ class Preferences(Gtk.ApplicationWindow):
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
         icon = Gtk.Image()
-        icon_path = os.path.join(imagespath, 'warging.png')
+        icon_path = os.path.join(imagespath, 'warning.png')
         icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: this setting affect to performance'))
+        icon.set_tooltip_text(_('Note: this setting affects to performance'))
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1, 
             xpadding=10,
@@ -1327,7 +1328,10 @@ class Preferences(Gtk.ApplicationWindow):
         self.brightness_switch2.set_name('balanced_brightness_switch')
         self.brightness_switch2.set_halign(Gtk.Align.END)
         self.brightness_switch2.set_valign(Gtk.Align.END)
+
+        self.brightness_switch2.connect("state-set", self.brightness_switch_changed, self.scaleBrightness2)
         self.check_autostart_switchBrightness(self.brightness_switch2, self.scaleBrightness2)
+        
         low_grid.attach(self.scaleBrightness2, button_col2-1, row, 1, 1)
         low_grid.attach(self.brightness_switch2, button_col2, row, 1, 1)
 
@@ -1477,11 +1481,10 @@ class Preferences(Gtk.ApplicationWindow):
         # BUTTON 7
         self.entryBlacklistUSBIDs2 = Gtk.Entry()
         if self.switchUSBSuspend2.get_active():
-            self.entryBlacklistUSBIDs2.set_text(str(self.gen_blacklist('equilibrado')))
             self.entryBlacklistUSBIDs2.set_sensitive(True)         
         else:
-            self.entryBlacklistUSBIDs2.set_text('')
             self.entryBlacklistUSBIDs2.set_sensitive(False)
+        self.entryBlacklistUSBIDs2.set_text(str(self.gen_blacklist('equilibrado')))
         low_grid.attach(self.entryBlacklistUSBIDs2, button_col2, row, 1, 1)
 
 
@@ -1764,6 +1767,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchWifiNIU3 = Gtk.Switch()
         self.switchWifiNIU3.set_name('maximorendimiento')
         self.switchWifiNIU3.set_halign(Gtk.Align.END)
+        self.switchWifiNIU3.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU3)
         low_grid.attach(self.switchWifiNIU3, button_col, row, 1, 1)
     # 8 ------------- TDP ADJUST
@@ -2027,11 +2031,10 @@ class Preferences(Gtk.ApplicationWindow):
         # BUTTON 7
         self.entryBlacklistUSBIDs3 = Gtk.Entry()
         if self.switchUSBSuspend3.get_active():
-            self.entryBlacklistUSBIDs3.set_text(str(self.gen_blacklist('maximorendimiento')))
             self.entryBlacklistUSBIDs3.set_sensitive(True)         
         else:
-            self.entryBlacklistUSBIDs3.set_text('')
             self.entryBlacklistUSBIDs3.set_sensitive(False)
+        self.entryBlacklistUSBIDs3.set_text(str(self.gen_blacklist('maximorendimiento')))
 
         low_grid.attach(self.entryBlacklistUSBIDs3, button_col2, row, 1, 1)
 
@@ -2613,7 +2616,7 @@ class Preferences(Gtk.ApplicationWindow):
         
         # (12, 0)
         self.buttonReportFile = Gtk.Button(label=(_('Generate report file')))
-        self.buttonReportFile.connect("clicked", self.on_buttonReportFile_clicked, 'x')
+        self.buttonReportFile.connect("clicked", self.on_buttonReportFile_clicked)
         self.buttonReportFile.set_halign(Gtk.Align.CENTER)
         info_grid.attach(self.buttonReportFile, 0, 15, 5, 1)
 
@@ -3117,7 +3120,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3132,7 +3134,6 @@ class Preferences(Gtk.ApplicationWindow):
                     ''')
                 
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
-
                 config.set('SETTINGS', 'limit_cpu_ahorro', '1')
 
             elif name == (_('medium')):
@@ -3143,7 +3144,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3167,7 +3167,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3364,7 +3363,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3380,7 +3378,7 @@ class Preferences(Gtk.ApplicationWindow):
                 
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
 
-                config.set('SETTINGS', 'limit_cpu_ahorro', '1')
+                config.set('SETTINGS', 'limit_cpu_equilibrado', '1')
 
             elif name == (_('medium')):
                 #os.system('/usr/share/slimbookbattery/bin/limitcpu.x 2')
@@ -3390,7 +3388,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3404,7 +3401,7 @@ class Preferences(Gtk.ApplicationWindow):
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     ''')
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
-                config.set('SETTINGS', 'limit_cpu_ahorro', '2')
+                config.set('SETTINGS', 'limit_cpu_equilibrado', '2')
             
             elif name == (_('none')):
                 #os.system('/usr/share/slimbookbattery/bin/limitcpu.x 3')
@@ -3414,7 +3411,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3428,7 +3424,7 @@ class Preferences(Gtk.ApplicationWindow):
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     ''')
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
-                config.set('SETTINGS', 'limit_cpu_ahorro', '3')
+                config.set('SETTINGS', 'limit_cpu_equilibrado', '3')
 
         statGovernor = self.comboBoxGovernor2.get_active_iter() # .conf file && Tlp custom file*
         # Test pending
@@ -3605,7 +3601,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3621,7 +3616,7 @@ class Preferences(Gtk.ApplicationWindow):
                 
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
 
-                config.set('SETTINGS', 'limit_cpu_ahorro', '1')
+                config.set('SETTINGS', 'limit_cpu_maximorendimiento', '1')
 
             elif name == (_('medium')):
                 #os.system('/usr/share/slimbookbattery/bin/limitcpu.x 2')
@@ -3631,7 +3626,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3645,7 +3639,7 @@ class Preferences(Gtk.ApplicationWindow):
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     ''')
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
-                config.set('SETTINGS', 'limit_cpu_ahorro', '2')
+                config.set('SETTINGS', 'limit_cpu_maximorendimiento', '2')
             
             elif name == (_('none')):
                 #os.system('/usr/share/slimbookbattery/bin/limitcpu.x 3')
@@ -3655,7 +3649,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3669,7 +3662,7 @@ class Preferences(Gtk.ApplicationWindow):
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     ''')
                 print('Setting limit to '+name+' --> Exit: '+str(exec[0]))
-                config.set('SETTINGS', 'limit_cpu_ahorro', '3')
+                config.set('SETTINGS', 'limit_cpu_maximorendimiento', '3')
 
         statGovernor = self.comboBoxGovernor3.get_active_iter() # .conf file && Tlp custom file*
         # Test pending
@@ -4039,17 +4032,18 @@ class Preferences(Gtk.ApplicationWindow):
             print('Mode not setting TDP')
 
 
-    def on_buttonReportFile_clicked(self, buttonReportFile, x):
+    def on_buttonReportFile_clicked(self, buttonReportFile):
         #Se abrirá un dialogo para el usuario para que elija donde desea guardar el archivo del reporte que se va a generar
         saveDialog = Gtk.FileChooserDialog("Please select a folder to save the file", self, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
         response = saveDialog.run()
+        saveDialog.set_name('save_dialog')
         if response == Gtk.ResponseType.OK:
             ruta = saveDialog.get_filename() + '/report_'+ time.strftime("%d-%m-%y_%H:%M") +'.txt'
             escritorio = subprocess.getoutput("echo $XDG_CURRENT_DESKTOP")
             if subprocess.getstatusoutput("pkexec slimbookbattery-pkexec report "+ ruta +' '+ escritorio +' '+ user_home)[0] == 0:
                 print(_('Report file generated'))
             else:
-                print(_('Report file canceled, wrong password'))
+                print(_('Report file canceled'))
         elif response == Gtk.ResponseType.CANCEL:
             print(_('Report file canceled'))
         saveDialog.destroy()    
@@ -4090,7 +4084,7 @@ def governorIsCompatible():
 def reboot_process(process_name, path, start):
     
     print('Rebooting '+process_name+' ...')
-
+    #print(path)
     process = subprocess.getoutput('pgrep -f '+process_name)
     #print(process)
 
