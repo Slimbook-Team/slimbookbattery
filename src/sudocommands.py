@@ -243,6 +243,13 @@ def set_tdp(mode):
                         print('  TDP Icon will be shown')
                     else:
                         config_tdp.set('CONFIGURATION','show-icon','off')
+                
+                configfile = open(tdp_config_file, 'w')
+                config_tdp.write(configfile)
+                configfile.close()
+
+                print('Actual TDP Mode: '+config_tdp['CONFIGURATION']['mode'])    
+
             else: 
                 print('TDP Sync not active')
 
@@ -252,11 +259,7 @@ def set_tdp(mode):
     else: 
         print('Not changing '+tdpcontroller+' mode configuration.')
 
-    configfile = open(tdp_config_file, 'w')
-    config_tdp.write(configfile)
-    configfile.close()
-
-    print('Actual TDP Mode: '+config_tdp['CONFIGURATION']['mode'])    
+    
 
 def change_config(args): # For general page options
     #print('[CHANGE CONFIGURATION]')
