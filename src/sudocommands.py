@@ -633,7 +633,7 @@ def brightness_settings(mode):
             # CRONTAB EDIT
             print('Brightness setting is off') 
             if not os.path.isfile("/var/spool/cron/crontabs/root"):
-                os.system('''cp /usr/share/slimbookbattery/root /var/spool/cron/crontabs/root
+                os.system('''cp /usr/share/slimbookbattery/src/root /var/spool/cron/crontabs/root
                             chmod 600 /var/spool/cron/crontabs/root')
                             chgrp crontab /var/spool/cron/crontabs/root''')
             if os.system('cat /var/spool/cron/crontabs/root | grep slimbookbattery') == 0:
