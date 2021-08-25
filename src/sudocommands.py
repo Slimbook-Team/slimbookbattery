@@ -35,16 +35,18 @@ print('\x1b[6;30;42m'+'SlimbookBattery-Commandline, executed as: '+str(subproces
 
 USERNAME = subprocess.getstatusoutput("logname")
 
-if USERNAME[0] == 0 and USERNAME[1] != 'root':
+if USERNAME[0] == 0 and USERNAME[1] != 'root' and subprocess.getstatusoutput('getent passwd '+USERNAME[1]) == 0:
     USER_NAME = USERNAME[1]
 else:
     USER_NAME = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
+
+print(str(subprocess.getstatusoutput('echo '+USER_NAME+'>> /etc/sudocmd.log')))
 
 HOMEDIR = subprocess.getoutput("echo ~"+USER_NAME)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 currpath = os.path.dirname(os.path.realpath(__file__))
 
-print("Username: "+USER_NAME+" - Homedir: "+HOMEDIR+"")
+print("Username: "+str(USER_NAME)+" - Homedir: "+HOMEDIR+"")
 
 
 config_file = HOMEDIR+'/.config/slimbookbattery/slimbookbattery.conf'

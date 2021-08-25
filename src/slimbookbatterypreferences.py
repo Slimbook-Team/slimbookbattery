@@ -43,6 +43,8 @@ except:
 
 #idiomas = ['pt']
 
+err_trace = []
+
 user = getpass.getuser()
 user_home = expanduser("~")
 currpath = os.path.dirname(os.path.realpath(__file__))
@@ -3980,7 +3982,11 @@ class Preferences(Gtk.ApplicationWindow):
 
         if autostart == '1' and self.autostart_inicial == '0':
             print('Enabling autostart ...')
-            print(subprocess.getoutput("cp /usr/share/slimbookbattery/src/slimbookbattery-autostart.desktop ~/.config/autostart/"))
+            if os.path.isfile('~/.config/autostart'):
+            	 print(subprocess.getoutput("cp /usr/share/slimbookbattery/src/slimbookbattery-autostart.desktop ~/.config/autostart/"))
+            else:
+            	 subprocess.getoutput('mkdir ~/.config/autostart')
+            	 print(subprocess.getoutput("cp /usr/share/slimbookbattery/src/slimbookbattery-autostart.desktop ~/.config/autostart/"))
         
         elif autostart == '0' and self.autostart_inicial == '1':
             print('Disabling autostart ...')
