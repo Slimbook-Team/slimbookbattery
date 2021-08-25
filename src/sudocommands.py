@@ -84,7 +84,6 @@ class colors: # You may need to change color settings
     BOLD = "\033[;1m"
 
 def main(args): # Args will be like --> command_name value
-    
     arguments = ''
 
     for argument in range(len(args)):
@@ -110,11 +109,11 @@ def main(args): # Args will be like --> command_name value
 
             elif battery_mode == '3':
                 print('Full power mode')
-                mode_name = 'maxrendimiento'
+                mode_name = 'maximorendimiento'
 
             brightness_settings(battery_mode) # Executed by indicator
             set_tdp(battery_mode)
-            required_reboot = mode_settings(battery_mode)
+            
 
             #print('\n[COPY TDP CUSTOM SETTINGS]')
             print(colors.GREEN + "\n[COPY TDP CUSTOM SETTINGS]" + colors.ENDC)
@@ -136,9 +135,10 @@ def main(args): # Args will be like --> command_name value
             # Restarting TLP
             subprocess.getoutput("sudo tlp start")
 
+            required_reboot = mode_settings(battery_mode)
             if required_reboot == 1:
                 print('Sudo notify')
-                notify(_('Graphics settingshabe been modified,\nthe changes will be applied on restart.'))
+                notify(_('Graphics settings have been modified,\nthe changes will be applied on restart.'))
 
             #print(str(os.system(command)))
 
@@ -189,6 +189,7 @@ def main(args): # Args will be like --> command_name value
             elif args[2]=="create":   
                 os.system('sudo cp /usr/share/slimbookbattery/src/service/slimbookbattery.service /lib/systemd/system/slimbookbattery.service')
                 os.system('sudo chmod 755 /usr/share/slimbookbattery/src/service/slimbookbatteryservice.sh')
+                os.system('systemctl daemon-reload')
         
         if args[1] == "change_config": 
             change_config(args)
@@ -196,11 +197,12 @@ def main(args): # Args will be like --> command_name value
     print('******************************************************************************\n')  
 
 def notify(msg):
-    os.system('''display=":$(ls /tmp/.X11-unix/* | sed 's#/tmp/.X11-unix/X##' | head -n 1)"
-                            user=$(who | grep '('$display')' | awk '{print $1}' | head -n 1)
-                            uid=$(id -u $user)
-                            sudo -u $user DISPLAY=$display DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$uid/bus notify-send "Slimbook Battery" "'''+msg+'''"
-                            ''')
+    os.system('''set -x 
+                display=":$(ls /tmp/.X11-unix/* | sed 's#/tmp/.X11-unix/X##' | head -n 1)"
+                user='''+USER_NAME+'''
+                uid=$(id -u $user)
+                sudo -u $user DISPLAY=$display DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$uid/bus notify-send "Slimbook Battery" "'''+msg+'''"
+                ''')
 
 def set_tdp(mode):
     # This function enables tdpcontroller autostart an changes it's mode if battery application, 

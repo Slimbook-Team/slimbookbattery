@@ -73,7 +73,9 @@ radio, radiobutton, radiobutton:checked, radiobutton:selected{
     margin-top: 20px;
 }
 
-
+/* #saveDialog button{
+    background-color: ;
+} */
 
 notebook header, notebook, stack{
     border-width: 0px;
@@ -83,7 +85,7 @@ notebook header, notebook, stack{
 header > tabs > tab {
     background: green;
     box-shadow: none;
-    margin-right: 10px;
+    margin-right: 5px;
 }
 
 window button{

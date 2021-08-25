@@ -97,7 +97,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.set_decorated(False)
 
-
         ### Movement
         self.is_in_drag = False
         self.x_in_drag = 0
@@ -3366,6 +3365,8 @@ class Preferences(Gtk.ApplicationWindow):
             print('Setting USB Suspension DISABLE ON SHUTDOWN to on --> Exit:'+str(exec[0]))
 
         print('\n')
+
+        print('COnfig: '+config['SETTINGS']['limit_cpu_ahorro'])
 
         # This step is done at the end of function
         configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')

@@ -24,6 +24,4 @@ for file in ${files[@]}; do
 fi
 done
 
-
-
 exit 0
