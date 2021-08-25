@@ -12,9 +12,9 @@ window notebook > *{
     background-color: transparent;
 }
 
-dialog button {
+/* dialog button {
     border-radius: 10px;
-}
+} */
 
 window label, scale *{
     color: white;
@@ -100,7 +100,7 @@ window button{
 }
 
 
-header > tabs > tab:hover, header > tabs > tab:checked, button:hover, button:checked {
+window header > tabs > tab:hover, window header > tabs > tab:checked, window button:hover, window button:checked {
     background: rgb(1, 77, 1);
     border-image: none;
 }

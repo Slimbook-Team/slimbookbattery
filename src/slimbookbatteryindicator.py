@@ -60,7 +60,8 @@ ENERGY_SAVING = '/usr/share/slimbookbattery/images/normal.png'
 EQUILIBRADO = '/usr/share/slimbookbattery/images/balanced_normal.png'
 MAX_PERFORMANCE = '/usr/share/slimbookbattery/images/performance_normal.png'
 
-DISABLED = '/usr/share/slimbookbattery/images/disabled.png'
+DISABLED = '/usr/share/slimbookbattery/images/disabled_normal.png'
+
 STATUS_NORMAL = '/usr/share/slimbookbattery/images/normal.png'
 STATUS_HIGH = '/usr/share/slimbookbattery/images/high.png'
 STATUS_CRITICAL = '/usr/share/slimbookbattery/images/critical.png'

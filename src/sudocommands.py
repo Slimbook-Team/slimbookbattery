@@ -22,32 +22,31 @@
 import os
 import sys
 import subprocess
-import gi
 from configparser import ConfigParser
 import re
 import gettext
 import locale
 
-#gi.require_version('Notify', '0.7')
-gi.require_version('Gtk', '3.0')
-
-from gi.repository import Gtk, GdkPixbuf
 
 print('******************************************************************************')
 
 
 print('\x1b[6;30;42m'+'SlimbookBattery-Commandline, executed as: '+str(subprocess.getoutput('whoami'))+'\x1b[0m')
 
-if subprocess.getstatusoutput("logname")[0]==0:
-    USER_NAME = subprocess.getoutput("logname")
+USERNAME = subprocess.getstatusoutput("logname")
+
+if USERNAME[0] == 0 and USERNAME[1] != 'root' and subprocess.getstatusoutput('getent passwd '+USERNAME[1]) == 0:
+    USER_NAME = USERNAME[1]
 else:
     USER_NAME = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
+
+print(str(subprocess.getstatusoutput('echo '+USER_NAME+'>> /etc/sudocmd.log')))
 
 HOMEDIR = subprocess.getoutput("echo ~"+USER_NAME)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 currpath = os.path.dirname(os.path.realpath(__file__))
 
-print("Username: "+USER_NAME+" - Homedir: "+HOMEDIR+"")
+print("Username: "+str(USER_NAME)+" - Homedir: "+HOMEDIR+"")
 
 
 config_file = HOMEDIR+'/.config/slimbookbattery/slimbookbattery.conf'
@@ -248,6 +247,13 @@ def set_tdp(mode):
                         print('  TDP Icon will be shown')
                     else:
                         config_tdp.set('CONFIGURATION','show-icon','off')
+                
+                configfile = open(tdp_config_file, 'w')
+                config_tdp.write(configfile)
+                configfile.close()
+
+                print('Actual TDP Mode: '+config_tdp['CONFIGURATION']['mode'])    
+
             else: 
                 print('TDP Sync not active')
 
@@ -257,11 +263,7 @@ def set_tdp(mode):
     else: 
         print('Not changing '+tdpcontroller+' mode configuration.')
 
-    configfile = open(tdp_config_file, 'w')
-    config_tdp.write(configfile)
-    configfile.close()
-
-    print('Actual TDP Mode: '+config_tdp['CONFIGURATION']['mode'])    
+    
 
 def change_config(args): # For general page options
     #print('[CHANGE CONFIGURATION]')
@@ -638,7 +640,7 @@ def brightness_settings(mode):
             # CRONTAB EDIT
             print('Brightness setting is off') 
             if not os.path.isfile("/var/spool/cron/crontabs/root"):
-                os.system('''cp /usr/share/slimbookbattery/root /var/spool/cron/crontabs/root
+                os.system('''cp /usr/share/slimbookbattery/src/root /var/spool/cron/crontabs/root
                             chmod 600 /var/spool/cron/crontabs/root')
                             chgrp crontab /var/spool/cron/crontabs/root''')
             if os.system('cat /var/spool/cron/crontabs/root | grep slimbookbattery') == 0:
@@ -648,7 +650,7 @@ def brightness_settings(mode):
     else: # Disabling crontab settings
         print('Application is off --> Restoring brightnes management') 
         if not os.path.isfile("/var/spool/cron/crontabs/root"):
-            os.system('''cp /usr/share/slimbookbattery/root /var/spool/cron/crontabs/root
+            os.system('''cp /usr/share/slimbookbattery/src/root /var/spool/cron/crontabs/root
                         chmod 600 /var/spool/cron/crontabs/root')
                         chgrp crontab /var/spool/cron/crontabs/root''')
         if os.system('cat /var/spool/cron/crontabs/root | grep slimbookbattery') == 0:

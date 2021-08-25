@@ -24,7 +24,6 @@ class Splash(Gtk.Window):
             self.set_visual(visual)
         self.set_app_paintable(True)
 
-        # El gif es de prueba, no el definitivo
         pixbufanim = GdkPixbuf.PixbufAnimation.new_from_file(imagespath+"/slimb3.gif")
         image = Gtk.Image()
         image.set_from_animation(pixbufanim)

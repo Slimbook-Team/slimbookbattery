@@ -43,6 +43,8 @@ except:
 
 #idiomas = ['pt']
 
+err_trace = []
+
 user = getpass.getuser()
 user_home = expanduser("~")
 currpath = os.path.dirname(os.path.realpath(__file__))
@@ -94,10 +96,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.set_resizable(False)
 
         self.set_decorated(False)
-
-        #self.set_position(Gtk.WindowPosition.CENTER) // Allow movement
-        #self.set_size_request(900,400) #anchoxalto
-        #self.connect("close", self.close_ok)
 
         ### Movement
         self.is_in_drag = False
@@ -2846,56 +2844,64 @@ class Preferences(Gtk.ApplicationWindow):
     def read_bat(self):
         var = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep native-path")[0] == 0:
-            batDevice = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep native-path")
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep native-path")
+        if cmd[0] == 0:
+            batDevice = cmd[1]
             batDevice = batDevice.split()
             batDevice = batDevice[1]
         else:
             batDevice = (_('Unknown'))
         var[0] = batDevice
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep vendor")[0] == 0:
-            manufacturer = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep vendor")
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep vendor")
+        if cmd[0] == 0:
+            manufacturer = cmd[1]
             manufacturer = manufacturer.split()
             manufacturer = manufacturer[1]
         else:
             manufacturer = (_('Unknown'))
         var[1] = manufacturer
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep model")[0] == 0:
-            model = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep model")
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep model")
+        if cmd[0] == 0:
+            model = cmd[1]
             model = model.split()
             model = model[1]
         else:
             model = (_('Unknown'))
         var[2] = model
-
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep technology")[0] == 0:
-            technology = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep technology")
+        
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep technology")
+        if cmd[0] == 0:
+            technology = cmd[1]
             technology = technology.split()
             technology = technology[1]
         else:
             technology = (_('Unknown'))
         var[3] = technology.capitalize()
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep percentage")[0] == 0:
-            currentCharge = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep percentage")
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep percentage")
+        if cmd[0] == 0:
+            currentCharge = cmd[1]
             currentCharge = currentCharge.split()
             currentCharge = currentCharge[1]
         else:
             currentCharge = (_('Unknown'))
         var[4] = currentCharge
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep capacity")[0] == 0:
-            maxCapacity = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep capacity")
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep capacity")
+        if cmd[0] == 0:
+            maxCapacity = cmd[1]
             maxCapacity = maxCapacity.split()
             maxCapacity = maxCapacity[1]
         else:
             maxCapacity = (_('Unknown'))
         var[5] = maxCapacity
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep state")[0] == 0:
-            status = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep state")
+
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep state")
+        if cmd[0] == 0:
+            status = cmd[1]
             status = status.split()
             status = status[1]
         else:
@@ -2903,17 +2909,26 @@ class Preferences(Gtk.ApplicationWindow):
         var[6] = status.capitalize()
 
         if status == 'discharging':
-            if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep 'time to empty'")[0] == 0:
-                timeTo = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep 'time to empty'")
+            cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep 'time to empty'")
+            if cmd[0] == 0:
+                timeTo = cmd[1]
                 timeTo = timeTo.split()
-                timeTo = timeTo[3] + (_(' hours'))
+                print(timeTo)
+                if timeTo[4] == 'hours':
+                    timeTo = timeTo[3] + (_(' hours'))
+                else:
+                    timeTo = timeTo[3] + (_(' min'))
             else:
                 timeTo = (_('Unknown'))
         elif status == 'charging':
-            if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep 'time to full'")[0] == 0:
-                timeTo = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep 'time to full'")
+            cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep 'time to full'")
+            if cmd[0] == 0:
+                timeTo = cmd[1]
                 timeTo = timeTo.split()
-                timeTo = timeTo[3] + (_(' hours'))
+                if timeTo[4] == 'hours':
+                    timeTo = timeTo[3] + (_(' hours'))
+                else:
+                    timeTo = timeTo[3] + (_(' min'))
             else:
                 timeTo = (_('Unknown'))
         elif status == 'fully-charged':
@@ -2922,39 +2937,45 @@ class Preferences(Gtk.ApplicationWindow):
             timeTo = (_('Unknown'))
         var[7] = timeTo
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep rechargeable")[0] == 0:
-            rechargeable = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep rechargeable")
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep rechargeable")
+        if cmd[0] == 0:
+            rechargeable = cmd[1]
             rechargeable = rechargeable.split()
             rechargeable = rechargeable[1]
         else:
             rechargeable = (_('Unknown'))
         var[8] = rechargeable.capitalize()
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep 'power supply'")[0] == 0:
-            powerSupply = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep 'power supply'")
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep 'power supply'")
+        if cmd[0] == 0:
+            powerSupply = cmd[1]
             powerSupply = powerSupply.split()
             powerSupply = powerSupply[2]
         else:
             powerSupply = (_('Unknown'))
         var[9] = powerSupply.capitalize()
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep energy-full")[0] == 0:
-            chargeFull = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep energy-full")
+
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep energy-full")
+        if cmd[0] == 0:
+            chargeFull = cmd[1]
             chargeFull = chargeFull.split()
             chargeFull = str(chargeFull[1]) + ' Wh'
         else:
             chargeFull = (_('Unknown'))
         var[10] = chargeFull
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep energy-full-design")[0] == 0:
-            chargeDesign = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep energy-full-design")
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep energy-full-design")
+        if cmd[0] == 0:
+            chargeDesign = cmd[1]
             chargeDesign = chargeDesign.split()
             chargeDesign = str(chargeDesign[1]) + ' Wh'
         else:
             chargeDesign = (_('Unknown'))
         var[11] = chargeDesign
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep energy-rate")[0] == 0:
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep energy-rate")
+        if cmd[0] == 0:
             chargeRate = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep energy-rate")
             chargeRate = chargeRate.split()
             chargeRate = str(chargeRate[1]) + ' Wh'
@@ -2962,16 +2983,18 @@ class Preferences(Gtk.ApplicationWindow):
             chargeRate = (_('Unknown'))
         var[12] = chargeRate
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep voltage")[0] == 0:
-            voltage = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep voltage")
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep voltage")
+        if cmd[0] == 0:
+            voltage = cmd[1]
             voltage = voltage.split()
             voltage = str(voltage[1]) + ' V'
         else:
             voltage = (_('Unknown'))
         var[13] = voltage
 
-        if subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep updated")[0] == 0:
-            infoUpdated = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep updated")
+        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep updated")
+        if cmd[0] == 0:
+            infoUpdated = cmd[1]
             infoUpdated = infoUpdated.split()
             date = ''
             for i in range(len(infoUpdated)):
@@ -3123,7 +3146,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3148,7 +3170,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3172,7 +3193,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3371,7 +3391,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3397,7 +3416,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3421,7 +3439,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3612,7 +3629,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3638,7 +3654,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3662,7 +3677,6 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/'''+mode+'''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3969,7 +3983,11 @@ class Preferences(Gtk.ApplicationWindow):
 
         if autostart == '1' and self.autostart_inicial == '0':
             print('Enabling autostart ...')
-            print(subprocess.getoutput("cp /usr/share/slimbookbattery/src/slimbookbattery-autostart.desktop ~/.config/autostart/"))
+            if os.path.isfile('~/.config/autostart'):
+            	 print(subprocess.getoutput("cp /usr/share/slimbookbattery/src/slimbookbattery-autostart.desktop ~/.config/autostart/"))
+            else:
+            	 subprocess.getoutput('mkdir ~/.config/autostart')
+            	 print(subprocess.getoutput("cp /usr/share/slimbookbattery/src/slimbookbattery-autostart.desktop ~/.config/autostart/"))
         
         elif autostart == '0' and self.autostart_inicial == '1':
             print('Disabling autostart ...')
@@ -4048,7 +4066,13 @@ class Preferences(Gtk.ApplicationWindow):
 
     def on_buttonReportFile_clicked(self, buttonReportFile):
         #Se abrirá un dialogo para el usuario para que elija donde desea guardar el archivo del reporte que se va a generar
-        saveDialog = Gtk.FileChooserDialog("Please select a folder to save the file", self, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        saveDialog = Gtk.FileChooserDialog(title = "Please select a folder to save the file", 
+                                            parent = self,
+                                            action = Gtk.FileChooserAction.SELECT_FOLDER)
+                                            
+        saveDialog.add_button(Gtk.STOCK_CANCEL, 0)
+        saveDialog.add_button(Gtk.STOCK_SAVE, 1)
+
         response = saveDialog.run()
         saveDialog.set_name('save_dialog')
         if response == Gtk.ResponseType.OK:
@@ -4098,7 +4122,7 @@ def governorIsCompatible():
 def reboot_process(process_name, path, start):
     
     print('Rebooting '+process_name+' ...')
-    print(path)
+    #print(path)
     process = subprocess.getoutput('pgrep -f '+process_name)
     #print(process)
 
