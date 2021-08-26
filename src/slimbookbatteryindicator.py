@@ -21,13 +21,8 @@
 import os
 import gi
 import signal
-import sys
 import subprocess
 import configparser
-
-from subprocess import PIPE
-from multiprocessing import Event, Process
-from threading import Thread
 from os.path import expanduser
 
 gi.require_version('Gtk', '3.0')

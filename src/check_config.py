@@ -3,10 +3,10 @@ import sys
 import subprocess
 import configparser
 
-USER_NAME = subprocess.getstatusoutput("logname")
+USERNAME = subprocess.getstatusoutput("logname")
 
-if USER_NAME[0]==0 and USER_NAME!='root':
-    USER_NAME = USER_NAME[1]
+if USERNAME[0] == 0 and USERNAME[1] != 'root' and subprocess.getstatusoutput('getent passwd '+USERNAME[1]) == 0:
+    USER_NAME = USERNAME[1]
 else:
     USER_NAME = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
 
