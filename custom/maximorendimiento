@@ -339,7 +339,8 @@ RUNTIME_PM_ON_BAT=auto
 # (separate with spaces). Use lspci to get the adresses (1st column).
 # Default: <none>
 
-#RUNTIME_PM_BLACKLIST="bb:dd.f 11:22.3 44:55.6"
+RUNTIME_PM_BLACKLIST="bb:dd.f 11:22.3 44:55.6 02:00.0"
+#slimbook
 
 # Exclude PCI(e) devices assigned to the listed drivers from Runtime PM.
 # Default when unconfigured is "amdgpu nouveau nvidia radeon" which
