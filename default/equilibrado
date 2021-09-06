@@ -362,7 +362,7 @@ USB_AUTOSUSPEND=1
 # Note: input devices (usbhid) are excluded automatically
 # Default: <none>
 
-USB_BLACKLIST="0bda:0411 0bda:"
+USB_BLACKLIST="0bda:0411 0bda:8153"
 #slimbook
 
 # Bluetooth devices are excluded from USB autosuspend:

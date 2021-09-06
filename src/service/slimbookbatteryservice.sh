@@ -60,7 +60,7 @@ if [ -e /sys/class/power_supply/BAT0 ]; then
 			fi
 		fi		
 
-	    	s#Sleeping to read if value changed
+	    #Sleeping to read if value changed
 		last_value=$CAPACITY
 		#echo "Last value: $last_value"
 	    	sleep 90
