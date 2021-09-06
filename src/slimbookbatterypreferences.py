@@ -190,14 +190,17 @@ class Preferences(Gtk.ApplicationWindow):
         self.add(win_grid)
 
         self.RestoreValues = Gtk.Button(label=(_('Restore default values')))
+        self.RestoreValues.set_name('restore')
         self.RestoreValues.connect("clicked", self.on_buttonRestGeneral_clicked)
         self.RestoreValues.set_halign(Gtk.Align.END)
    
         self.btnCancel = Gtk.Button(label=(_('Cancel')))
+        self.btnCancel.set_name('cancel')
         self.btnCancel.connect("clicked", self.close, 'x')
         self.btnCancel.set_halign(Gtk.Align.END)
    
         self.btnAccept = Gtk.Button(label=(_('Accept')))
+        self.btnAccept.set_name('accept')
         self.btnAccept.connect("clicked", self.close_ok)
         self.btnAccept.set_halign(Gtk.Align.END)
     
@@ -235,7 +238,7 @@ class Preferences(Gtk.ApplicationWindow):
         notebook.set_tab_pos(Gtk.PositionType.TOP)
 
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename = os.path.join(imagespath, 'slimbookbattery.png'),
+            filename = os.path.join(imagespath, 'slimbookbattery-header.png'),
             width = 825,
             height = 225,
             preserve_aspect_ratio=True)
@@ -998,6 +1001,9 @@ class Preferences(Gtk.ApplicationWindow):
         self.check_autostart_ShutdownSuspendUSB(self.switchShutdownSuspendUSB)
 
         low_grid.attach(self.switchShutdownSuspendUSB, button_col2, row, 1, 1)
+
+        
+    
     # Connections
         self.switchUSBSuspend.connect("notify::active", self.on_switchUSBSuspend_change, self.entryBlacklistUSBIDs, self.switchBlacklistBUSB, self.switchBlacklistPrintUSB, self.switchBlacklistWWANUSB, self.switchShutdownSuspendUSB)
         self.on_switchUSBSuspend_change(self.switchUSBSuspend, 'x' ,self.entryBlacklistUSBIDs, self.switchBlacklistBUSB, self.switchBlacklistPrintUSB, self.switchBlacklistWWANUSB, self.switchShutdownSuspendUSB)               
@@ -2640,8 +2646,22 @@ class Preferences(Gtk.ApplicationWindow):
             height=200,
             preserve_aspect_ratio=True)
         CCIcon = Gtk.Image.new_from_pixbuf(pixbuf)
-        #CCIcon.set_alignment(0.5, 0)
-        
+        info_grid.attach(CCIcon, 0, 18, 5, 1)
+
+        # Interface
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename= os.path.join(imagespath, 'interface/top-line.png'),
+            width=100,
+            height=200,
+            preserve_aspect_ratio=True)
+        top_line = Gtk.Image.new_from_pixbuf(pixbuf)
+        info_grid.attach(top_line, 0, 18, 5, 1)
+
+        img = Gtk.Image()
+        img.set_from_pixbuf(pixbuf)
+        info_grid.attach(top_line, 0, 18, 5, 1)
+
+
 # END
         self.child_process.terminate()
         #SHOW

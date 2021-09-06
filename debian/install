@@ -4,7 +4,7 @@ slimbookbattery.desktop /usr/share/applications/
 src/* /usr/share/slimbookbattery/src/
 bin/* /usr/share/slimbookbattery/bin/
 images/* /usr/share/slimbookbattery/images/
-slimbookbattery.png /usr/share/pixmaps/
+images/slimbookbattery.png /usr/share/pixmaps/
 custom/* /usr/share/slimbookbattery/custom/
 default/* /usr/share/slimbookbattery/default/
 policykit/* /usr/share/polkit-1/actions/

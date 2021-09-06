@@ -1,61 +1,14 @@
-window{
-    background-image: linear-gradient(rgb(39, 38, 38) 0%, rgb(20, 20, 20) 100%);
-}
-
-/* dialog grid *{
-    border-width: 1px;
-    border-color: red;
-    border-style: solid;
-} 
- */
-window notebook > *{
-    background-color: transparent;
-}
-
-/* dialog button {
-    border-radius: 10px;
+/* window * {
+    border: 1px solid red
 } */
 
-window label, scale *{
-    color: white;
-}
-
-/* stack * {
-    border-width: 1px;
-    border-color: red;
-    border-style: solid;
-} */
-
-#version {
-    padding: 20px;
-}
-
-notebook {
-    margin-left: 90px;
-    margin-right: 90px;
-    margin-top: 50px;
-    margin-bottom: 40px;
-}
-
-notebook stack{
-    margin-top: 20px;
-}
-
-/* #close_button{
-    border-color: tomato;
-    border-width: 2px;
-    border-style: solid;
-} */
-
+/* GENERAL */
 #win_bttns button, #close_button {
     margin: 10px;
 }
 
-combobox, entry {
-    background-color: white;
-    background: white;
-    color: black;
-    border-radius: 0px;
+#version {
+    padding: 20px;
 }
 
 #modes {
@@ -64,33 +17,8 @@ combobox, entry {
     margin-bottom: 10px;
 }
 
-radio, radiobutton, radiobutton:checked, radiobutton:selected{
-    color: green;
-
-}
-
 #radio_grid{
     margin-top: 20px;
-}
-
-/* #saveDialog button{
-    background-color: ;
-} */
-
-notebook header, notebook, stack{
-    border-width: 0px;
-}
-
-
-header > tabs > tab {
-    background: green;
-    box-shadow: none;
-    margin-right: 5px;
-}
-
-window button{
-    background: green;
-    box-shadow: none
 }
 
 #link{
@@ -99,12 +27,115 @@ window button{
     font-weight: bold;
 }
 
-
-window header > tabs > tab:hover, window header > tabs > tab:checked, window button:hover, window button:checked {
-    background: rgb(1, 77, 1);
-    border-image: none;
+#restore {
+    background-image: url('../../images/interface/btn3.png');
+    /* background-image: linear-gradient(to right, rgb(136, 135, 135) 0%, transparent 100%); */
+}
+#accept {
+    background-image: url('../../images/interface/btn1.png');
+    /* background-image: linear-gradient(to right, green 0%, transparent 100%); */
+}
+#cancel {
+    background-image: url('../../images/interface/btn2.png');  
+    /* background-image: linear-gradient(to right, rgb(211, 24, 24) 0%, transparent 100%); */
 }
 
-window>buttons {
-    margin: 10px;
+combobox>box>entry, entry {
+    background-color: white;
+    background: white;
+    color: black;
+    border-radius: 0px;
+    border: none;
+}
+
+combobox>box>button {
+    background-color: green;
+    background: green;
+    color: white;
+}
+combobox>box>button:disabled {
+    background-color: rgb(0, 100, 0);
+    background: rgb(0, 100, 0);
+    color: white;
+}
+
+
+radio, radiobutton, radiobutton:checked, radiobutton:selected{
+    color: green;
+    background: transparent;
+}
+
+window label, scale *{
+    color: white;
+}
+radiobutton:checked, radiobutton:active{
+    border: none;
+}
+
+/* WINDOW */
+
+window{
+    background-image: linear-gradient(rgb(39, 38, 38) 0%, rgb(20, 20, 20) 100%);
+}
+
+/* WINDOW BUTTONS */
+
+window button:hover label, window button:checked label{
+    /* background-image: radial-gradient(ellipse at center,green 0%, transparent 100%); */
+    margin-bottom: 3px;
+}
+window button{
+    background: transparent;
+    border: none;
+    border-radius: 0px;
+    box-shadow: none;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
+
+
+/* NOTEBOOK */
+notebook {
+    margin-left: 90px;
+    margin-right: 90px;
+    margin-top: 40px;
+    margin-bottom: 10px;
+}
+
+window notebook > *{
+    background-color: transparent;
+}
+
+notebook header, notebook box, tab box{
+    border: none;
+}
+
+notebook stack {
+    padding: 20px;
+    background-image: url('../../images/interface/stack-background.png');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+
+}
+
+
+/* TABS */
+
+header > tabs > tab {
+    background-image: url('../../images/interface/tab.png');
+    border: none;
+    box-shadow: none;
+    background-size: 100% 100%;
+}
+
+window header > tabs > tab:hover, window header > tabs > tab:checked {
+    background-image: url('../../images/interface/current-tab.png');
+    border: none;
+    background-color: transparent;
+}
+
+window header > tabs label {
+    border: none;
+    padding-left: 20px;
+    padding-right: 20px;
 }

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import gi
 import os
-from time import sleep
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, Pango, GdkPixbuf
+from gi.repository import Gtk, Gdk, GdkPixbuf
 
 currpath = os.path.dirname(os.path.realpath(__file__))
 imagespath = os.path.normpath(os.path.join(currpath, '..', 'images'))
@@ -13,7 +12,9 @@ class Splash(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Slimbook Battery")
         #self.set_skip_taskbar_hint(True) # Evita que se muestre icono en taskbar
-        maingrid = Gtk.Grid(row_spacing = 10)
+        maingrid = Gtk.Grid(row_spacing = 10,
+                            column_homogeneous =True,
+                            row_homogeneous =True)
         self.add(maingrid)
         self.set_name('splash_dialog')
         
@@ -22,27 +23,26 @@ class Splash(Gtk.Window):
         visual = screen.get_rgba_visual()
         if visual and screen.is_composited():
             self.set_visual(visual)
-        self.set_app_paintable(True)
+        self.set_app_paintable(True)      
 
-        pixbufanim = GdkPixbuf.PixbufAnimation.new_from_file(imagespath+"/slimb3.gif")
+        #set content for the spash window
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename = os.path.join(imagespath, 'slimbook_splash.png'))
+        """ pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(filename = os.path.join(imagespath, 'slimbook_splash.png'),
+            width = 500,
+            height = 500,
+            preserve_aspect_ratio=True) """
+        logo = Gtk.Image.new_from_pixbuf(pixbuf)
+
+        """ pixbufanim = GdkPixbuf.PixbufAnimation.new_from_file(
+                imagespath+"/loading2.gif")
         image = Gtk.Image()
         image.set_from_animation(pixbufanim)
-        image.show()
+        image.set_size_request(10, 10)
+        image.show() """
 
-        # set content for the spash window
-        # pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-        #     filename = os.path.join(imagespath, 'normal.png'),
-        #     width = 100,
-        #     height = 100,
-        #     preserve_aspect_ratio=True)
-        # logo = Gtk.Image.new_from_pixbuf(pixbuf)
-
-        # label = Gtk.Label("")
-        # label.modify_font(Pango.FontDescription('Ubuntu 22'))
-
-        # maingrid.attach(label, 0, 1, 1, 1)
-        # maingrid.attach(logo, 0, 0, 1, 1)
-        maingrid.attach(image, 0, 0, 1, 1)
+        #maingrid.attach(image, 4, 7, 2, 2)
+        maingrid.attach(logo, 0, 0, 10, 11)
+        
 
 
 
