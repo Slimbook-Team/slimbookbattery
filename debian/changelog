@@ -1,7 +1,12 @@
 slimbookbattery (4.0beta) focal; urgency=low
-
+  * New interface
+  * Draggable window
   * Added config values
-  * Fixed minibugs
+  * Added brightness switch
+  * Added TDP sync option
+  * Added config check
+  * Added splash window
+  * Fixed bugs
 
  -- slimbook <dev@slimbook.es>  Wed, 11 Aug 2021 11:24:04 +0100
 slimbookbattery (3.99beta) focal; urgency=low
