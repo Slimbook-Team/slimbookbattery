@@ -85,15 +85,16 @@ def check2():
     incidences = False
 
     files = ['ahorrodeenergia', 'equilibrado', 'maximorendimiento']
+
+    # Checks if default files are the same in the app folder and in the system, if something changed all will be restored
     for file in files:
-        if not os.path.isfile(HOMEDIR+'/.config/slimbookbattery/custom/'+file):
-            incidences = True
-    for file in files:
-        if not os.path.isfile(HOMEDIR+'/.config/slimbookbattery/default/'+file):
-            incidences = True
+        if os.path.isfile(HOMEDIR+'/.config/slimbookbattery/default/'+file):
+            print('Found '+file)
+            if subprocess.getstatusoutput('diff /usr/share/slimbookbattery/custom/'+file+' '+HOMEDIR+'/.config/slimbookbattery/'+file)!=0:
+                incidences = True
 
     if incidences:
-        print('Creating default an custom files ...')
+        print('Setting default an custom files ...')
         os.system('''cp -r /usr/share/slimbookbattery/custom '''+HOMEDIR+'''/.config/slimbookbattery/
                     cp -r /usr/share/slimbookbattery/default '''+HOMEDIR+'''/.config/slimbookbattery/
                     ''')

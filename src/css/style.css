@@ -71,11 +71,14 @@ window label, scale *{
 radiobutton:checked, radiobutton:active{
     border: none;
 }
-
+/* grid * {
+    border: 1px solid red;
+} */
 /* WINDOW */
 
+
 window{
-    background-image: linear-gradient(rgb(39, 38, 38) 0%, rgb(20, 20, 20) 100%);
+    background-color: rgb(30, 30, 30);
 }
 
 /* WINDOW BUTTONS */
@@ -106,8 +109,8 @@ window notebook > *{
     background-color: transparent;
 }
 
-notebook header, notebook box, tab box{
-    border: none;
+notebook header, notebook , stack{
+    border: 1px solid rgb(30, 30, 30);
 }
 
 notebook stack {

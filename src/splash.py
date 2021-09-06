@@ -33,14 +33,15 @@ class Splash(Gtk.Window):
             preserve_aspect_ratio=True) """
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
 
-        """ pixbufanim = GdkPixbuf.PixbufAnimation.new_from_file(
-                imagespath+"/loading2.gif")
+        pixbufanim = GdkPixbuf.PixbufAnimation.new_from_file(
+                imagespath+"/splash.gif")
+                #imagespath+"/loading.gif")
         image = Gtk.Image()
         image.set_from_animation(pixbufanim)
         image.set_size_request(10, 10)
-        image.show() """
+        image.show()
 
-        #maingrid.attach(image, 4, 7, 2, 2)
+        maingrid.attach(image, 4, 7, 2, 2)
         maingrid.attach(logo, 0, 0, 10, 11)
         
 

@@ -83,9 +83,6 @@ class Preferences(Gtk.ApplicationWindow):
     icono_actual = ''
 
     def __init__(self):
-    # Init Window
-        
-        #response = dialog.run()
 
         Gtk.Window.__init__(self, title =(_('Slimbook Battery Preferences')))    
         
@@ -115,8 +112,6 @@ class Preferences(Gtk.ApplicationWindow):
         except Exception as e:
             print(e)
             self.child_process.terminate()
-
-
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -330,8 +325,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.comboBoxWorkMode = Gtk.ComboBox.new_with_model_and_entry(store)
         self.comboBoxWorkMode.set_entry_text_column(1)
-        self.comboBoxWorkMode.set_halign(Gtk.Align.END)
-        self.comboBoxWorkMode.set_valign(Gtk.Align.CENTER)      
+   
 
         if subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_DEFAULT_MODE=AC'")[0] == 0:
             self.workMode='AC'
@@ -449,7 +443,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         low_grid = Gtk.Grid(column_homogeneous=True,
                             row_homogeneous=False,
-                            column_spacing=25,
+                            column_spacing=30,
                             row_spacing=20)
 
         low_page_grid.attach(low_grid, 0, 0, 2, 4)
@@ -461,21 +455,21 @@ class Preferences(Gtk.ApplicationWindow):
         print('\nLOADING LOW MODE COMPONENTS ...')
 
         label_width = 3
-
-        label_width2 = 3
+        label_width2 = 4
+        scale_width = 2
 
         label_col = 0
-        button_col = 2
-        
-        label_col2 = 3
-        button_col2 = 5
+        button_col = 4
+
+        label_col2 = 5
+        button_col2 = 10
         row = 1
 
                 # LABEL 0
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>'+ (_('Battery mode parameters (disabled when you connect AC power):')) +'</b></big>')
         label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col, row, 4, 1)
+        low_grid.attach(label33, label_col, row, 6, 1)
        
     # 1 ------------- CPU LIMITER *
         # LABEL 1
@@ -507,9 +501,10 @@ class Preferences(Gtk.ApplicationWindow):
         store.append([2, (_('medium'))])
         store.append([3, (_('none'))])
         self.comboBoxLimitCPU = Gtk.ComboBox.new_with_model_and_entry(store)
-        self.comboBoxLimitCPU.set_valign(Gtk.Align.END)
+        self.comboBoxLimitCPU.set_valign(Gtk.Align.CENTER)
+        self.comboBoxLimitCPU.set_halign(Gtk.Align.END)
         self.comboBoxLimitCPU.set_entry_text_column(1)
-        #self.comboBoxLimitCPU.set_active(self.check_autostart_comboBoxLimitCPU(self.comboBoxLimitCPU))
+
         config.read(user_home + '/.config/slimbookbattery/slimbookbattery.conf')
 
         value = config['SETTINGS']['limit_cpu_ahorro']
@@ -521,7 +516,7 @@ class Preferences(Gtk.ApplicationWindow):
         elif value == '3': # None
             self.comboBoxLimitCPU.set_active(2)
 
-        low_grid.attach(self.comboBoxLimitCPU, button_col, row, 1, 1)       
+        low_grid.attach(self.comboBoxLimitCPU, button_col-1, row, scale_width, 1)       
     # 2 ------------- CPU GOVERNOR *   
         # LABEL 2
         governorCompatible, governor_name = governorIsCompatible()
@@ -537,10 +532,12 @@ class Preferences(Gtk.ApplicationWindow):
             store = Gtk.ListStore(int, str)
             store.append([1, 'powersave'])
             self.comboBoxGovernor = Gtk.ComboBox.new_with_model_and_entry(store)
+            self.comboBoxGovernor.set_valign(Gtk.Align.CENTER)
+            self.comboBoxGovernor.set_halign(Gtk.Align.END)
             self.comboBoxGovernor.set_entry_text_column(1)
             self.comboBoxGovernor.set_active(0)
             self.comboBoxGovernor.set_sensitive(False)
-            low_grid.attach(self.comboBoxGovernor, button_col, row, 1, 1)
+            low_grid.attach(self.comboBoxGovernor, button_col-1, row, scale_width, 1)
     # 3 ------------- GRAPHICS SAVING * 
         # LABEL 3
         row = row + 1
@@ -550,9 +547,8 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label33, label_col, row, label_width, 1)
 
         # BUTTON 3
-        self.switchGraphics = Gtk.Switch()
+        self.switchGraphics = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchGraphics.set_name('ahorrodeenergia')
-        self.switchGraphics.set_halign(Gtk.Align.END)
 
         self.check_autostart_Graphics(self.switchGraphics)
         
@@ -584,9 +580,8 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
 
         # BUTTON 4
-        self.switchSound = Gtk.Switch()
+        self.switchSound = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchSound.set_name('ahorrodeenergia')
-        self.switchSound.set_halign(Gtk.Align.END)
         self.check_autostart_switchSound(self.switchSound)
 
         low_grid.attach(self.switchSound, button_col, row, 1, 1)
@@ -614,9 +609,8 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
 
         # BUTTON 5
-        self.switchWifiPower = Gtk.Switch()
+        self.switchWifiPower = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchWifiPower.set_name('ahorrodeenergia')
-        self.switchWifiPower.set_halign(Gtk.Align.END)
         self.check_autostart_switchWifiPower(self.switchWifiPower)
 
         low_grid.attach(self.switchWifiPower, button_col, row, 1, 1)
@@ -628,10 +622,9 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label33, label_col, row, label_width, 1)
         
         # BUTTON 6
-        self.switchBluetoothNIU =Gtk.Switch()
+        self.switchBluetoothNIU = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchBluetoothNIU.set_valign(Gtk.Align.CENTER)
         self.switchBluetoothNIU.set_name('ahorrodeenergia')
-        self.switchBluetoothNIU.set_halign(Gtk.Align.END)
         self.check_switchBluetooth(self.switchBluetoothNIU)      
 
         low_grid.attach(self.switchBluetoothNIU, button_col, row, 1, 1)
@@ -684,9 +677,8 @@ class Preferences(Gtk.ApplicationWindow):
                 low_grid.attach(label33, label_col, row, label_width, 1)
                 
                 # BUTTON 7
-                self.switchTDP = Gtk.Switch()
+                self.switchTDP = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
                 self.switchTDP.set_name('saving_tdpsync')
-                self.switchTDP.set_halign(Gtk.Align.END)
                 self.check_autostart_switchTDP(self.switchTDP)
                 low_grid.attach(self.switchTDP, button_col, row, 1, 1) 
                 #print(tdpcontroller)
@@ -699,9 +691,9 @@ class Preferences(Gtk.ApplicationWindow):
                 low_grid.attach(label33, label_col, row, label_width, 1)
                 
                 # BUTTON 7
-                self.switchTDP = Gtk.Switch()
+                self.switchTDP = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
                 self.switchTDP.set_name('saving_tdpsync')
-                self.switchTDP.set_halign(Gtk.Align.END)
+
                 self.switchTDP.set_sensitive(False)
                 #self.check_autostart_switchTDP(self.switchTDP)
                 low_grid.attach(self.switchTDP, button_col, row, 1, 1) 
@@ -736,13 +728,13 @@ class Preferences(Gtk.ApplicationWindow):
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>'+ (_('Persistent changes:')) +'</b></big>')
         label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col2, row, 3, 1)
+        low_grid.attach(label33, label_col2, row, 5, 1)
     # 1 ------------- BRIGHTNESS *
         # LABEL 1
         row = row + 1
         table_icon = Gtk.Table(n_columns=2, n_rows=1, homogeneous=False)
         table_icon.set_valign(Gtk.Align.END)
-        low_grid.attach(table_icon, label_col2, row, label_width2, 1)
+        low_grid.attach(table_icon, label_col2, row, label_width2-1, 1)
         label33 = Gtk.Label(label=_('Set screen brightness:'))
         label33.set_halign(Gtk.Align.START)
         table_icon.attach(label33, 0, 1, 0, 1,
@@ -764,22 +756,19 @@ class Preferences(Gtk.ApplicationWindow):
         # BUTTON 1
 
         self.scaleBrightness = Gtk.Scale()
-        self.scaleBrightness.set_halign(Gtk.Align.END)
-        self.scaleBrightness.set_size_request(200, 10)
         ahorroBrightness = config['SETTINGS']['ahorro_brightness']
         self.scaleBrightness.set_adjustment(Gtk.Adjustment.new(int(ahorroBrightness), 00, 100, 5, 5, 0))
         self.scaleBrightness.set_digits(0)
+        self.scaleBrightness.set_hexpand(True)
 
-        self.brightness_switch1 = Gtk.Switch()
+        self.brightness_switch1 = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.END)
         self.brightness_switch1.set_name('saving_brightness_switch')
-        self.brightness_switch1.set_halign(Gtk.Align.END)
-        self.brightness_switch1.set_valign(Gtk.Align.END)
         
         self.brightness_switch1.connect("state-set", self.brightness_switch_changed, self.scaleBrightness)
         self.check_autostart_switchBrightness(self.brightness_switch1, self.scaleBrightness)
 
         low_grid.attach(self.brightness_switch1, button_col2, row, 1, 1)
-        low_grid.attach(self.scaleBrightness, button_col2-1, row, 1, 1)
+        low_grid.attach(self.scaleBrightness, button_col2-2, row, scale_width, 1)
 
         
         exec = subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')
@@ -791,10 +780,8 @@ class Preferences(Gtk.ApplicationWindow):
             label33.set_halign(Gtk.Align.START)
             low_grid.attach(label33, label_col2, row, label_width2, 1)
             # BUTTON 2
-            self.switchAnimations = Gtk.Switch()
+            self.switchAnimations = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
             self.switchAnimations.set_name('ahorro_animations')
-            self.switchAnimations.set_valign(Gtk.Align.CENTER)
-            self.switchAnimations.set_halign(Gtk.Align.END)
 
             self.check_autostart_switchAnimations(self.switchAnimations)
 
@@ -808,10 +795,8 @@ class Preferences(Gtk.ApplicationWindow):
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, label_width2, 1)
         # BUTTON 3
-        self.switchBluetoothOS = Gtk.Switch()
-        self.switchBluetoothOS.set_valign(Gtk.Align.CENTER)
+        self.switchBluetoothOS = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchBluetoothOS.set_name('ahorrodeenergia')
-        self.switchBluetoothOS.set_halign(Gtk.Align.END)
 
         self.check_switchBluetoothOS(self.switchBluetoothOS)
 
@@ -829,6 +814,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchWifiOS = Gtk.Switch()
         self.switchWifiOS.set_name('ahorrodeenergia')
         self.switchWifiOS.set_halign(Gtk.Align.END)
+        self.switchWifiOS.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiOS(self.switchWifiOS)
 
         low_grid.attach(self.switchWifiOS, button_col2, row, 1, 1)
@@ -840,9 +826,8 @@ class Preferences(Gtk.ApplicationWindow):
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, label_width2, 1)
         # BUTTON 5
-        self.switchWifiDisableLAN = Gtk.Switch()
+        self.switchWifiDisableLAN = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchWifiDisableLAN.set_name('ahorrodeenergia')
-        self.switchWifiDisableLAN.set_halign(Gtk.Align.END)
         self.check_autostart_switchDisableLAN(self.switchWifiDisableLAN)
         low_grid.attach(self.switchWifiDisableLAN, button_col2, row, 1,1)
 
@@ -871,9 +856,9 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
         
         # BUTTON 6
-        self.switchUSBSuspend = Gtk.Switch()
+        self.switchUSBSuspend = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchUSBSuspend.set_name('ahorrodeenergia')
-        self.switchUSBSuspend.set_halign(Gtk.Align.END)
+
         self.check_autostart_USBSuspend(self.switchUSBSuspend)
         low_grid.attach(self.switchUSBSuspend, button_col2, row, 1, 1)
 
@@ -929,14 +914,14 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
         
         # BUTTON 7
-        self.entryBlacklistUSBIDs = Gtk.Entry()
+        self.entryBlacklistUSBIDs = Gtk.Entry(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         if self.switchUSBSuspend.get_active():
             self.entryBlacklistUSBIDs.set_sensitive(True)         
         else:
             self.entryBlacklistUSBIDs.set_sensitive(False)
         self.entryBlacklistUSBIDs.set_text(str(self.gen_blacklist('ahorrodeenergia')))
 
-        low_grid.attach(self.entryBlacklistUSBIDs, button_col2, row, 1, 1)
+        low_grid.attach(self.entryBlacklistUSBIDs, button_col2-1, row, scale_width, 1)
 
 
         row = row + 1
@@ -946,11 +931,9 @@ class Preferences(Gtk.ApplicationWindow):
         label44.set_halign(Gtk.Align.START)
         low_grid.attach(label44, label_col2, row, label_width2, 1)
         # BUTTON 8
-        self.switchBlacklistBUSB = Gtk.Switch()
+        self.switchBlacklistBUSB = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchBlacklistBUSB.set_valign(Gtk.Align.CENTER)
         self.switchBlacklistBUSB.set_name('ahorrodeenergia')
-        self.switchBlacklistBUSB.set_halign(Gtk.Align.END)
-
         self.check_autostart_BlacklistBUSB(self.switchBlacklistBUSB)
         
         low_grid.attach(self.switchBlacklistBUSB, button_col2, row, 1, 1)
@@ -963,9 +946,8 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label44, label_col2, row, label_width2, 1)
 
         # BUTTON 9
-        self.switchBlacklistPrintUSB = Gtk.Switch()
+        self.switchBlacklistPrintUSB = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchBlacklistPrintUSB.set_name('ahorrodeenergia')
-        self.switchBlacklistPrintUSB.set_halign(Gtk.Align.END)
         self.check_autostart_BlacklistPrintUSB(self.switchBlacklistPrintUSB)
 
         low_grid.attach(self.switchBlacklistPrintUSB, button_col2, row, 1, 1)
@@ -978,9 +960,8 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label44, label_col2, row, label_width2, 1)
         
         # BUTTON 10
-        self.switchBlacklistWWANUSB = Gtk.Switch()
+        self.switchBlacklistWWANUSB = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchBlacklistWWANUSB.set_name('ahorrodeenergia')
-        self.switchBlacklistWWANUSB.set_halign(Gtk.Align.END)
         
         self.check_autostart_BlacklistWWANUSB(self.switchBlacklistWWANUSB)
 
@@ -994,16 +975,13 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label44, label_col2, row, label_width2, 1)
         
         # BUTTON 11
-        self.switchShutdownSuspendUSB = Gtk.Switch()
-        self.switchShutdownSuspendUSB.set_halign(Gtk.Align.END)
+        self.switchShutdownSuspendUSB = Gtk.Switch(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         self.switchShutdownSuspendUSB.set_name('ahorrodeenergia')
 
         self.check_autostart_ShutdownSuspendUSB(self.switchShutdownSuspendUSB)
 
         low_grid.attach(self.switchShutdownSuspendUSB, button_col2, row, 1, 1)
 
-        
-    
     # Connections
         self.switchUSBSuspend.connect("notify::active", self.on_switchUSBSuspend_change, self.entryBlacklistUSBIDs, self.switchBlacklistBUSB, self.switchBlacklistPrintUSB, self.switchBlacklistWWANUSB, self.switchShutdownSuspendUSB)
         self.on_switchUSBSuspend_change(self.switchUSBSuspend, 'x' ,self.entryBlacklistUSBIDs, self.switchBlacklistBUSB, self.switchBlacklistPrintUSB, self.switchBlacklistWWANUSB, self.switchShutdownSuspendUSB)               
@@ -1034,22 +1012,14 @@ class Preferences(Gtk.ApplicationWindow):
 
     # ********* MID MODE COMPONENTS COLUMN 1 *********************************
         print('\nLOADING BALANCED MODE COMPONENTS ...')
-        label_width = 3
 
-        label_width2 = 3
-
-        label_col = 0
-        button_col = 2
-        
-        label_col2 = 3
-        button_col2 = 5
         row = 1
         
         # LABEL 0
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>'+ (_('Battery mode parameters (disabled when you connect AC power):')) +'</b></big>')
         label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col, row, 4, 1)
+        low_grid.attach(label33, label_col, row, 6, 1)
     # 1 ------------- CPU LIMITER *
         # LABEL 1
         row=row + 1
@@ -1080,7 +1050,8 @@ class Preferences(Gtk.ApplicationWindow):
         store.append([2, (_('medium'))])
         store.append([3, (_('none'))])
         self.comboBoxLimitCPU2 = Gtk.ComboBox.new_with_model_and_entry(store)
-        self.comboBoxLimitCPU2.set_valign(Gtk.Align.END)
+        self.comboBoxLimitCPU2.set_valign(Gtk.Align.CENTER)
+        self.comboBoxLimitCPU2.set_halign(Gtk.Align.END)
         self.comboBoxLimitCPU2.set_entry_text_column(1)
         
         value = config['SETTINGS']['limit_cpu_equilibrado']
@@ -1092,7 +1063,7 @@ class Preferences(Gtk.ApplicationWindow):
         elif value == '3':
             self.comboBoxLimitCPU2.set_active(2)
 
-        low_grid.attach(self.comboBoxLimitCPU2, button_col, row, 1, 1)       
+        low_grid.attach(self.comboBoxLimitCPU2, button_col-1, row, scale_width, 1)       
     # 2 ------------- CPU GOVERNOR *   
         # LABEL 2
         governorCompatible, governor_name = governorIsCompatible()
@@ -1118,10 +1089,12 @@ class Preferences(Gtk.ApplicationWindow):
 
             self.comboBoxGovernor2 = Gtk.ComboBox.new_with_model_and_entry(store)
             self.comboBoxGovernor2.set_name('equilibrado')
+            self.comboBoxGovernor2.set_valign(Gtk.Align.CENTER)
+            self.comboBoxGovernor2.set_halign(Gtk.Align.END)
             self.comboBoxGovernor2.set_entry_text_column(1)
             self.check_autostart_Governor(self.comboBoxGovernor2, governor_name)
-            #self.comboBoxGovernor.set_sensitive(False)
-            low_grid.attach(self.comboBoxGovernor2, button_col, row, 1, 1)
+
+            low_grid.attach(self.comboBoxGovernor2, button_col-1, row, scale_width, 1)
     # 3 ------------- GRAPHICS SAVING *
         # LABEL 3
         row = row + 1
@@ -1131,8 +1104,7 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label33, label_col, row, label_width, 1)
 
         # BUTTON 3
-        self.switchGraphics2 = Gtk.Switch()
-        self.switchGraphics2.set_halign(Gtk.Align.END)
+        self.switchGraphics2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchGraphics2.set_name('equilibrado')
 
         self.check_autostart_Graphics(self.switchGraphics2)
@@ -1162,9 +1134,9 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
 
         # BUTTON 4
-        self.switchSound2 = Gtk.Switch()
+        self.switchSound2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchSound2.set_name('equilibrado')
-        self.switchSound2.set_halign(Gtk.Align.END)
+
         self.check_autostart_switchSound(self.switchSound2)
         low_grid.attach(self.switchSound2, button_col, row, 1, 1)
     # 5 ------------- WIFI SAVING *
@@ -1191,9 +1163,9 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
     
         # BUTTON 5
-        self.switchWifiPower2 = Gtk.Switch()
+        self.switchWifiPower2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchWifiPower2.set_name('equilibrado')
-        self.switchWifiPower2.set_halign(Gtk.Align.END)
+
         self.check_autostart_switchWifiPower(self.switchWifiPower2)
         low_grid.attach(self.switchWifiPower2, button_col, row, 1, 1)
     # 6 ------------- DISABLE BLUETOOTH IF NOT IN USE *
@@ -1204,9 +1176,9 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label33, label_col, row, label_width, 1)
         
         # BUTTON 6
-        self.switchBluetoothNIU2 =Gtk.Switch()
+        self.switchBluetoothNIU2 =Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchBluetoothNIU2.set_name('equilibrado')
-        self.switchBluetoothNIU2.set_halign(Gtk.Align.END)
+
         self.switchBluetoothNIU2.set_valign(Gtk.Align.CENTER)
         self.check_switchBluetooth(self.switchBluetoothNIU2) 
         low_grid.attach(self.switchBluetoothNIU2, button_col, row, 1, 1)
@@ -1218,9 +1190,9 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label33, label_col, row, label_width, 1)
         
         # BUTTON 7
-        self.switchWifiNIU2 = Gtk.Switch()
+        self.switchWifiNIU2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchWifiNIU2.set_name('equilibrado')
-        self.switchWifiNIU2.set_halign(Gtk.Align.END)
+
         self.switchWifiNIU2.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU2)
         low_grid.attach(self.switchWifiNIU2, button_col, row, 1, 1)
@@ -1249,9 +1221,9 @@ class Preferences(Gtk.ApplicationWindow):
                 low_grid.attach(label33, label_col, row, label_width, 1)
                 
                 # BUTTON 7
-                self.switchTDP2 = Gtk.Switch()
+                self.switchTDP2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
                 self.switchTDP2.set_name('balanced_tdpsync')
-                self.switchTDP2.set_halign(Gtk.Align.END)
+
                 self.check_autostart_switchTDP(self.switchTDP2)
                 low_grid.attach(self.switchTDP2, button_col, row, 1, 1) 
                 #print(tdpcontroller)
@@ -1264,9 +1236,8 @@ class Preferences(Gtk.ApplicationWindow):
                 low_grid.attach(label33, label_col, row, label_width, 1)
                 
                 # BUTTON 7
-                self.switchTDP2 = Gtk.Switch()
+                self.switchTDP2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
                 self.switchTDP2.set_name('balanced_tdpsync')
-                self.switchTDP2.set_halign(Gtk.Align.END)
                 self.switchTDP2.set_sensitive(False)
                 #self.check_autostart_switchTDP(self.switchTDP)
                 low_grid.attach(self.switchTDP2, button_col, row, 1, 1) 
@@ -1299,13 +1270,13 @@ class Preferences(Gtk.ApplicationWindow):
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>'+ (_('Persistent changes:')) +'</b></big>')
         label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col2, row, 3, 1)
+        low_grid.attach(label33, label_col2, row, 5, 1)
     # 1 ------------- BRIGHTNESS *
         # LABEL 1
         row = row + 1
         table_icon = Gtk.Table(n_columns=2, n_rows=1, homogeneous=False)
         table_icon.set_valign(Gtk.Align.END)
-        low_grid.attach(table_icon, label_col2, row, label_width2, 1)
+        low_grid.attach(table_icon, label_col2, row, label_width2-1, 1)
         label33 = Gtk.Label(label=_('Set screen brightness:'))
         label33.set_halign(Gtk.Align.START)
         table_icon.attach(label33, 0, 1, 0, 1,
@@ -1326,20 +1297,18 @@ class Preferences(Gtk.ApplicationWindow):
 
         # BUTTON 1
         self.scaleBrightness2 = Gtk.Scale()
-        self.scaleBrightness2.set_size_request(200, 10)
         equilibradoBrightness = config['SETTINGS']['equilibrado_brightness']
         self.scaleBrightness2.set_adjustment(Gtk.Adjustment.new(int(equilibradoBrightness), 0, 100, 5, 5, 0))
         self.scaleBrightness2.set_digits(0)
+        self.scaleBrightness2.set_hexpand(True)
 
-        self.brightness_switch2 = Gtk.Switch()
+        self.brightness_switch2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.END)
         self.brightness_switch2.set_name('balanced_brightness_switch')
-        self.brightness_switch2.set_halign(Gtk.Align.END)
-        self.brightness_switch2.set_valign(Gtk.Align.END)
 
         self.brightness_switch2.connect("state-set", self.brightness_switch_changed, self.scaleBrightness2)
         self.check_autostart_switchBrightness(self.brightness_switch2, self.scaleBrightness2)
         
-        low_grid.attach(self.scaleBrightness2, button_col2-1, row, 1, 1)
+        low_grid.attach(self.scaleBrightness2, button_col2-2, row, scale_width, 1)
         low_grid.attach(self.brightness_switch2, button_col2, row, 1, 1)
 
         
@@ -1351,10 +1320,8 @@ class Preferences(Gtk.ApplicationWindow):
             label33.set_halign(Gtk.Align.START)
             low_grid.attach(label33, label_col2, row, label_width2, 1)
             # BUTTON 2
-            self.switchAnimations2 = Gtk.Switch()
+            self.switchAnimations2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
             self.switchAnimations2.set_name('equilibrado_animations')
-            self.switchAnimations2.set_valign(Gtk.Align.CENTER)
-            self.switchAnimations2.set_halign(Gtk.Align.END)
             
             self.check_autostart_switchAnimations(self.switchAnimations2)
             low_grid.attach(self.switchAnimations2, button_col2, row, 1, 1)
@@ -1384,9 +1351,9 @@ class Preferences(Gtk.ApplicationWindow):
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, label_width2, 1)
         # BUTTON 4
-        self.switchWifiOS2 = Gtk.Switch()
+        self.switchWifiOS2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchWifiOS2.set_name('equilibrado')
-        self.switchWifiOS2.set_halign(Gtk.Align.END)
+
         self.check_autostart_switchWifiOS(self.switchWifiOS2)
         low_grid.attach(self.switchWifiOS2, button_col2, row, 1, 1)
         
@@ -1397,9 +1364,9 @@ class Preferences(Gtk.ApplicationWindow):
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, label_width2, 1)
         # BUTTON 5
-        self.switchWifiDisableLAN2 = Gtk.Switch()
+        self.switchWifiDisableLAN2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchWifiDisableLAN2.set_name('equilibrado')
-        self.switchWifiDisableLAN2.set_halign(Gtk.Align.END)
+
         self.check_autostart_switchDisableLAN(self.switchWifiDisableLAN2)
         low_grid.attach(self.switchWifiDisableLAN2, button_col2, row, 1,1)
 
@@ -1427,9 +1394,8 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
         
         # BUTTON 6
-        self.switchUSBSuspend2 = Gtk.Switch()
+        self.switchUSBSuspend2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchUSBSuspend2.set_name('equilibrado')
-        self.switchUSBSuspend2.set_halign(Gtk.Align.END)
         self.check_autostart_USBSuspend(self.switchUSBSuspend2)
         low_grid.attach(self.switchUSBSuspend2, button_col2, row, 1, 1)
         
@@ -1486,13 +1452,13 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
         
         # BUTTON 7
-        self.entryBlacklistUSBIDs2 = Gtk.Entry()
+        self.entryBlacklistUSBIDs2 = Gtk.Entry(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         if self.switchUSBSuspend2.get_active():
             self.entryBlacklistUSBIDs2.set_sensitive(True)         
         else:
             self.entryBlacklistUSBIDs2.set_sensitive(False)
         self.entryBlacklistUSBIDs2.set_text(str(self.gen_blacklist('equilibrado')))
-        low_grid.attach(self.entryBlacklistUSBIDs2, button_col2, row, 1, 1)
+        low_grid.attach(self.entryBlacklistUSBIDs2, button_col2-1, row, scale_width, 1)
 
 
         row = row + 1
@@ -1518,9 +1484,8 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label44, label_col2, row, label_width2, 1)
     # 9 ------------- EXCLUDE PRINTERS *
         # BUTTON 9
-        self.switchBlacklistPrintUSB2 = Gtk.Switch()
+        self.switchBlacklistPrintUSB2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchBlacklistPrintUSB2.set_name('equilibrado')
-        self.switchBlacklistPrintUSB2.set_halign(Gtk.Align.END)
         self.check_autostart_BlacklistPrintUSB(self.switchBlacklistPrintUSB2)
 
         low_grid.attach(self.switchBlacklistPrintUSB2, button_col2, row, 1, 1)
@@ -1533,9 +1498,9 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label44, label_col2, row, label_width2, 1)
         
         # BUTTON 10
-        self.switchBlacklistWWANUSB2 = Gtk.Switch()
+        self.switchBlacklistWWANUSB2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchBlacklistWWANUSB2.set_name('equilibrado')
-        self.switchBlacklistWWANUSB2.set_halign(Gtk.Align.END)
+
         self.check_autostart_BlacklistWWANUSB(self.switchBlacklistWWANUSB2)
 
         low_grid.attach(self.switchBlacklistWWANUSB2, button_col2, row, 1, 1)
@@ -1548,9 +1513,8 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label44, label_col2, row, label_width2,1)
         
         # BUTTON 11
-        self.switchShutdownSuspendUSB2 = Gtk.Switch()
+        self.switchShutdownSuspendUSB2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchShutdownSuspendUSB2.set_name('equilibrado')
-        self.switchShutdownSuspendUSB2.set_halign(Gtk.Align.END)
         
         self.check_autostart_ShutdownSuspendUSB(self.switchShutdownSuspendUSB2)
 
@@ -1587,23 +1551,14 @@ class Preferences(Gtk.ApplicationWindow):
         vbox7.pack_start(low_page_grid, True, True, 0)
 
     # ********* HIGH MODE COMPONENTS COLUMN 1 *********************************
-        
-        label_width = 3
 
-        label_width2 = 3
-
-        label_col = 0
-        button_col = 2
-        
-        label_col2 = 3
-        button_col2 = 5
         row = 1
         
         # LABEL 0
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>'+ (_('Battery mode parameters (disabled when you connect AC power):')) +'</b></big>')
         label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col, row, 4, 1)
+        low_grid.attach(label33, label_col, row, 6, 1)
     # 1 ------------- CPU LIMITER *
         # LABEL 1
         row=row + 1
@@ -1634,7 +1589,8 @@ class Preferences(Gtk.ApplicationWindow):
         store.append([2, (_('medium'))])
         store.append([3, (_('none'))])
         self.comboBoxLimitCPU3 = Gtk.ComboBox.new_with_model_and_entry(store)
-        self.comboBoxLimitCPU3.set_valign(Gtk.Align.END)
+        self.comboBoxLimitCPU3.set_valign(Gtk.Align.CENTER)
+        self.comboBoxLimitCPU3.set_halign(Gtk.Align.END)
         self.comboBoxLimitCPU3.set_entry_text_column(1)
         #self.comboBoxLimitCPU.set_active(self.check_autostart_comboBoxLimitCPU(self.comboBoxLimitCPU))
         
@@ -1647,7 +1603,7 @@ class Preferences(Gtk.ApplicationWindow):
         elif value == '3':
             self.comboBoxLimitCPU3.set_active(2)
 
-        low_grid.attach(self.comboBoxLimitCPU3, button_col, row, 1, 1)       
+        low_grid.attach(self.comboBoxLimitCPU3, button_col-1, row, scale_width, 1)       
     # 2 ------------- CPU GOVERNOR *   
         # LABEL 2
         governorCompatible, governor_name = governorIsCompatible()
@@ -1674,10 +1630,12 @@ class Preferences(Gtk.ApplicationWindow):
 
             self.comboBoxGovernor3 = Gtk.ComboBox.new_with_model_and_entry(store)
             self.comboBoxGovernor3.set_name('maximorendimiento')
+            self.comboBoxGovernor3.set_halign(Gtk.Align.END)
+            self.comboBoxGovernor3.set_valign(Gtk.Align.CENTER)
             self.comboBoxGovernor3.set_entry_text_column(1)
             self.check_autostart_Governor(self.comboBoxGovernor3, governor_name)
 
-            low_grid.attach(self.comboBoxGovernor3, button_col, row, 1, 1)
+            low_grid.attach(self.comboBoxGovernor3, button_col-1, row, scale_width, 1)
     # 3 ------------- GRAPHICS SAVING * 
         # LABEL 3
         row = row + 1
@@ -1687,8 +1645,8 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label33, label_col, row, label_width, 1)
 
         # BUTTON 3
-        self.switchGraphics3 = Gtk.Switch()
-        self.switchGraphics3.set_halign(Gtk.Align.END)
+        self.switchGraphics3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
+
         self.switchGraphics3.set_sensitive(False)
         low_grid.attach(self.switchGraphics3, button_col, row, 1, 1)
     # 4 ------------- SOUND SAVING *
@@ -1715,9 +1673,9 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
 
         # BUTTON 3
-        self.switchSound3 = Gtk.Switch()
+        self.switchSound3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchSound3.set_name('maximorendimiento')
-        self.switchSound3.set_halign(Gtk.Align.END)
+
         self.check_autostart_switchSound(self.switchSound3)
         low_grid.attach(self.switchSound3, button_col, row, 1, 1)
     # 4 ------------- WIFI SAVING *
@@ -1744,9 +1702,9 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
 
         # BUTTON 4
-        self.switchWifiPower3 = Gtk.Switch()
+        self.switchWifiPower3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchWifiPower3.set_name('maximorendimiento')
-        self.switchWifiPower3.set_halign(Gtk.Align.END)
+
         self.check_autostart_switchWifiPower(self.switchWifiPower3)
         low_grid.attach(self.switchWifiPower3, button_col, row, 1, 1)
     # 6 ------------- DISABLE BLUETOOTH IF NOT IN USE *
@@ -1757,10 +1715,9 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label33, label_col, row, label_width, 1)
         
         # BUTTON 5
-        self.switchBluetoothNIU3 = Gtk.Switch()
-        self.switchBluetoothNIU3.set_valign(Gtk.Align.CENTER)
+        self.switchBluetoothNIU3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchBluetoothNIU3.set_name('maximorendimiento')
-        self.switchBluetoothNIU3.set_halign(Gtk.Align.END)
+
         self.check_switchBluetooth(self.switchBluetoothNIU3)
         low_grid.attach(self.switchBluetoothNIU3, button_col, row, 1, 1)
     # 7 ------------- DISABLE WIFI IF NOT IN USE *
@@ -1771,9 +1728,9 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label33, label_col, row, label_width, 1)
         
         # BUTTON 6
-        self.switchWifiNIU3 = Gtk.Switch()
+        self.switchWifiNIU3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchWifiNIU3.set_name('maximorendimiento')
-        self.switchWifiNIU3.set_halign(Gtk.Align.END)
+
         self.switchWifiNIU3.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU3)
         low_grid.attach(self.switchWifiNIU3, button_col, row, 1, 1)
@@ -1802,9 +1759,9 @@ class Preferences(Gtk.ApplicationWindow):
                 low_grid.attach(label33, label_col, row, label_width, 1)
                 
                 # BUTTON 7
-                self.switchTDP3 = Gtk.Switch()
+                self.switchTDP3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
                 self.switchTDP3.set_name('power_tdpsync')
-                self.switchTDP3.set_halign(Gtk.Align.END)
+
                 self.check_autostart_switchTDP(self.switchTDP3)
                 low_grid.attach(self.switchTDP3, button_col, row, 1, 1) 
                 #print(tdpcontroller)
@@ -1817,9 +1774,8 @@ class Preferences(Gtk.ApplicationWindow):
                 low_grid.attach(label33, label_col, row, label_width, 1)
                 
                 # BUTTON 7
-                self.switchTDP3 = Gtk.Switch()
+                self.switchTDP3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
                 self.switchTDP3.set_name('power_tdpsync')
-                self.switchTDP3.set_halign(Gtk.Align.END)
                 self.switchTDP3.set_sensitive(False)
                 #self.check_autostart_switchTDP(self.switchTDP)
                 low_grid.attach(self.switchTDP3, button_col, row, 1, 1) 
@@ -1851,13 +1807,13 @@ class Preferences(Gtk.ApplicationWindow):
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>'+ (_('Persistent changes:')) +'</b></big>')
         label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col2, row, 3, 1)
+        low_grid.attach(label33, label_col2, row, 5, 1)
     # 1 ------------- BRIGHTNESS *
         # LABEL 1
         row = row + 1
         table_icon = Gtk.Table(n_columns=2, n_rows=1, homogeneous=False)
         table_icon.set_valign(Gtk.Align.END)
-        low_grid.attach(table_icon, label_col2, row, label_width2, 1)
+        low_grid.attach(table_icon, label_col2, row, label_width2-1, 1)
         label33 = Gtk.Label(label=_('Set screen brightness:'))
         label33.set_halign(Gtk.Align.START)
         table_icon.attach(label33, 0, 1, 0, 1,
@@ -1879,20 +1835,18 @@ class Preferences(Gtk.ApplicationWindow):
         # BUTTON 1
 
         self.scaleBrightness3 = Gtk.Scale()
-        self.scaleBrightness3.set_size_request(200, 10)
         maxrendimientoBrightness = config['SETTINGS']['maxrendimiento_brightness']
         self.scaleBrightness3.set_adjustment(Gtk.Adjustment.new(int(maxrendimientoBrightness), 0, 100, 5, 5, 0))
         self.scaleBrightness3.set_digits(0)
         self.scaleBrightness3.set_hexpand(True)
 
-        self.brightness_switch3 = Gtk.Switch()
+        self.brightness_switch3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.END)
         self.brightness_switch3.set_name('power_brightness_switch')
-        self.brightness_switch3.set_halign(Gtk.Align.END)
-        self.brightness_switch3.set_valign(Gtk.Align.END)
+
         self.check_autostart_switchBrightness(self.brightness_switch3, self.scaleBrightness3)
         self.brightness_switch3.connect("state-set", self.brightness_switch_changed, self.scaleBrightness3)
 
-        low_grid.attach(self.scaleBrightness3, button_col2-1, row, 1, 1)
+        low_grid.attach(self.scaleBrightness3, button_col2-2, row, scale_width, 1)
         low_grid.attach(self.brightness_switch3, button_col2, row, 1, 1)
 
         
@@ -1904,10 +1858,8 @@ class Preferences(Gtk.ApplicationWindow):
             label33.set_halign(Gtk.Align.START)
             low_grid.attach(label33, label_col2, row, label_width2, 1)
             # BUTTON 2
-            self.switchAnimations3 = Gtk.Switch()
+            self.switchAnimations3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
             self.switchAnimations3.set_name('maxrendimiento_animations')
-            self.switchAnimations3.set_valign(Gtk.Align.CENTER)
-            self.switchAnimations3.set_halign(Gtk.Align.END)
             
             self.check_autostart_switchAnimations(self.switchAnimations3)
             low_grid.attach(self.switchAnimations3, button_col2, row, 1, 1)
@@ -1920,10 +1872,8 @@ class Preferences(Gtk.ApplicationWindow):
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, label_width2, 1)
         # BUTTON 3
-        self.switchBluetoothOS3 = Gtk.Switch()
-        self.switchBluetoothOS3.set_valign(Gtk.Align.CENTER)
+        self.switchBluetoothOS3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchBluetoothOS3.set_name('maximorendimiento')
-        self.switchBluetoothOS3.set_halign(Gtk.Align.END)
         self.check_switchBluetoothOS(self.switchBluetoothOS3)
         low_grid.attach(self.switchBluetoothOS3, button_col2, row, 1, 1)
     # 4 ------------- DISABLE WIFI ON STARTUP *
@@ -1933,8 +1883,7 @@ class Preferences(Gtk.ApplicationWindow):
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, label_width2, 1)
         # BUTTON 4
-        self.switchWifiOS3 = Gtk.Switch()
-        self.switchWifiOS3.set_halign(Gtk.Align.END)
+        self.switchWifiOS3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchWifiOS3.set_name('maximorendimiento')
         self.check_autostart_switchWifiOS(self.switchWifiOS3)
         low_grid.attach(self.switchWifiOS3, button_col2, row, 1, 1)
@@ -1945,9 +1894,8 @@ class Preferences(Gtk.ApplicationWindow):
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, label_width2, 1)
         # BUTTON 5
-        self.switchWifiDisableLAN3 = Gtk.Switch()
+        self.switchWifiDisableLAN3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchWifiDisableLAN3.set_name('maximorendimiento')
-        self.switchWifiDisableLAN3.set_halign(Gtk.Align.END)
         self.check_autostart_switchDisableLAN(self.switchWifiDisableLAN3)
         low_grid.attach(self.switchWifiDisableLAN3, button_col2, row, 1,1)
 
@@ -1974,13 +1922,10 @@ class Preferences(Gtk.ApplicationWindow):
             ypadding=5,
             xoptions=Gtk.AttachOptions.SHRINK,
             yoptions=Gtk.AttachOptions.SHRINK)
-        
-        
 
         # BUTTON 6
-        self.switchUSBSuspend3 = Gtk.Switch()
+        self.switchUSBSuspend3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchUSBSuspend3.set_name('maximorendimiento')
-        self.switchUSBSuspend3.set_halign(Gtk.Align.END)
         self.check_autostart_USBSuspend(self.switchUSBSuspend3)
         low_grid.attach(self.switchUSBSuspend3, button_col2, row, 1, 1)
 
@@ -2036,14 +1981,14 @@ class Preferences(Gtk.ApplicationWindow):
             yoptions=Gtk.AttachOptions.SHRINK)
         
         # BUTTON 7
-        self.entryBlacklistUSBIDs3 = Gtk.Entry()
+        self.entryBlacklistUSBIDs3 = Gtk.Entry(halign = Gtk.Align.END, valign = Gtk.Align.CENTER)
         if self.switchUSBSuspend3.get_active():
             self.entryBlacklistUSBIDs3.set_sensitive(True)         
         else:
             self.entryBlacklistUSBIDs3.set_sensitive(False)
         self.entryBlacklistUSBIDs3.set_text(str(self.gen_blacklist('maximorendimiento')))
 
-        low_grid.attach(self.entryBlacklistUSBIDs3, button_col2, row, 1, 1)
+        low_grid.attach(self.entryBlacklistUSBIDs3, button_col2-1, row, scale_width, 1)
 
 
         row = row + 1
@@ -2069,9 +2014,8 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label44, label_col2, row, label_width2, 1)
 
         # BUTTON 9
-        self.switchBlacklistPrintUSB3 = Gtk.Switch()
+        self.switchBlacklistPrintUSB3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchBlacklistPrintUSB3.set_name('maximorendimiento')
-        self.switchBlacklistPrintUSB3.set_halign(Gtk.Align.END)
 
         self.check_autostart_BlacklistPrintUSB(self.switchBlacklistPrintUSB3)
 
@@ -2085,10 +2029,8 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label44, label_col2, row, label_width2, 1)
         
         # BUTTON 10
-        self.switchBlacklistWWANUSB3 = Gtk.Switch()
+        self.switchBlacklistWWANUSB3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchBlacklistWWANUSB3.set_name('maximorendimiento')
-        self.switchBlacklistWWANUSB3.set_halign(Gtk.Align.END)
-
         self.check_autostart_BlacklistWWANUSB(self.switchBlacklistWWANUSB3)
 
         low_grid.attach(self.switchBlacklistWWANUSB3, button_col2, row, 1, 1)
@@ -2101,9 +2043,8 @@ class Preferences(Gtk.ApplicationWindow):
         low_grid.attach(label44, label_col2, row, label_width2,1)
         
         # BUTTON 11
-        self.switchShutdownSuspendUSB3 = Gtk.Switch()
+        self.switchShutdownSuspendUSB3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
         self.switchShutdownSuspendUSB3.set_name('maximorendimiento')
-        self.switchShutdownSuspendUSB3.set_halign(Gtk.Align.END)
         self.check_autostart_ShutdownSuspendUSB(self.switchShutdownSuspendUSB3)
         low_grid.attach(self.switchShutdownSuspendUSB3, button_col2, row, 1, 1)
     # Connections
@@ -2646,20 +2587,6 @@ class Preferences(Gtk.ApplicationWindow):
             height=200,
             preserve_aspect_ratio=True)
         CCIcon = Gtk.Image.new_from_pixbuf(pixbuf)
-        info_grid.attach(CCIcon, 0, 18, 5, 1)
-
-        # Interface
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename= os.path.join(imagespath, 'interface/top-line.png'),
-            width=100,
-            height=200,
-            preserve_aspect_ratio=True)
-        top_line = Gtk.Image.new_from_pixbuf(pixbuf)
-        info_grid.attach(top_line, 0, 18, 5, 1)
-
-        img = Gtk.Image()
-        img.set_from_pixbuf(pixbuf)
-        info_grid.attach(top_line, 0, 18, 5, 1)
 
 
 # END
@@ -2667,7 +2594,7 @@ class Preferences(Gtk.ApplicationWindow):
         #SHOW
         self.show_all()
  
-# FUNCTIONS ***********************************
+# CLASS FUNCTIONS ***********************************
     def brightness_switch_changed(self, switchBrightness, state, scale):
         #print(str(state))
         if state:
@@ -3213,6 +3140,7 @@ class Preferences(Gtk.ApplicationWindow):
                     
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/'''+mode+'''
+                    
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/'''+mode+'''
                     
@@ -3234,7 +3162,7 @@ class Preferences(Gtk.ApplicationWindow):
         if statGovernor is not None:
             model = self.comboBoxGovernor.get_model()
             row_id, name = model[statGovernor][:2]
-
+            subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_AC=/ cCPU_SCALING_GOVERNOR_ON_AC='+name+'" ~/.config/slimbookbattery/custom/'+mode)
             subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
 
 

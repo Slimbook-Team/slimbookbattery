@@ -2,18 +2,30 @@
 # postinst script for slimbookbattery
 
 set -e
-set -x
 
-python3 /usr/share/slimbookbattery/src/check_config.py
+echo "Debian postinst $1 :"
 
-chmod -R 755 /usr/share/slimbookbattery/src/*.py
-chmod -R 755 /usr/share/slimbookbattery/src/*.sh
+if python3 /usr/share/slimbookbattery/src/check_config.py; then
+  echo 'Configuration OK'
+fi
+
+if chmod -R 755 /usr/share/slimbookbattery/src/*.py; then
+  echo 'Permissions given.'
+
+fi
+
+if chmod -R 755 /usr/share/slimbookbattery/src/*.sh; then
+  echo 'Permissions given.'
+
+fi
 
 # Enabling tlp.service
-sudo systemctl enable tlp.service
+if sudo systemctl enable tlp.service; then
+  echo 'Tlp service enabled'
+fi
 
 files=(
-/lib/systemd/system/slimbookbattery.service 
+/lib/systemd/system/slimbookbattery.service
 /home/*/.config/autostart/slimbookbattery-autostart.desktop
 )
 
@@ -21,7 +33,7 @@ files=(
 for file in ${files[@]}; do
   if test -f $file; then
     rm $file
-fi
+  fi
 done
 
 exit 0
