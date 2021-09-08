@@ -1,6 +1,8 @@
 #!/bin/bash
 # postinst script for slimbookbattery
 
+#DEBHELPER#
+
 set -e
 
 echo "Debian postinst $1 :"

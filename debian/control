@@ -1,10 +1,10 @@
 Source: slimbookbattery
 Section: utils
 Priority: extra
-Maintainer: slimbook <dev@slimbook.es>
+Maintainer: Slimbook <dev@slimbook.es>
 Build-Depends: debhelper (>= 9)
-Standards-Version: 3.9.6
-Homepage: <http://slimbook.es>
+Standards-Version: 4.1.4
+Homepage: http://slimbook.es
 
 Package: slimbookbattery
 Architecture: all
@@ -28,4 +28,4 @@ Depends: ${misc:Depends}, ${python:Depends},
 	libnotify-bin,
 	cron
 Description: Slimbook Battery
- Is a battery optimization application for portable devices that can increase the battery life by 50%. For this purpose, the third-party software (TLP and others) is used to manage and configure the system resources.
+ Battery optimization application for portable devices.

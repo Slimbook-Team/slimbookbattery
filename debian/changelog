@@ -1,4 +1,4 @@
-slimbookbattery (4.0beta) focal; urgency=low
+slimbookbattery (4.0.0) focal; urgency=low
   * New interface
   * Draggable window
   * Added config values
@@ -8,7 +8,8 @@ slimbookbattery (4.0beta) focal; urgency=low
   * Added splash window
   * Fixed bugs
 
- -- slimbook <dev@slimbook.es>  Wed, 11 Aug 2021 11:24:04 +0100
+ -- slimbook <dev@slimbook.es>  Wed, 8 Sep 2021 11:24:04 +0100
+
 slimbookbattery (3.99beta) focal; urgency=low
 
   * Added config values
@@ -16,6 +17,7 @@ slimbookbattery (3.99beta) focal; urgency=low
   * Added version 
 
  -- slimbook <dev@slimbook.es>  Wed, 11 Aug 2021 11:24:04 +0100
+ 
 slimbookbattery (3.98beta) focal; urgency=low
 
   * New interface
