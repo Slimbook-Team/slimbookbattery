@@ -34,6 +34,7 @@ def main(args):
         print('Done')
 
 def check(): # Args will be like --> command_name value
+    print('Checking Slimbook Battery Configuration')
     if os.path.isfile(config_file):
         config = configparser.ConfigParser()
         config.read(config_file)
@@ -81,6 +82,7 @@ def check(): # Args will be like --> command_name value
         os.system('''mkdir -p '''+HOMEDIR+'''/.config/slimbookbattery/ && cp '''+default+''' '''+config_file)
 
 def check2():
+    print("Checking Slimbook Battery's TLP Configuration")
     # Slimbookbattery tlp conf files
     incidences = False
 
@@ -92,6 +94,8 @@ def check2():
             print('Found '+file)
             if subprocess.getstatusoutput('diff /usr/share/slimbookbattery/custom/'+file+' '+HOMEDIR+'/.config/slimbookbattery/'+file)!=0:
                 incidences = True
+        else:
+            incidences = True
 
     if incidences:
         print('Setting default an custom files ...')
