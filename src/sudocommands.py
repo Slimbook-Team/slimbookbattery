@@ -68,11 +68,13 @@ try:
     print('Language: ', entorno_usu)
 except:
     idiomas = ['en']
-t = gettext.translation('slimbookbattery',
+t = gettext.translation('sudocommands',
                         currpath+'/locale',
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
+
+msg_graphics = _('Graphics settings have been modified, changes will be applied on restart.')
 
 class colors: # You may need to change color settings
     RED = '\033[31m'
@@ -84,8 +86,8 @@ class colors: # You may need to change color settings
     BOLD = "\033[;1m"
 
 def main(args): # Args will be like --> command_name value
-    arguments = ''
 
+    arguments = ''
     for argument in range(len(args)):
         if argument != 0:
             arguments = arguments+' '+(args[argument])
@@ -138,7 +140,7 @@ def main(args): # Args will be like --> command_name value
             required_reboot = mode_settings(battery_mode)
             if required_reboot == 1:
                 print('Sudo notify')
-                notify(_('Graphics settings have been modified,\nthe changes will be applied on restart.'))
+                notify(msg_graphics)
 
             #print(str(os.system(command)))
 

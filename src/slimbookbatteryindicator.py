@@ -70,6 +70,7 @@ proceso = None
 alert = None
 
 currpath = os.path.dirname(os.path.realpath(__file__))
+imagespath = os.path.normpath(os.path.join(currpath, '..', 'images'))
 
 t = gettext.translation('slimbookbattery',
                         currpath+'/locale',
@@ -89,7 +90,7 @@ if config['CONFIGURATION']['alerts'] == '1':
 
 tdpcontroller = config['TDP']['tdpcontroller']
 
-class Indicator():
+class Indicator(Gtk.Application):
     
     modo_actual = config['CONFIGURATION']['modo_actual']
 
@@ -149,7 +150,7 @@ def build_menu():
 
     #Imagenes a utilizar para los iconos del menú
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/normal.png',
+            filename=imagespath+'/normal.png',
             width=25,
             height=25,
             preserve_aspect_ratio=True)
@@ -157,21 +158,21 @@ def build_menu():
 
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/balanced_normal.png',
+            filename=imagespath+'/balanced_normal.png',
             width=25,
             height=25,
             preserve_aspect_ratio=True)
     icon_equilibrado = Gtk.Image.new_from_pixbuf(pixbuf)
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/performance_normal.png',
+            filename=imagespath+'/performance_normal.png',
             width=25,
             height=25,
             preserve_aspect_ratio=True)
     icon_max_rendimiento = Gtk.Image.new_from_pixbuf(pixbuf)
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/disabled_normal.png',
+            filename=imagespath+'/disabled_normal.png',
             width=25,
             height=25,
             preserve_aspect_ratio=True)

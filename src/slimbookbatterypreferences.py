@@ -325,6 +325,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.comboBoxWorkMode = Gtk.ComboBox.new_with_model_and_entry(store)
         self.comboBoxWorkMode.set_entry_text_column(1)
+        self.comboBoxWorkMode.set_halign(Gtk.Align.END)
    
 
         if subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_DEFAULT_MODE=AC'")[0] == 0:
@@ -530,7 +531,9 @@ class Preferences(Gtk.ApplicationWindow):
             
             # BUTTON 2
             store = Gtk.ListStore(int, str)
-            store.append([1, 'powersave'])
+
+            store.append([1, 'powersave']) # aureo
+
             self.comboBoxGovernor = Gtk.ComboBox.new_with_model_and_entry(store)
             self.comboBoxGovernor.set_valign(Gtk.Align.CENTER)
             self.comboBoxGovernor.set_halign(Gtk.Align.END)
@@ -2728,6 +2731,9 @@ class Preferences(Gtk.ApplicationWindow):
                 comboBoxGovernor.set_active(0)
             elif subprocess.getstatusoutput("cat " + user_home + "/.config/slimbookbattery/custom/"+mode+" | grep 'CPU_SCALING_GOVERNOR_ON_BAT=performance'")[0] == 0:
                 comboBoxGovernor.set_active(1)
+            else:
+                print('Setting default mode powersave')
+                comboBoxGovernor.set_active(0)
         elif governor_name == 'acpi-cpufreq':
             if subprocess.getstatusoutput("cat " + user_home + "/.config/slimbookbattery/custom/"+mode+" | grep 'CPU_SCALING_GOVERNOR_ON_BAT=ondemand'")[0] == 0:
                 comboBoxGovernor.set_active(0)
@@ -2739,6 +2745,9 @@ class Preferences(Gtk.ApplicationWindow):
                 comboBoxGovernor.set_active(3)
             elif subprocess.getstatusoutput("cat " + user_home + "/.config/slimbookbattery/custom/"+mode+" | grep 'CPU_SCALING_GOVERNOR_ON_BAT=conservative'")[0] == 0:
                 comboBoxGovernor.set_active(4)
+            else:
+                print('Setting default mode on-demand')
+                comboBoxGovernor.set_active(0)
     
     def check_switchBluetooth(self, switch): #All modes
         mode = switch.get_name()
@@ -3407,7 +3416,7 @@ class Preferences(Gtk.ApplicationWindow):
         if statGovernor is not None:
             model = self.comboBoxGovernor2.get_model()
             row_id, name = model[statGovernor][:2]
-
+            subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_AC=/ cCPU_SCALING_GOVERNOR_ON_AC='+name+'" ~/.config/slimbookbattery/custom/'+mode)
             subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
 
         statGraphics = self.switchGraphics2.get_active() # .conf file *
@@ -3645,7 +3654,7 @@ class Preferences(Gtk.ApplicationWindow):
         if statGovernor is not None:
             model = self.comboBoxGovernor3.get_model()
             row_id, name = model[statGovernor][:2]
-
+            subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_AC=/ cCPU_SCALING_GOVERNOR_ON_AC='+name+'" ~/.config/slimbookbattery/custom/'+mode)
             subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
 
 
