@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2021-08-17 13:47+0200\n"
+"POT-Creation-Date: 2021-09-08 13:36+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,43 +15,43 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: slimbookbatteryindicator.py:143
+#: slimbookbatteryindicator.py:138
 msgid "strappstatus4"
 msgstr ""
 
-#: slimbookbatteryindicator.py:196
+#: slimbookbatteryindicator.py:184
 msgid "Energy Saving"
 msgstr ""
 
-#: slimbookbatteryindicator.py:202
+#: slimbookbatteryindicator.py:190
 msgid "Balanced"
 msgstr ""
 
-#: slimbookbatteryindicator.py:208
+#: slimbookbatteryindicator.py:196
 msgid "Maximum Performance"
 msgstr ""
 
-#: slimbookbatteryindicator.py:214
+#: slimbookbatteryindicator.py:202
 msgid "Off"
 msgstr ""
 
-#: slimbookbatteryindicator.py:220
+#: slimbookbatteryindicator.py:208
 msgid "Advanced mode"
 msgstr ""
 
-#: slimbookbatteryindicator.py:224
+#: slimbookbatteryindicator.py:212
 msgid "Exit"
 msgstr ""
 
-#: slimbookbatteryindicator.py:376
+#: slimbookbatteryindicator.py:365
 msgid "Slimbook Battery"
 msgstr ""
 
-#: slimbookbatteryindicator.py:378
+#: slimbookbatteryindicator.py:367
 msgid "The changes have been applied, but it is necessary to restart so that some of them may take effect."
 msgstr ""
 
-#: slimbookbatteryindicator.py:383
+#: slimbookbatteryindicator.py:372
 msgid "System will not restart"
 msgstr ""
 
