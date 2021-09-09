@@ -83,7 +83,7 @@ window{
 
 /* WINDOW BUTTONS */
 
-window button:hover label, window button:checked label{
+window>grid>box button:hover label, window>grid>box button:checked label{
     /* background-image: radial-gradient(ellipse at center,green 0%, transparent 100%); */
     margin-bottom: 3px;
 }
@@ -129,6 +129,7 @@ header > tabs > tab {
     border: none;
     box-shadow: none;
     background-size: 100% 100%;
+    background-color: transparent;
 }
 
 window header > tabs > tab:hover, window header > tabs > tab:checked {
