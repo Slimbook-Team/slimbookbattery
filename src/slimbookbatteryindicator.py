@@ -42,7 +42,8 @@ else:
 print('Slimbook Battery Indicator, executed as: '+str(subprocess.getoutput('whoami')))
 print('Language: ', entorno_usu)
 
-
+currpath = os.path.dirname(os.path.realpath(__file__))
+imagespath = os.path.normpath(os.path.join(currpath, '..', 'images'))
 
 #Ruta del usuario actual
 user_home = expanduser("~")
@@ -51,25 +52,22 @@ fichero_conf = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
 config = configparser.ConfigParser()
 config.read(fichero_conf)
 
-ENERGY_SAVING = '/usr/share/slimbookbattery/images/normal.png'
-EQUILIBRADO = '/usr/share/slimbookbattery/images/balanced_normal.png'
-MAX_PERFORMANCE = '/usr/share/slimbookbattery/images/performance_normal.png'
+ENERGY_SAVING = imagespath+'/indicator/normal.png'
+EQUILIBRADO = imagespath+'/indicator/balanced_normal.png'
+MAX_PERFORMANCE = imagespath+'/indicator/performance_normal.png'
 
-DISABLED = '/usr/share/slimbookbattery/images/disabled_normal.png'
-
-STATUS_NORMAL = '/usr/share/slimbookbattery/images/normal.png'
-STATUS_HIGH = '/usr/share/slimbookbattery/images/high.png'
-STATUS_CRITICAL = '/usr/share/slimbookbattery/images/critical.png'
+DISABLED = imagespath+'/indicator/disabled_normal.png'
 
 APPINDICATOR_ID = 'Slimbook Battery Indicator'
 
-indicator = AppIndicator3.Indicator.new(APPINDICATOR_ID, '', AppIndicator3.IndicatorCategory.SYSTEM_SERVICES)
+indicator = AppIndicator3.Indicator.new(APPINDICATOR_ID, 'Slimbook Battery', AppIndicator3.IndicatorCategory.SYSTEM_SERVICES)
 indicator.set_icon_full(DISABLED, 'Icon disabled')
 
 proceso = None
 alert = None
 
 currpath = os.path.dirname(os.path.realpath(__file__))
+imagespath = os.path.normpath(os.path.join(currpath, '..', 'images'))
 
 t = gettext.translation('slimbookbattery',
                         currpath+'/locale',
@@ -89,7 +87,7 @@ if config['CONFIGURATION']['alerts'] == '1':
 
 tdpcontroller = config['TDP']['tdpcontroller']
 
-class Indicator():
+class Indicator(Gtk.Application):
     
     modo_actual = config['CONFIGURATION']['modo_actual']
 
@@ -129,9 +127,7 @@ class Indicator():
         elif int(config['CONFIGURATION']['application_on']) == 0 :
             print()
 
-            indicator.set_icon_full(DISABLED, 'Icon energy saving')
-                
-            #print(_("strappstatus3"))
+            indicator.set_icon_full(DISABLED, 'Icon energy saving')        
 
         else:
             print(_("strappstatus4"))
@@ -149,7 +145,7 @@ def build_menu():
 
     #Imagenes a utilizar para los iconos del menú
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/normal.png',
+            filename=imagespath+'/normal.png',
             width=25,
             height=25,
             preserve_aspect_ratio=True)
@@ -157,21 +153,21 @@ def build_menu():
 
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/balanced_normal.png',
+            filename=imagespath+'/balanced_normal.png',
             width=25,
             height=25,
             preserve_aspect_ratio=True)
     icon_equilibrado = Gtk.Image.new_from_pixbuf(pixbuf)
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/performance_normal.png',
+            filename=imagespath+'/performance_normal.png',
             width=25,
             height=25,
             preserve_aspect_ratio=True)
     icon_max_rendimiento = Gtk.Image.new_from_pixbuf(pixbuf)
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename='/usr/share/slimbookbattery/images/disabled_normal.png',
+            filename=imagespath+'/disabled_normal.png',
             width=25,
             height=25,
             preserve_aspect_ratio=True)
