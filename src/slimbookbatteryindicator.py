@@ -42,7 +42,8 @@ else:
 print('Slimbook Battery Indicator, executed as: '+str(subprocess.getoutput('whoami')))
 print('Language: ', entorno_usu)
 
-
+currpath = os.path.dirname(os.path.realpath(__file__))
+imagespath = os.path.normpath(os.path.join(currpath, '..', 'images'))
 
 #Ruta del usuario actual
 user_home = expanduser("~")
@@ -51,19 +52,15 @@ fichero_conf = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
 config = configparser.ConfigParser()
 config.read(fichero_conf)
 
-ENERGY_SAVING = '/usr/share/slimbookbattery/images/normal.png'
-EQUILIBRADO = '/usr/share/slimbookbattery/images/balanced_normal.png'
-MAX_PERFORMANCE = '/usr/share/slimbookbattery/images/performance_normal.png'
+ENERGY_SAVING = imagespath+'/indicator/normal.png'
+EQUILIBRADO = imagespath+'/indicator/balanced_normal.png'
+MAX_PERFORMANCE = imagespath+'/indicator/performance_normal.png'
 
-DISABLED = '/usr/share/slimbookbattery/images/disabled_normal.png'
-
-STATUS_NORMAL = '/usr/share/slimbookbattery/images/normal.png'
-STATUS_HIGH = '/usr/share/slimbookbattery/images/high.png'
-STATUS_CRITICAL = '/usr/share/slimbookbattery/images/critical.png'
+DISABLED = imagespath+'/indicator/disabled_normal.png'
 
 APPINDICATOR_ID = 'Slimbook Battery Indicator'
 
-indicator = AppIndicator3.Indicator.new(APPINDICATOR_ID, '', AppIndicator3.IndicatorCategory.SYSTEM_SERVICES)
+indicator = AppIndicator3.Indicator.new(APPINDICATOR_ID, 'Slimbook Battery', AppIndicator3.IndicatorCategory.SYSTEM_SERVICES)
 indicator.set_icon_full(DISABLED, 'Icon disabled')
 
 proceso = None
@@ -130,9 +127,7 @@ class Indicator(Gtk.Application):
         elif int(config['CONFIGURATION']['application_on']) == 0 :
             print()
 
-            indicator.set_icon_full(DISABLED, 'Icon energy saving')
-                
-            #print(_("strappstatus3"))
+            indicator.set_icon_full(DISABLED, 'Icon energy saving')        
 
         else:
             print(_("strappstatus4"))
