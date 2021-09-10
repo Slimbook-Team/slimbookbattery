@@ -290,33 +290,38 @@ class Preferences(Gtk.ApplicationWindow):
     # ********* GENERAL PAGE COMPONENENTS ************************************	
 
         # IMG 
+        col_1 = 0
+        col_2 = 4
+
+        alignmet_1 = Gtk.Align.START
+        alignmet_2 = Gtk.Align.START
         
         # LABEL ON/OFF (0, 0)
         label11 = Gtk.Label(label=_('Application On - Off:'))
-        label11.set_halign(Gtk.Align.START)
-        general_grid.attach(label11, 0, 0, 2, 1)
+        label11.set_halign(alignmet_1)
+        general_grid.attach(label11, col_1, 0, 2, 1)
         
         # SWITCH (0, 1)
         self.switchOnOff = Gtk. Switch()
-        self.switchOnOff.set_halign(Gtk.Align.END)
+        self.switchOnOff.set_halign(alignmet_2)
         #self.switchOnOff.set_active(self.check_autostart_switchOnOff(self.switchOnOff))
-        general_grid.attach(self.switchOnOff, 2, 0, 1, 1)
+        general_grid.attach(self.switchOnOff, col_2, 0, 1, 1)
         
         # LABEL AUTOSTART (1, 0)
         label11 = Gtk.Label(label=_('Autostart application:'))
-        label11.set_halign(Gtk.Align.START)
-        general_grid.attach(label11, 0, 1, 2, 1)
+        label11.set_halign(alignmet_1)
+        general_grid.attach(label11, col_1, 1, 2, 1)
         
         # SWITCH (1, 1)
         self.switchAutostart = Gtk.Switch()
-        self.switchAutostart.set_halign(Gtk.Align.END)
+        self.switchAutostart.set_halign(alignmet_2)
         #self.switchAutostart.set_active(self.check_autostart_switchAutostart(self.switchAutostart))
-        general_grid.attach(self.switchAutostart, 2, 1, 1, 1)
+        general_grid.attach(self.switchAutostart, col_2, 1, 1, 1)
 
         # LABEL DEVICE WORKING (3, 0)
         label11 = Gtk.Label(label=_('Working mode in case of battery failure'))
-        label11.set_halign(Gtk.Align.START)
-        general_grid.attach(label11, 0, 6, 2, 1)
+        label11.set_halign(alignmet_1)
+        general_grid.attach(label11, col_1, 6, 2, 1)
         
         # DEVICES COMBO (3, 1)
         store = Gtk.ListStore(int, str)
@@ -325,7 +330,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.comboBoxWorkMode = Gtk.ComboBox.new_with_model_and_entry(store)
         self.comboBoxWorkMode.set_entry_text_column(1)
-        self.comboBoxWorkMode.set_halign(Gtk.Align.END)
+        self.comboBoxWorkMode.set_halign(alignmet_2)
    
 
         if subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_DEFAULT_MODE=AC'")[0] == 0:
@@ -335,7 +340,7 @@ class Preferences(Gtk.ApplicationWindow):
             self.workMode='BAT'
             self.comboBoxWorkMode.set_active(1)
         
-        general_grid.attach(self.comboBoxWorkMode, 2, 6, 1, 1)
+        general_grid.attach(self.comboBoxWorkMode, col_2, 6, 1, 1)
         
         # LABEL INDICATOR (4, 0)
         hbox_indicator = Gtk.HBox(spacing = 5)
@@ -349,14 +354,14 @@ class Preferences(Gtk.ApplicationWindow):
 
         hbox_indicator.pack_start(label11, True, True, 0)
         hbox_indicator.pack_start(icon, True, True, 0)
-        hbox_indicator.set_halign(Gtk.Align.START)
+        hbox_indicator.set_halign(alignmet_1)
 
-        general_grid.attach(hbox_indicator, 0, 4, 2, 1)
+        general_grid.attach(hbox_indicator, col_1, 4, 2, 1)
         
         # INDICATOR SWITCH (4, 1)
         self.switchIcon = Gtk.Switch()
-        self.switchIcon.set_halign(Gtk.Align.END)
-        general_grid.attach(self.switchIcon, 2, 4, 1, 1)
+        self.switchIcon.set_halign(alignmet_2)
+        general_grid.attach(self.switchIcon, col_2, 4, 1, 1)
 
     # ***************** BUTTONS **********************************************
     
@@ -367,7 +372,7 @@ class Preferences(Gtk.ApplicationWindow):
         buttons_grid.set_name('radio_grid')
         
 
-        general_grid.attach(buttons_grid, 0, 7, 3, 3)
+        general_grid.attach(buttons_grid, 0, 7, 5, 3)
 
         label = Gtk.Label(label=_('Actual energy mode:'))
         label.set_name('modes')
@@ -3170,8 +3175,7 @@ class Preferences(Gtk.ApplicationWindow):
         # Test pending
         if statGovernor is not None:
             model = self.comboBoxGovernor.get_model()
-            row_id, name = model[statGovernor][:2]
-            subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_AC=/ cCPU_SCALING_GOVERNOR_ON_AC='+name+'" ~/.config/slimbookbattery/custom/'+mode)
+            row_id, name = model[statGovernor][:2]           
             subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
 
 
@@ -3416,7 +3420,6 @@ class Preferences(Gtk.ApplicationWindow):
         if statGovernor is not None:
             model = self.comboBoxGovernor2.get_model()
             row_id, name = model[statGovernor][:2]
-            subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_AC=/ cCPU_SCALING_GOVERNOR_ON_AC='+name+'" ~/.config/slimbookbattery/custom/'+mode)
             subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
 
         statGraphics = self.switchGraphics2.get_active() # .conf file *
@@ -3654,7 +3657,6 @@ class Preferences(Gtk.ApplicationWindow):
         if statGovernor is not None:
             model = self.comboBoxGovernor3.get_model()
             row_id, name = model[statGovernor][:2]
-            subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_AC=/ cCPU_SCALING_GOVERNOR_ON_AC='+name+'" ~/.config/slimbookbattery/custom/'+mode)
             subprocess.getstatusoutput('sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT='+name+'" ~/.config/slimbookbattery/custom/'+mode)
 
 

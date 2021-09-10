@@ -29,16 +29,31 @@
 
 #restore {
     background-image: url('../../images/interface/btn3.png');
-    /* background-image: linear-gradient(to right, rgb(136, 135, 135) 0%, transparent 100%); */
+    background-image: linear-gradient(to right, rgb(136, 135, 135) 0%, transparent 100%);
 }
 #accept {
     background-image: url('../../images/interface/btn1.png');
-    /* background-image: linear-gradient(to right, green 0%, transparent 100%); */
+    background-image: linear-gradient(to right, green 0%, transparent 100%);
 }
 #cancel {
     background-image: url('../../images/interface/btn2.png');  
-    /* background-image: linear-gradient(to right, rgb(211, 24, 24) 0%, transparent 100%); */
+    background-image: linear-gradient(to right, rgb(211, 24, 24) 0%, transparent 100%);
 }
+
+ 
+/* window>grid>box>button {
+    background-color: rgb(23, 24, 23);
+    border: 1px solid rgb(39, 161, 15);
+    border-style: outset;
+    border-radius: 5px;
+}
+
+window>grid>box>button:hover {    
+    outline-style: solid;
+    outline-offset: -2px;
+    outline-width: 2px;
+} */
+
 
 combobox>box>entry, entry {
     background-color: white;
@@ -79,11 +94,12 @@ radiobutton:checked, radiobutton:active{
 
 window{
     background-color: rgb(30, 30, 30);
+    /* background-image: radial-gradient(ellipse at center,green 80%, transparent 100%); */
 }
 
 /* WINDOW BUTTONS */
 
-window>grid>box>button:hover label, window>grid>box>button:checked label{
+window>grid>box button:hover label, window>grid>box button:checked label{
     /* background-image: radial-gradient(ellipse at center,green 0%, transparent 100%); */
     margin-bottom: 3px;
 }

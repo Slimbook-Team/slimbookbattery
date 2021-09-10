@@ -1,6 +1,7 @@
 slimbookbattery (4.0.0) focal; urgency=low
   * New interface
   * Draggable window
+  * Skipping password asking
   * Added config values
   * Added brightness switch
   * Added TDP sync option
