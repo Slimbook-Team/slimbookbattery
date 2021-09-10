@@ -25,6 +25,9 @@ You can download Slimbook Battery from our application download center for Linux
 sudo add-apt-repository ppa:slimbook/slimbook
 sudo apt update
 ```
+# Collaborate
+[*To do list*](https://github.com/slimbook/slimbookbattery/projects/1)
+
 
 By doing this we will have added the Slimbook repositories. Now we will execute the next command to install the application:
 
