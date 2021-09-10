@@ -233,7 +233,7 @@ class Preferences(Gtk.ApplicationWindow):
         notebook.set_tab_pos(Gtk.PositionType.TOP)
 
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename = os.path.join(imagespath, 'slimbookbattery-header.png'),
+            filename = os.path.join(imagespath, 'slimbookbattery-header-2.png'),
             width = 825,
             height = 225,
             preserve_aspect_ratio=True)
@@ -290,8 +290,8 @@ class Preferences(Gtk.ApplicationWindow):
     # ********* GENERAL PAGE COMPONENENTS ************************************	
 
         # IMG 
-        col_1 = 0
-        col_2 = 4
+        col_1 = 1
+        col_2 = 3
 
         alignmet_1 = Gtk.Align.START
         alignmet_2 = Gtk.Align.START
@@ -374,7 +374,8 @@ class Preferences(Gtk.ApplicationWindow):
 
         general_grid.attach(buttons_grid, 0, 7, 5, 3)
 
-        label = Gtk.Label(label=_('Actual energy mode:'))
+        text = _('Actual energy mode:')
+        label = Gtk.Label(label=text.upper())
         label.set_name('modes')
         buttons_grid.attach(label,0,0,3,1)
 
@@ -2497,7 +2498,6 @@ class Preferences(Gtk.ApplicationWindow):
         label77.set_justify(Gtk.Justification.CENTER)
         info_grid.attach(label77, 0,7, 5, 1)
 
-       
         # (7, 0)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename= os.path.join(imagespath, 'logo.png'),
@@ -2545,8 +2545,6 @@ class Preferences(Gtk.ApplicationWindow):
         github.set_halign(Gtk.Align.CENTER)
         github.set_image(img)
 
-
-
         hbox = Gtk.HBox()
         hbox.set_halign(Gtk.Align.CENTER)
         
@@ -2568,13 +2566,18 @@ class Preferences(Gtk.ApplicationWindow):
         label77 = Gtk.Label(label=' ')
         label77.set_markup("<span><b>"+ (_("Send an e-mail to: ")) +"dev@slimbook.es</b></span>")
         label77.set_justify(Gtk.Justification.CENTER)
-        info_grid.attach(label77, 0, 14, 5, 1) 
+        #info_grid.attach(label77, 0, 14, 5, 1) 
         
         # (12, 0)
         self.buttonReportFile = Gtk.Button(label=(_('Generate report file')))
         self.buttonReportFile.connect("clicked", self.on_buttonReportFile_clicked)
         self.buttonReportFile.set_halign(Gtk.Align.CENTER)
-        info_grid.attach(self.buttonReportFile, 0, 15, 5, 1)
+        #info_grid.attach(self.buttonReportFile, 0, 15, 5, 1)
+
+        hbox = Gtk.HBox()
+        hbox.add(label77)
+        hbox.pack_start( self.buttonReportFile, True, True, 0)
+        info_grid.attach(hbox, 1, 15, 3, 1)
 
         # (13, 0)
         label77 = Gtk.Label(label='')

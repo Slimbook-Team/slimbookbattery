@@ -5,7 +5,7 @@ slimbookbattery (4.0.0) focal; urgency=low
   * Added config values
   * Added brightness switch
   * Added TDP sync option
-  * Added config check
+  * Added user config check
   * Added splash window
   * Fixed bugs
 
