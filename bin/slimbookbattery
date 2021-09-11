@@ -3,10 +3,10 @@
 
 
 import os
-import sys
 import subprocess
-tlp="/usr/bin/tlp"
-tlp2="/usr/sbin/tlp"
+
+tlp = "/usr/bin/tlp"
+tlp2 = "/usr/sbin/tlp"
 
 if os.path.exists(tlp) or os.path.exists(tlp2):
     if __name__ == "__main__":
