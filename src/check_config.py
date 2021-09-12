@@ -40,33 +40,22 @@ def check():  # Args will be like --> command_name value
         config = configparser.ConfigParser()
         config.read(config_file)
 
-        vars = subprocess.getoutput('cat ' + default).split('\n')
-        # print(str(vars))
+        default_config = configparser.ConfigParser()
+        default_config.read(default)
         incidences = False
 
-        section = ''
-        for var in vars:
+        for section in default_config.sections():
+            print('Checking section: ' + section + '...')
+            if not config.has_section(section):
+                incidences = True
+                config.add_section(section)
+                print('Section added')
 
-            if var.find('=') != -1:
-                # We get the line, then the variable name, then we remove spaces at the start or the end
-                value = var.split('=')[1].strip()
-                var = var.split('=')[0].strip()
-                try:
-                    config[section][var]
-                except (ValueError, IndexError, KeyError):
+            for var in default_config.options(section):
+                if not config.has_option(section, var):
                     incidences = True
                     print('Not found: ' + var)
-                    try:
-                        config.set(section, var, value)
-                    except configparser.NoSectionError:
-                        config.add_section(section)
-                        print('Section added')
-                        config.set(section, var, value)
-
-            else:
-                if var.startswith('[') and var.endswith(']'):
-                    section = var[1:len(var) - 1]
-                    print('Checking section: ' + section + '...')
+                    config.set(section, var, config.get(section, var))
 
         if incidences:
             try:
