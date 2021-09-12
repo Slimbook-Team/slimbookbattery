@@ -19,6 +19,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import configparser
+import gettext
+import locale
 import os
 import signal
 import subprocess
@@ -32,7 +34,6 @@ gi.require_version('Notify', '0.7')
 
 from gi.repository import Gtk, GdkPixbuf, AppIndicator3, Notify as notify
 
-import gettext, locale
 
 entorno_usu = locale.getlocale()[0]
 if entorno_usu.find("en") >= 0 or entorno_usu.find("es") >= 0 or entorno_usu.find("it") >= 0 or entorno_usu.find(
@@ -98,7 +99,8 @@ class Indicator(Gtk.Application):
 
         icono = int(config['CONFIGURATION']['icono'])
 
-        # Si el valor del icono obenido de la configuración es 1 nos mostrará el indicados de la aplicación para poder interactuar, en caso contrario estará oculto.
+        # Si el valor del icono obenido de la configuración es 1 nos mostrará el indicados de la
+        # aplicación para poder interactuar, en caso contrario estará oculto.
         if icono == 1:
             indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
             # print('Icon: on')
@@ -231,7 +233,7 @@ def modo_ahorro(self):
     self.modo_actual = '1'
     update_config('CONFIGURATION', 'application_on', '1')
     update_config('CONFIGURATION', 'modo_actual', self.modo_actual)
-    child = subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
+    subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
 
     reboot_process(tdpcontroller, '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + 'indicator.py')
     animations(self.modo_actual)
@@ -243,7 +245,7 @@ def modo_equilibrado(self):
     self.modo_actual = '2'
     update_config('CONFIGURATION', 'application_on', '1')
     update_config('CONFIGURATION', 'modo_actual', self.modo_actual)
-    child = subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
+    subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
     reboot_process(tdpcontroller, '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + 'indicator.py')
     animations(self.modo_actual)
 
@@ -254,7 +256,7 @@ def modo_max_rendimiento(self):
     self.modo_actual = '3'
     update_config('CONFIGURATION', 'application_on', '1')
     update_config('CONFIGURATION', 'modo_actual', self.modo_actual)
-    child = subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
+    subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
     reboot_process(tdpcontroller,
                    '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + 'indicator.py')  # Only if it's running
     animations(self.modo_actual)
@@ -385,7 +387,7 @@ def update_config(section, variable, value):
     # We change our variable: config.set(section, variable, value)
     config.set(str(section), str(variable), str(value))
 
-    # Writing our configuration file 
+    # Writing our configuration file
     with open(fichero_conf, 'w') as configfile:
         config.write(configfile)
 

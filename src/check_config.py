@@ -53,12 +53,12 @@ def check():  # Args will be like --> command_name value
                 var = var.split('=')[0].strip()
                 try:
                     config[section][var]
-                except:
+                except (ValueError, IndexError, KeyError):
                     incidences = True
                     print('Not found: ' + var)
                     try:
                         config.set(section, var, value)
-                    except:
+                    except configparser.NoSectionError:
                         config.add_section(section)
                         print('Section added')
                         config.set(section, var, value)
@@ -74,7 +74,7 @@ def check():  # Args will be like --> command_name value
                 config.write(configfile)
                 configfile.close()
                 print('Incidences corrected.')
-            except:
+            except Exception:
                 print('Incidences could not be corrected.')
         else:
             print('Incidences not found.')
@@ -90,12 +90,15 @@ def check2():
 
     files = ['ahorrodeenergia', 'equilibrado', 'maximorendimiento']
 
-    # Checks if default files are the same in the app folder and in the system, if something changed all will be restored
+    # Checks if default files are the same in the app folder and in the system,
+    # if something changed all will be restored
     for file in files:
         if os.path.isfile(HOMEDIR + '/.config/slimbookbattery/default/' + file):
             print('Found ' + file)
-            if subprocess.getstatusoutput(
-                    'diff /usr/share/slimbookbattery/custom/' + file + ' ' + HOMEDIR + '/.config/slimbookbattery/' + file) != 0:
+            usr_file = os.path.join('/usr/share/slimbookbattery/custom/', file)
+            home_file = os.path.join(HOMEDIR, '.config/slimbookbattery', file)
+
+            if subprocess.getstatusoutput('diff {} {}'.format(usr_file, home_file)) != 0:
                 incidences = True
         else:
             incidences = True

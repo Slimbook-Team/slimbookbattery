@@ -41,7 +41,7 @@ try:
     else:
         idiomas = ['en']
     print('Language: ', entorno_usu)
-except:
+except Exception:
     idiomas = ['en']
 
 # idiomas = ['pt']
@@ -97,7 +97,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.set_decorated(False)
 
-        ### Movement
+        # Movement
         self.is_in_drag = False
         self.x_in_drag = 0
         self.y_in_drag = 0
@@ -105,7 +105,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.connect('button-release-event', self.on_mouse_button_released)
         self.connect('motion-notify-event', self.on_mouse_moved)
 
-        ### Center
+        # Center
         # self.connect('realize', self.on_realize)
 
         self.child_process = subprocess.Popen(currpath + '/splash.py', stdout=subprocess.PIPE)
@@ -292,7 +292,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # ********* GENERAL PAGE COMPONENENTS ************************************
 
-        # IMG 
+        # IMG
         col_1 = 0
         col_2 = 4
 
@@ -353,7 +353,8 @@ class Preferences(Gtk.ApplicationWindow):
         icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(
-            _('Note: If you have the autostart activated and the icon hide, the app will be executed with the icon hide (once you restart the system)'))
+            _('Note: If you have the autostart activated and the icon hide, '
+              'the app will be executed with the icon hide (once you restart the system)'))
 
         hbox_indicator.pack_start(label11, True, True, 0)
         hbox_indicator.pack_start(icon, True, True, 0)
@@ -529,7 +530,7 @@ class Preferences(Gtk.ApplicationWindow):
         # 2 ------------- CPU GOVERNOR *
         # LABEL 2
         governorCompatible, governor_name = governorIsCompatible()
-        if governorCompatible == True:
+        if governorCompatible:
             row = row + 1
 
             # LABEL 2
@@ -709,12 +710,10 @@ class Preferences(Gtk.ApplicationWindow):
 
                 # LABEL 7
                 row = row + 1
-                link = ''
+                link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
                 if tdpcontroller == 'slimbookintelcontroller':
                     if idiomas[0].find('es'):
                         link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
-                    else:
-                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
                 else:
                     if idiomas[0].find('es'):
                         link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
@@ -852,7 +851,8 @@ class Preferences(Gtk.ApplicationWindow):
         icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(
-            _('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. Input devices like mice and keyboards as well as scanners are excluded by default'))
+            _('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. '
+              'Input devices like mice and keyboards as well as scanners are excluded by default'))
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,
@@ -887,7 +887,8 @@ class Preferences(Gtk.ApplicationWindow):
         if os.system('lsusb | grep ID >> ' + user_home + '/.config/slimbookbattery/usbidlist') == 0:
             try:
                 USBIDsList = ''
-                # Se lee el archivo temporal que se ha creado y se va sacando para que solo nos muestre el ID junto con el nombre del USB
+                # Se lee el archivo temporal que se ha creado y
+                # se va sacando para que solo nos muestre el ID junto con el nombre del USB
                 f = open(user_home + '/.config/slimbookbattery/usbidlist', 'r')
                 line = f.readline()
                 while line:
@@ -896,21 +897,23 @@ class Preferences(Gtk.ApplicationWindow):
                     IDPos = lineaActual.find("ID")
                     # Saca la última posición de la linea
                     longitud = len(lineaActual) - 1
-                    # Una vez teniendo estas 2 posiciones ya tenemos el ID junto con el nombre del USB y se concatena al string USBIDsList
+                    # Una vez teniendo estas 2 posiciones ya tenemos el ID junto con el nombre del USB
+                    # y se concatena al string USBIDsList
                     USBIDsList = USBIDsList + lineaActual[IDPos:longitud] + '\n'
                     line = f.readline()
                 f.close()
 
                 # Se elimina el archivo temporal
                 os.system('rm ' + user_home + '/.config/slimbookbattery/usbidlist')
-            except:
+            except Exception:
                 print('USB ID list 403')
         else:
             print('USB ID list 404')
 
         # En este tooltip
-        icon.set_tooltip_text((
-                                  _('Note: You need to write in the Text Box the USB IDs (separate with spaces) to exclude from autosuspend')) + '.\n\n' + USBIDsList)
+        msg = _('Note: You need to write in the Text Box the USB IDs '
+                '(separate with spaces) to exclude from autosuspend')
+        icon.set_tooltip_text(msg + '.\n\n' + USBIDsList)
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,
@@ -1076,7 +1079,7 @@ class Preferences(Gtk.ApplicationWindow):
         # 2 ------------- CPU GOVERNOR *
         # LABEL 2
         governorCompatible, governor_name = governorIsCompatible()
-        if governorCompatible == True:
+        if governorCompatible:
             row = row + 1
 
             # LABEL 2
@@ -1084,7 +1087,7 @@ class Preferences(Gtk.ApplicationWindow):
             label33.set_halign(Gtk.Align.START)
             low_grid.attach(label33, label_col, row, label_width, 1)
 
-            # BUTTON 2      
+            # BUTTON 2
             store = Gtk.ListStore(int, str)
             if governor_name == 'intel_pstate':
                 store.append([1, 'powersave'])
@@ -1253,12 +1256,10 @@ class Preferences(Gtk.ApplicationWindow):
 
                 # LABEL 7
                 row = row + 1
-                link = ''
+                link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
                 if tdpcontroller == 'slimbookintelcontroller':
                     if idiomas[0].find('es'):
                         link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
-                    else:
-                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
                 else:
                     if idiomas[0].find('es'):
                         link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
@@ -1390,7 +1391,8 @@ class Preferences(Gtk.ApplicationWindow):
         icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(
-            _('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. Input devices like mice and keyboards as well as scanners are excluded by default'))
+            _('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. '
+              'Input devices like mice and keyboards as well as scanners are excluded by default'))
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,
@@ -1424,7 +1426,8 @@ class Preferences(Gtk.ApplicationWindow):
         if os.system('lsusb | grep ID >> ' + user_home + '/.config/slimbookbattery/usbidlist') == 0:
             try:
                 USBIDsList = ''
-                # Se lee el archivo temporal que se ha creado y se va sacando para que solo nos muestre el ID junto con el nombre del USB
+                # Se lee el archivo temporal que se ha creado y se va sacando
+                # para que solo nos muestre el ID junto con el nombre del USB
                 f = open(user_home + '/.config/slimbookbattery/usbidlist', 'r')
                 line = f.readline()
                 while line:
@@ -1433,21 +1436,23 @@ class Preferences(Gtk.ApplicationWindow):
                     IDPos = lineaActual.find("ID")
                     # Saca la última posición de la linea
                     longitud = len(lineaActual) - 1
-                    # Una vez teniendo estas 2 posiciones ya tenemos el ID junto con el nombre del USB y se concatena al string USBIDsList
+                    # Una vez teniendo estas 2 posiciones ya tenemos el ID
+                    # junto con el nombre del USB y se concatena al string USBIDsList
                     USBIDsList = USBIDsList + lineaActual[IDPos:longitud] + '\n'
                     line = f.readline()
                 f.close()
 
                 # Se elimina el archivo temporal
                 os.system('rm ' + user_home + '/.config/slimbookbattery/usbidlist')
-            except:
+            except Exception:
                 print('USB ID list 403')
         else:
             print('USB ID list 404')
 
         # En este tooltip
-        icon.set_tooltip_text((
-                                  _('Note: You need to write in the Text Box the USB IDs (separate with spaces) to exclude from autosuspend')) + '.\n\n' + USBIDsList)
+        msg = _('Note: You need to write in the Text Box the USB IDs (separate with spaces) '
+                'to exclude from autosuspend')
+        icon.set_tooltip_text(msg + '.\n\n' + USBIDsList)
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,
@@ -1615,7 +1620,7 @@ class Preferences(Gtk.ApplicationWindow):
         # 2 ------------- CPU GOVERNOR *
         # LABEL 2
         governorCompatible, governor_name = governorIsCompatible()
-        if governorCompatible == True:
+        if governorCompatible:
             row = row + 1
 
             # LABEL 2
@@ -1624,7 +1629,6 @@ class Preferences(Gtk.ApplicationWindow):
             low_grid.attach(label33, label_col, row, label_width, 1)
 
             # BUTTON 2
-            # BUTTON 2      
             store = Gtk.ListStore(int, str)
             if governor_name == 'intel_pstate':
                 store.append([1, 'powersave'])
@@ -1790,12 +1794,10 @@ class Preferences(Gtk.ApplicationWindow):
 
                 # LABEL 7
                 row = row + 1
-                link = ''
+                link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
                 if tdpcontroller == 'slimbookintelcontroller':
                     if idiomas[0].find('es'):
                         link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
-                    else:
-                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
                 else:
                     if idiomas[0].find('es'):
                         link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
@@ -1921,7 +1923,8 @@ class Preferences(Gtk.ApplicationWindow):
         icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(
-            _('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. Input devices like mice and keyboards as well as scanners are excluded by default'))
+            _('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. '
+              'Input devices like mice and keyboards as well as scanners are excluded by default'))
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,
@@ -1955,7 +1958,8 @@ class Preferences(Gtk.ApplicationWindow):
         if os.system('lsusb | grep ID >> ' + user_home + '/.config/slimbookbattery/usbidlist') == 0:
             try:
                 USBIDsList = ''
-                # Se lee el archivo temporal que se ha creado y se va sacando para que solo nos muestre el ID junto con el nombre del USB
+                # Se lee el archivo temporal que se ha creado y
+                # se va sacando para que solo nos muestre el ID junto con el nombre del USB
                 f = open(user_home + '/.config/slimbookbattery/usbidlist', 'r')
                 line = f.readline()
                 while line:
@@ -1964,21 +1968,24 @@ class Preferences(Gtk.ApplicationWindow):
                     IDPos = lineaActual.find("ID")
                     # Saca la última posición de la linea
                     longitud = len(lineaActual) - 1
-                    # Una vez teniendo estas 2 posiciones ya tenemos el ID junto con el nombre del USB y se concatena al string USBIDsList
+                    # Una vez teniendo estas 2 posiciones ya tenemos el ID
+                    # junto con el nombre del USB y se concatena al string USBIDsList
                     USBIDsList = USBIDsList + lineaActual[IDPos:longitud] + '\n'
                     line = f.readline()
                 f.close()
 
                 # Se elimina el archivo temporal
                 os.system('rm ' + user_home + '/.config/slimbookbattery/usbidlist')
-            except:
+            except Exception:
                 print('USB ID list 403')
         else:
             print('USB ID list 404')
 
         # En este tooltip
-        icon.set_tooltip_text((
-                                  _('Note: You need to write in the Text Box the USB IDs (separate with spaces) to exclude from autosuspend')) + '.\n\n' + USBIDsList)
+        icon.set_tooltip_text(
+            _('Note: You need to write in the Text Box the USB IDs '
+              '(separate with spaces) to exclude from autosuspend') + '.\n\n' + USBIDsList
+        )
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,
@@ -2420,23 +2427,29 @@ class Preferences(Gtk.ApplicationWindow):
 
         # Text 1
         label77 = Gtk.Label(label='')
-        label77.set_markup("<span>" + (
-            _("Slimbook Battery is a battery optimization application for portable devices and can increase the battery")) + "\n" + (
-                               _("life up to 50%. For this purpose, the third-party software is used to manage and configure the system resources.")) + "</span>")
+        msg = "<span>{}\n{}</span>".format(
+            _("Slimbook Battery is a battery optimization application for "
+              "portable devices and can increase the battery"),
+            _("life up to 50%. For this purpose, the third-party software is "
+              "used to manage and configure the system resources.")
+        )
+        label77.set_markup(msg)
         label77.set_justify(Gtk.Justification.CENTER)
         info_grid.attach(label77, 0, 2, 5, 1)
 
         # (3, 0)
         label77 = Gtk.Label(label='')
         label77.set_markup("<span>" + (
-            _("Special thanks to TLP (© 2019, linrunner), Nvidia, AMD and Intel for offering us the necessary tools to make it possible!")) + "</span>")
+            _("Special thanks to TLP (© 2019, linrunner), Nvidia, AMD and Intel "
+              "for offering us the necessary tools to make it possible!")) + "</span>")
         label77.set_justify(Gtk.Justification.CENTER)
         info_grid.attach(label77, 0, 3, 5, 1)
 
         # (4, 0)
         label77 = Gtk.Label(label='')
         label77.set_markup("<span>" + (
-            _("If this application has been useful to you, consider saying it in our social networks or even buy a SLIMBOOK ;)")) + "</span>")
+            _("If this application has been useful to you, "
+              "consider saying it in our social networks or even buy a SLIMBOOK ;)")) + "</span>")
         label77.set_justify(Gtk.Justification.CENTER)
         info_grid.attach(label77, 0, 4, 5, 1)
 
@@ -2480,7 +2493,7 @@ class Preferences(Gtk.ApplicationWindow):
                 width=25,
                 height=25,
                 preserve_aspect_ratio=True)
-        except:
+        except Exception:
             print()
 
         instagram = Gtk.Image.new_from_pixbuf(pixbuf)
@@ -2495,9 +2508,13 @@ class Preferences(Gtk.ApplicationWindow):
 
         # (6, 0)
         label77 = Gtk.Label(label='')
-        label77.set_markup("<span><b>" + (_("IMPORTANT NOTE:")) + "</b>" + (
-            _(" If you have any software, widget or application that changes the CPU profile, battery")) + "\n" + (
-                               _("optimization or similar, it may affect the operation of this application. Use it under your responsibility.")) + "</span>")
+        msg = "<span><b>{}</b>{}\n{}</span>".format(
+            _("IMPORTANT NOTE:"),
+            _(" If you have any software, widget or application that changes the CPU profile, battery"),
+            _("optimization or similar, it may affect the operation of this application. "
+              "Use it under your responsibility.")
+        )
+        label77.set_markup(msg)
         label77.set_justify(Gtk.Justification.CENTER)
         info_grid.attach(label77, 0, 7, 5, 1)
 
@@ -2556,17 +2573,24 @@ class Preferences(Gtk.ApplicationWindow):
         info_grid.attach(hbox, 0, 11, 5, 1)
 
         label77 = Gtk.Label()
-        label77.set_markup("<span>" + (
-            _("If you want you can support the developement of this app and several more to come by joining us on ")) + "<a href='https://www.patreon.com/slimbook'>Patreon</a>" + (
-                               _(" or buying a brand new Slimbook ;)")) + "</span>")
+        msg = "<span>{}<a href='https://www.patreon.com/slimbook'>Patreon</a>{}</span>".format(
+            _("If you want you can support the developement of this app "
+              "and several more to come by joining us on "),
+            _(" or buying a brand new Slimbook ;)")
+        )
+        label77.set_markup(msg)
         label77.set_justify(Gtk.Justification.CENTER)
         info_grid.attach(label77, 0, 12, 5, 1)
 
         # (10, 0)
         label77 = Gtk.Label(label='')
-        label77.set_markup("<span><b>" + (_("Info:")) + " </b>" + (
-            _("Contact with us if you find something wrong. We would appreciate that you attach the file that is generated")) + " " + (
-                               _("by clicking the button below")) + "</span>")
+        msg = "<span><b>{}</b> {} {}</span>".format(
+            _("Info:"),
+            _("Contact with us if you find something wrong. "
+              "We would appreciate that you attach the file that is generated"),
+            _("by clicking the button below")
+        )
+        label77.set_markup(msg)
         label77.set_justify(Gtk.Justification.CENTER)
         info_grid.attach(label77, 0, 13, 5, 1)
 
@@ -2602,7 +2626,7 @@ class Preferences(Gtk.ApplicationWindow):
             width=100,
             height=200,
             preserve_aspect_ratio=True)
-        CCIcon = Gtk.Image.new_from_pixbuf(pixbuf)
+        Gtk.Image.new_from_pixbuf(pixbuf)
 
         # END
         self.child_process.terminate()
@@ -2631,7 +2655,7 @@ class Preferences(Gtk.ApplicationWindow):
         mode_brightness = switchBrightness.get_name()
         try:
             stat = config['SETTINGS'][mode_brightness]
-        except:
+        except (ValueError, IndexError, KeyError):
             import check_config
 
         stat = config['SETTINGS'][mode_brightness]
@@ -2652,74 +2676,72 @@ class Preferences(Gtk.ApplicationWindow):
 
     def check_autostart_USBSuspend(self, switchUSBSuspend):
         mode = switchUSBSuspend.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'USB_AUTOSUSPEND=0'")[0] == 0:
+                "cat " + file_mode + " | grep 'USB_AUTOSUSPEND=0'")[0] == 0:
             switchUSBSuspend.set_active(False)
             # print('Disabling autosuspend switch')
         elif subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'USB_AUTOSUSPEND=1'")[0] == 0:
+                "cat " + file_mode + " | grep 'USB_AUTOSUSPEND=1'")[0] == 0:
             switchUSBSuspend.set_active(True)
 
     def check_autostart_switchDisableLAN(self, switchWifiDisableLAN):  # All modes
         mode = switchWifiDisableLAN.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
+
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'DEVICES_TO_DISABLE_ON_LAN_CONNECT' | grep 'wifi'")[
-            0] == 0 and subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'DEVICES_TO_ENABLE_ON_LAN_DISCONNECT' | grep 'wifi'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'DEVICES_TO_DISABLE_ON_LAN_CONNECT' | grep 'wifi'")[0] == 0 \
+            and subprocess.getstatusoutput(
+                "cat " + file_mode + " | grep 'DEVICES_TO_ENABLE_ON_LAN_DISCONNECT' | grep 'wifi'")[0] == 0:
             switchWifiDisableLAN.set_active(True)
         else:
             switchWifiDisableLAN.set_active(False)
 
     def check_autostart_ShutdownSuspendUSB(self, switchShutdownSuspendUSB):
         mode = switchShutdownSuspendUSB.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=0'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=0'")[0] == 0:
             switchShutdownSuspendUSB.set_active(False)
         elif subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1'")[0] == 0:
             switchShutdownSuspendUSB.set_active(True)
 
     def check_autostart_BlacklistWWANUSB(self, switchBlacklistWWANUSB):
         mode = switchBlacklistWWANUSB.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'USB_BLACKLIST_WWAN=0'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'USB_BLACKLIST_WWAN=0'")[0] == 0:
             switchBlacklistWWANUSB.set_active(False)
         elif subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'USB_BLACKLIST_WWAN=1'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'USB_BLACKLIST_WWAN=1'")[0] == 0:
             switchBlacklistWWANUSB.set_active(True)
 
     def check_autostart_BlacklistBUSB(self, switchBlacklistBUSB):
         mode = switchBlacklistBUSB.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'USB_BLACKLIST_BTUSB=0'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'USB_BLACKLIST_BTUSB=0'")[0] == 0:
             switchBlacklistBUSB.set_active(False)
         elif subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'USB_BLACKLIST_BTUSB=1'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'USB_BLACKLIST_BTUSB=1'")[0] == 0:
             switchBlacklistBUSB.set_active(True)
 
     def check_autostart_BlacklistPrintUSB(self, switchBlacklistPrintUSB):
         mode = switchBlacklistPrintUSB.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'USB_BLACKLIST_PRINTER=0'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'USB_BLACKLIST_PRINTER=0'")[0] == 0:
             switchBlacklistPrintUSB.set_active(False)
         elif subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'USB_BLACKLIST_PRINTER=1'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'USB_BLACKLIST_PRINTER=1'")[0] == 0:
             switchBlacklistPrintUSB.set_active(True)
 
     def check_autostart_switchWifiOS(self, switchWifiOS):  # All modes
         mode = switchWifiOS.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'DEVICES_TO_DISABLE_ON_STARTUP' | grep 'wifi'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'DEVICES_TO_DISABLE_ON_STARTUP' | grep 'wifi'")[0] == 0:
             switchWifiOS.set_active(True)
         else:
             switchWifiOS.set_active(False)
@@ -2727,27 +2749,27 @@ class Preferences(Gtk.ApplicationWindow):
 
     def check_autostart_switchWifiNIU(self, switchWifiNIU):  # All modes
         mode = switchWifiNIU.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE' | grep 'wifi'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE' | grep 'wifi'")[0] == 0:
             switchWifiNIU.set_active(True)
         else:
             switchWifiNIU.set_active(False)
 
     def check_autostart_switchWifiPower(self, switchWifiPower):  # All modes
         mode = switchWifiPower.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'WIFI_PWR_ON_BAT=on'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'WIFI_PWR_ON_BAT=on'")[0] == 0:
             switchWifiPower.set_active(True)
         else:
             switchWifiPower.set_active(False)
 
     def check_autostart_switchSound(self, switchSound):  # All modes
         mode = switchSound.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'SOUND_POWER_SAVE_ON_BAT=1'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'SOUND_POWER_SAVE_ON_BAT=1'")[0] == 0:
             switchSound.set_active(True)
         else:
             switchSound.set_active(False)
@@ -2768,38 +2790,32 @@ class Preferences(Gtk.ApplicationWindow):
 
     def check_autostart_Governor(self, comboBoxGovernor, governor_name):  # All modes
         mode = comboBoxGovernor.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if governor_name == 'intel_pstate':
             if subprocess.getstatusoutput(
-                    "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=powersave'")[
-                0] == 0:
+                    "cat " + file_mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=powersave'")[0] == 0:
                 comboBoxGovernor.set_active(0)
             elif subprocess.getstatusoutput(
-                    "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=performance'")[
-                0] == 0:
+                    "cat " + file_mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=performance'")[0] == 0:
                 comboBoxGovernor.set_active(1)
             else:
                 print('Setting default mode powersave')
                 comboBoxGovernor.set_active(0)
         elif governor_name == 'acpi-cpufreq':
             if subprocess.getstatusoutput(
-                    "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=ondemand'")[
-                0] == 0:
+                    "cat " + file_mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=ondemand'")[0] == 0:
                 comboBoxGovernor.set_active(0)
             elif subprocess.getstatusoutput(
-                    "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=schedutil'")[
-                0] == 0:
+                    "cat " + file_mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=schedutil'")[0] == 0:
                 comboBoxGovernor.set_active(1)
             elif subprocess.getstatusoutput(
-                    "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=powersave'")[
-                0] == 0:
+                    "cat " + file_mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=powersave'")[0] == 0:
                 comboBoxGovernor.set_active(2)
             elif subprocess.getstatusoutput(
-                    "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=performance'")[
-                0] == 0:
+                    "cat " + file_mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=performance'")[0] == 0:
                 comboBoxGovernor.set_active(3)
             elif subprocess.getstatusoutput(
-                    "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=conservative'")[
-                0] == 0:
+                    "cat " + file_mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=conservative'")[0] == 0:
                 comboBoxGovernor.set_active(4)
             else:
                 print('Setting default mode on-demand')
@@ -2807,18 +2823,18 @@ class Preferences(Gtk.ApplicationWindow):
 
     def check_switchBluetooth(self, switch):  # All modes
         mode = switch.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE' | grep 'bluetooth'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE' | grep 'bluetooth'")[0] == 0:
             switch.set_active(True)
         else:
             switch.set_active(False)
 
     def check_switchBluetoothOS(self, switch):  # All modes
         mode = switch.get_name()
+        file_mode = os.path.join(user_home, '.config/slimbookbattery/custom', mode)
         if subprocess.getstatusoutput(
-                "cat " + user_home + "/.config/slimbookbattery/custom/" + mode + " | grep 'DEVICES_TO_DISABLE_ON_STARTUP' | grep 'bluetooth'")[
-            0] == 0:
+                "cat " + file_mode + " | grep 'DEVICES_TO_DISABLE_ON_STARTUP' | grep 'bluetooth'")[0] == 0:
             switch.set_active(True)
         else:
             switch.set_active(False)
@@ -2838,7 +2854,7 @@ class Preferences(Gtk.ApplicationWindow):
             # Enables USB switches
             mode = switchUSBSuspend.get_name()
 
-            USBBlacklist = self.gen_blacklist(mode)
+            self.gen_blacklist(mode)
 
             # switch1.set_text(str(USBBlacklist))
             switch1.set_sensitive(True)
@@ -3060,7 +3076,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # SWITCH ALERTS
         stat = str(int(config['CONFIGURATION']['alerts']))
-        active = None
+        # active = None
 
         if stat == '1':
             self.switchAlerts.set_active(True)
@@ -3117,7 +3133,8 @@ class Preferences(Gtk.ApplicationWindow):
         # Work Mode (custom conf avocado)
 
         # Se mirará el archivo original de tlp para poder comprobar que modo tiene activo.
-        # Esto se comprueba para poder devolver 0 o 1 y en el combobox poder mostrar como seleccionado el que esta activo actualmente.
+        # Esto se comprueba para poder devolver 0 o 1 y en el combobox poder
+        # mostrar como seleccionado el que esta activo actualmente.
         # print('Loading workmode...')
         if subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_DEFAULT_MODE=AC'")[0] == 0:
             print('\tWorkMode:  AC')
@@ -3159,18 +3176,18 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3183,18 +3200,18 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3206,19 +3223,19 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3231,7 +3248,8 @@ class Preferences(Gtk.ApplicationWindow):
             model = self.comboBoxGovernor.get_model()
             row_id, name = model[statGovernor][:2]
             subprocess.getstatusoutput(
-                'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ '
+                'cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
 
         statGraphics = self.switchGraphics.get_active()  # .conf file *
         if statGraphics:
@@ -3243,11 +3261,13 @@ class Preferences(Gtk.ApplicationWindow):
 
         if statSound:
             exec = subprocess.getstatusoutput(
-                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ cSOUND_POWER_SAVE_ON_BAT=1" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ '
+                'cSOUND_POWER_SAVE_ON_BAT=1" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting sound sving to ' + str(statSound) + ' --> Exit: ' + str(exec[0]))
         else:
             exec = subprocess.getstatusoutput(
-                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ cSOUND_POWER_SAVE_ON_BAT=0" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ '
+                'cSOUND_POWER_SAVE_ON_BAT=0" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting sound sving to ' + str(statSound) + ' --> Exit: ' + str(exec[0]))
         print(mode, str(exec), )
 
@@ -3273,7 +3293,8 @@ class Preferences(Gtk.ApplicationWindow):
             devices = devices + ' wifi'
 
         exec = subprocess.getstatusoutput(
-            "sed -i '/DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE/ cDEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
+            "sed -i '/DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE/ "
+            "cDEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
         print('Setting devices to disable when not in use: ' + devices + ' --> Exit:' + str(exec[0]))
 
         try:
@@ -3285,7 +3306,7 @@ class Preferences(Gtk.ApplicationWindow):
             else:
                 config.set('TDP', variable, '0')
                 print('Setting devices TDP sync: 0 ')
-        except:
+        except Exception:
             print('Switch TDP not set')
 
         config.set('SETTINGS', 'ahorro_brightness', str(int(self.scaleBrightness.get_value())))
@@ -3304,7 +3325,7 @@ class Preferences(Gtk.ApplicationWindow):
                 config.set('SETTINGS', 'ahorro_animations', '1')
             else:
                 config.set('SETTINGS', 'ahorro_animations', '0')
-        except:
+        except Exception:
             print('Switch animations disabled')
 
         statBluetoothOS = self.switchBluetoothOS.get_active()  # Tlp custom file
@@ -3319,20 +3340,21 @@ class Preferences(Gtk.ApplicationWindow):
             devices = devices + ' wifi'
 
         exec = subprocess.getstatusoutput(
-            "sed -i '/DEVICES_TO_DISABLE_ON_STARTUP/ cDEVICES_TO_DISABLE_ON_STARTUP=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
+            "sed -i '/DEVICES_TO_DISABLE_ON_STARTUP/ "
+            "cDEVICES_TO_DISABLE_ON_STARTUP=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
         print('Setting devices to disable on startup: ' + devices + ' --> Exit:' + str(exec[0]))
 
         statWifiDisableLAN = self.switchWifiDisableLAN.get_active()  # Tlp custom file
         if statWifiDisableLAN:
             exec = subprocess.getstatusoutput('''
                 sed -i '/DEVICES_TO_DISABLE_ON_LAN_CONNECT/ cDEVICES_TO_DISABLE_ON_LAN_CONNECT="wifi"' ~/.config/slimbookbattery/custom/''' + mode + '''
-	            sed -i '/DEVICES_TO_ENABLE_ON_LAN_DISCONNECT/ cDEVICES_TO_ENABLE_ON_LAN_DISCONNECT="wifi"' ~/.config/slimbookbattery/custom/''' + mode + '''
+                sed -i '/DEVICES_TO_ENABLE_ON_LAN_DISCONNECT/ cDEVICES_TO_ENABLE_ON_LAN_DISCONNECT="wifi"' ~/.config/slimbookbattery/custom/''' + mode + '''
                 ''')
             print('Setting disable wifi when LAN to on --> Exit:' + str(exec[0]))
         else:
             exec = subprocess.getstatusoutput('''
                 sed -i '/DEVICES_TO_DISABLE_ON_LAN_CONNECT/ cDEVICES_TO_DISABLE_ON_LAN_CONNECT=""' ~/.config/slimbookbattery/custom/''' + mode + '''
-	            sed -i '/DEVICES_TO_ENABLE_ON_LAN_DISCONNECT/ cDEVICES_TO_ENABLE_ON_LAN_DISCONNECT=""' ~/.config/slimbookbattery/custom/''' + mode + '''
+                sed -i '/DEVICES_TO_ENABLE_ON_LAN_DISCONNECT/ cDEVICES_TO_ENABLE_ON_LAN_DISCONNECT=""' ~/.config/slimbookbattery/custom/''' + mode + '''
                 ''')
             print('Setting disable wifi when LAN to off --> Exit:' + str(exec[0]))
 
@@ -3349,8 +3371,10 @@ class Preferences(Gtk.ApplicationWindow):
         textBlacklistUSBIDs = self.entryBlacklistUSBIDs.get_text()
 
         os.system(
-            "sed -i '/USB_BLACKLIST=/ cUSB_BLACKLIST=\"" + textBlacklistUSBIDs + "\"' ~/.config/slimbookbattery/custom/" + mode)
-        # os.system('sed -i "/USB_BLACKLIST=/ cUSB_BLACKLIST=\"'+textBlacklistUSBIDs+'\"" ~/.config/slimbookbattery/custom/'+mode)
+            "sed -i '/USB_BLACKLIST=/ "
+            "cUSB_BLACKLIST=\"" + textBlacklistUSBIDs + "\"' ~/.config/slimbookbattery/custom/" + mode)
+        # os.system('sed -i "/USB_BLACKLIST=/ cUSB_BLACKLIST=\"'+
+        #                    textBlacklistUSBIDs+'\"" ~/.config/slimbookbattery/custom/'+mode)
         print('Setting devices blacklist: ' + textBlacklistUSBIDs + ' --> Exit:' + str(exec[0]))
 
         statBlacklistBUSB = self.switchBlacklistBUSB.get_active()
@@ -3386,11 +3410,13 @@ class Preferences(Gtk.ApplicationWindow):
         statShutdownSuspendUSB = self.switchShutdownSuspendUSB.get_active()
         if statShutdownSuspendUSB:
             exec = subprocess.getstatusoutput(
-                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ '
+                'cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting USB Suspension DISABLE ON SHUTDOWN to on --> Exit:' + str(exec[0]))
         else:
             exec = subprocess.getstatusoutput(
-                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=0" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ '
+                'cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=0" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting USB Suspension DISABLE ON SHUTDOWN to on --> Exit:' + str(exec[0]))
 
         print('\n')
@@ -3417,18 +3443,18 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3442,18 +3468,18 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3465,18 +3491,18 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3489,7 +3515,8 @@ class Preferences(Gtk.ApplicationWindow):
             model = self.comboBoxGovernor2.get_model()
             row_id, name = model[statGovernor][:2]
             subprocess.getstatusoutput(
-                'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ '
+                'cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
 
         statGraphics = self.switchGraphics2.get_active()  # .conf file *
         if statGraphics:
@@ -3500,11 +3527,13 @@ class Preferences(Gtk.ApplicationWindow):
         statSound = self.switchSound2.get_active()  # Tlp custom file *
         if statSound:
             exec = subprocess.getstatusoutput(
-                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ cSOUND_POWER_SAVE_ON_BAT=1" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ '
+                'cSOUND_POWER_SAVE_ON_BAT=1" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting sound sving to ' + str(statSound) + ' --> Exit: ' + str(exec[0]))
         else:
             exec = subprocess.getstatusoutput(
-                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ cSOUND_POWER_SAVE_ON_BAT=0" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ '
+                'cSOUND_POWER_SAVE_ON_BAT=0" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting sound sving to ' + str(statSound) + ' --> Exit: ' + str(exec[0]))
 
         statWifiPower = self.switchWifiPower2.get_active()  # Tlp custom file *
@@ -3529,7 +3558,8 @@ class Preferences(Gtk.ApplicationWindow):
             devices = devices + ' wifi'
 
         exec = subprocess.getstatusoutput(
-            "sed -i '/DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE/ cDEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
+            "sed -i '/DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE/ "
+            "cDEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
         print('Setting devices to disable when not in use: ' + devices + ' --> Exit:' + str(exec[0]))
 
         try:
@@ -3541,7 +3571,7 @@ class Preferences(Gtk.ApplicationWindow):
             else:
                 config.set('TDP', variable, '0')
                 print('Setting devices TDP sync: 0 ')
-        except:
+        except Exception:
             print('Switch TDP not set')
 
         config.set('SETTINGS', 'equilibrado_brightness', str(int(self.scaleBrightness2.get_value())))
@@ -3559,7 +3589,7 @@ class Preferences(Gtk.ApplicationWindow):
                 config.set('SETTINGS', 'equilibrado_animations', '1')
             else:
                 config.set('SETTINGS', 'equilibrado_animations', '0')
-        except:
+        except Exception:
             print('Switch animations disabled')
 
         statBluetoothOS = self.switchBluetoothOS2.get_active()  # Tlp custom file
@@ -3574,20 +3604,21 @@ class Preferences(Gtk.ApplicationWindow):
             devices = devices + ' wifi'
 
         exec = subprocess.getstatusoutput(
-            "sed -i '/DEVICES_TO_DISABLE_ON_STARTUP/ cDEVICES_TO_DISABLE_ON_STARTUP=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
+            "sed -i '/DEVICES_TO_DISABLE_ON_STARTUP/ "
+            "cDEVICES_TO_DISABLE_ON_STARTUP=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
         print('Setting devices to disable on startup: ' + devices + ' --> Exit:' + str(exec[0]))
 
         statWifiDisableLAN = self.switchWifiDisableLAN2.get_active()  # Tlp custom file
         if statWifiDisableLAN:
             exec = subprocess.getstatusoutput('''
                 sed -i '/DEVICES_TO_DISABLE_ON_LAN_CONNECT/ cDEVICES_TO_DISABLE_ON_LAN_CONNECT="wifi"' ~/.config/slimbookbattery/custom/''' + mode + '''
-	            sed -i '/DEVICES_TO_ENABLE_ON_LAN_DISCONNECT/ cDEVICES_TO_ENABLE_ON_LAN_DISCONNECT="wifi"' ~/.config/slimbookbattery/custom/''' + mode + '''
+                sed -i '/DEVICES_TO_ENABLE_ON_LAN_DISCONNECT/ cDEVICES_TO_ENABLE_ON_LAN_DISCONNECT="wifi"' ~/.config/slimbookbattery/custom/''' + mode + '''
                 ''')
             print('Setting disable wifi when LAN to on --> Exit:' + str(exec[0]))
         else:
             exec = subprocess.getstatusoutput('''
                 sed -i '/DEVICES_TO_DISABLE_ON_LAN_CONNECT/ cDEVICES_TO_DISABLE_ON_LAN_CONNECT=""' ~/.config/slimbookbattery/custom/''' + mode + '''
-	            sed -i '/DEVICES_TO_ENABLE_ON_LAN_DISCONNECT/ cDEVICES_TO_ENABLE_ON_LAN_DISCONNECT=""' ~/.config/slimbookbattery/custom/''' + mode + '''
+                sed -i '/DEVICES_TO_ENABLE_ON_LAN_DISCONNECT/ cDEVICES_TO_ENABLE_ON_LAN_DISCONNECT=""' ~/.config/slimbookbattery/custom/''' + mode + '''
                 ''')
             print('Setting disable wifi when LAN to off --> Exit:' + str(exec[0]))
 
@@ -3604,8 +3635,12 @@ class Preferences(Gtk.ApplicationWindow):
         textBlacklistUSBIDs = self.entryBlacklistUSBIDs.get_text()
 
         os.system(
-            "sed -i '/USB_BLACKLIST=/ cUSB_BLACKLIST=\"" + textBlacklistUSBIDs + "\"' ~/.config/slimbookbattery/custom/" + mode)
-        # os.system('sed -i "/USB_BLACKLIST=/ cUSB_BLACKLIST=\"'+textBlacklistUSBIDs+'\"" ~/.config/slimbookbattery/custom/'+mode)
+            "sed -i '/USB_BLACKLIST=/ cUSB_BLACKLIST=\"{}\"' ~/.config/slimbookbattery/custom/{}".format(
+                textBlacklistUSBIDs, mode
+            )
+        )
+        # os.system('sed -i "/USB_BLACKLIST=/ cUSB_BLACKLIST=\"'+
+        #                    textBlacklistUSBIDs+'\"" ~/.config/slimbookbattery/custom/'+mode)
         print('Setting devices blacklist: ' + textBlacklistUSBIDs + ' --> Exit:' + str(exec[0]))
 
         statBlacklistBUSB = self.switchBlacklistBUSB2.get_active()
@@ -3641,11 +3676,13 @@ class Preferences(Gtk.ApplicationWindow):
         statShutdownSuspendUSB = self.switchShutdownSuspendUSB2.get_active()
         if statShutdownSuspendUSB:
             exec = subprocess.getstatusoutput(
-                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ '
+                'cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting USB Suspension DISABLE ON SHUTDOWN to on --> Exit:' + str(exec[0]))
         else:
             exec = subprocess.getstatusoutput(
-                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=0" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ '
+                'cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=0" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting USB Suspension DISABLE ON SHUTDOWN to on --> Exit:' + str(exec[0]))
 
         print('\n')
@@ -3669,18 +3706,18 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3694,18 +3731,18 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3717,18 +3754,18 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
-                    
+
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3741,16 +3778,19 @@ class Preferences(Gtk.ApplicationWindow):
             model = self.comboBoxGovernor3.get_model()
             row_id, name = model[statGovernor][:2]
             subprocess.getstatusoutput(
-                'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ '
+                'cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
 
         statSound = self.switchSound3.get_active()  # Tlp custom file *
         if statSound:
             exec = subprocess.getstatusoutput(
-                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ cSOUND_POWER_SAVE_ON_BAT=1" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ '
+                'cSOUND_POWER_SAVE_ON_BAT=1" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting sound sving to ' + str(statSound) + ' --> Exit: ' + str(exec[0]))
         else:
             exec = subprocess.getstatusoutput(
-                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ cSOUND_POWER_SAVE_ON_BAT=0" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/SOUND_POWER_SAVE_ON_BAT=/ '
+                'cSOUND_POWER_SAVE_ON_BAT=0" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting sound sving to ' + str(statSound) + ' --> Exit: ' + str(exec[0]))
 
         statWifiPower = self.switchWifiPower3.get_active()  # Tlp custom file *
@@ -3775,7 +3815,8 @@ class Preferences(Gtk.ApplicationWindow):
             devices = devices + ' wifi'
 
         exec = subprocess.getstatusoutput(
-            "sed -i '/DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE/ cDEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
+            "sed -i '/DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE/ "
+            "cDEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
         print('Setting devices to disable when not in use: ' + devices + ' --> Exit:' + str(exec[0]))
 
         try:
@@ -3787,7 +3828,7 @@ class Preferences(Gtk.ApplicationWindow):
             else:
                 config.set('TDP', variable, '0')
                 print('Setting devices TDP sync: 0 ')
-        except:
+        except Exception:
             print('Switch TDP not set')
 
         value = (str(int(self.scaleBrightness3.get_value())))
@@ -3808,7 +3849,7 @@ class Preferences(Gtk.ApplicationWindow):
                 config.set('SETTINGS', 'maxrendimiento_animations', '1')
             else:
                 config.set('SETTINGS', 'maxrendimiento_animations', '0')
-        except:
+        except Exception:
             print('Switch animations disabled')
 
         statWifiNIU = self.switchWifiNIU3.get_active()
@@ -3825,7 +3866,8 @@ class Preferences(Gtk.ApplicationWindow):
             devices = devices + ' wifi'
 
         exec = subprocess.getstatusoutput(
-            "sed -i '/DEVICES_TO_DISABLE_ON_STARTUP/ cDEVICES_TO_DISABLE_ON_STARTUP=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
+            "sed -i '/DEVICES_TO_DISABLE_ON_STARTUP/ "
+            "cDEVICES_TO_DISABLE_ON_STARTUP=\"" + devices + "\"' ~/.config/slimbookbattery/custom/" + mode)
         print('Setting devices to disable on startup: ' + devices + ' --> Exit:' + str(exec[0]))
 
         statWifiDisableLAN = self.switchWifiDisableLAN3.get_active()  # Tlp custom file
@@ -3855,8 +3897,11 @@ class Preferences(Gtk.ApplicationWindow):
         textBlacklistUSBIDs = self.entryBlacklistUSBIDs.get_text()
 
         os.system(
-            "sed -i '/USB_BLACKLIST=/ cUSB_BLACKLIST=\"" + textBlacklistUSBIDs + "\"' ~/.config/slimbookbattery/custom/" + mode)
-        # os.system('sed -i "/USB_BLACKLIST=/ cUSB_BLACKLIST=\"'+textBlacklistUSBIDs+'\"" ~/.config/slimbookbattery/custom/'+mode)
+            "sed -i '/USB_BLACKLIST=/ cUSB_BLACKLIST=\"{}\"' ~/.config/slimbookbattery/custom/{}".format(
+                textBlacklistUSBIDs, mode
+            ))
+        # os.system('sed -i "/USB_BLACKLIST=/ cUSB_BLACKLIST=\"'+
+        #                   textBlacklistUSBIDs+'\"" ~/.config/slimbookbattery/custom/'+mode)
         print('Setting devices blacklist: ' + textBlacklistUSBIDs + ' --> Exit:' + str(exec[0]))
 
         statBlacklistBUSB = self.switchBlacklistBUSB3.get_active()
@@ -3892,11 +3937,13 @@ class Preferences(Gtk.ApplicationWindow):
         statShutdownSuspendUSB = self.switchShutdownSuspendUSB3.get_active()
         if statShutdownSuspendUSB:
             exec = subprocess.getstatusoutput(
-                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1" '
+                '~/.config/slimbookbattery/custom/' + mode)
             print('Setting USB Suspension DISABLE ON SHUTDOWN to on --> Exit:' + str(exec[0]))
         else:
             exec = subprocess.getstatusoutput(
-                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=0" ~/.config/slimbookbattery/custom/' + mode)
+                'sed -i "/USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=/ '
+                'cUSB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=0" ~/.config/slimbookbattery/custom/' + mode)
             print('Setting USB Suspension DISABLE ON SHUTDOWN to on --> Exit:' + str(exec[0]))
 
         print('\n')
@@ -3969,7 +4016,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         state = ''
         autostart = ''
-        mode = ''
+        # mode = ''
         workMode = ''
         icono = ''
 
@@ -3997,15 +4044,15 @@ class Preferences(Gtk.ApplicationWindow):
 
         if self.modo_actual == '1':
             print('\tMode: Low')
-            mode = 'ahorrodeenergia'
+            # mode = 'ahorrodeenergia'
 
         elif self.modo_actual == '2':
             print('\tMode: Mid')
-            mode = 'equilibrado'
+            # mode = 'equilibrado'
 
         elif self.modo_actual == '3':
             print('\tMode: High')
-            mode = 'maximorendimiento'
+            # mode = 'maximorendimiento'
 
         else:
             print('Err: Could not get mode')
@@ -4024,7 +4071,7 @@ class Preferences(Gtk.ApplicationWindow):
             if not workMode == '':
                 print('Setting workmode ' + workMode + '...')
                 # exec = subprocess.getstatusoutput("sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' /etc/tlp.conf")
-                exec = subprocess.getstatusoutput(
+                subprocess.getstatusoutput(
                     'pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE ' + workMode)
 
                 # Icon
@@ -4126,7 +4173,8 @@ class Preferences(Gtk.ApplicationWindow):
             print('Mode not setting TDP')
 
     def on_buttonReportFile_clicked(self, buttonReportFile):
-        # Se abrirá un dialogo para el usuario para que elija donde desea guardar el archivo del reporte que se va a generar
+        # Se abrirá un dialogo para el usuario para que
+        # elija donde desea guardar el archivo del reporte que se va a generar
         saveDialog = Gtk.FileChooserDialog(title="Please select a folder to save the file",
                                            parent=self,
                                            action=Gtk.FileChooserAction.SELECT_FOLDER)
@@ -4161,7 +4209,7 @@ class Preferences(Gtk.ApplicationWindow):
         # We change our variable: config.set(section, variable, value)
         config.set(str(section), str(variable), str(value))
 
-        # Writing our configuration file 
+        # Writing our configuration file
         with open(fichero, 'w') as configfile:
             config.write(configfile)
 

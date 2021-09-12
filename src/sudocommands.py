@@ -57,16 +57,14 @@ tdp_config_file = HOMEDIR + '/.config/' + tdpcontroller + '/' + tdpcontroller + 
 config_tdp = ConfigParser()
 config_tdp.read(tdp_config_file)
 
-try:
-    entorno_usu = locale.getlocale()[0]
-    if entorno_usu.find("en") >= 0 or entorno_usu.find("es") >= 0 or entorno_usu.find("it") >= 0 or entorno_usu.find(
-            "pt") >= 0 or entorno_usu.find("gl") >= 0:
+idiomas = ['en']
+entorno_usu = locale.getlocale()[0]
+for lang in ["en", "es", "it", "pt", "gl"]:
+    if entorno_usu.find(lang) >= 0:
         idiomas = [entorno_usu]
-    else:
-        idiomas = ['en']
-    print('Language: ', entorno_usu)
-except:
-    idiomas = ['en']
+        break
+print('Language: ', entorno_usu)
+
 t = gettext.translation('sudocommands',
                         currpath + '/locale',
                         languages=idiomas,
@@ -128,7 +126,7 @@ def main(args):  # Args will be like --> command_name value
 
             if config.get('CONFIGURATION',
                           'application_on') == '1':  # Sets mode changes and enables/disables TLP according to conf
-                # Extra configuration               
+                # Extra configuration
                 if update_config('/etc/tlp.conf', 'TLP_ENABLE', '1') == 0:
                     print('TLP is enabled')
 
@@ -151,18 +149,18 @@ def main(args):  # Args will be like --> command_name value
         if args[1] == "restore":
 
             # Copies selected DEFAULT conf to CUSTOM conf (also slimbookbattery.conf)
+            home_file = os.path.join(HOMEDIR, ".config/slimbookbattery/slimbookbattery.conf")
             print(str(subprocess.getstatusoutput(
-                "sudo cp /usr/share/slimbookbattery/src/slimbookbattery.conf " + HOMEDIR + "/.config/slimbookbattery/slimbookbattery.conf")[
-                          0]))
+                "sudo cp /usr/share/slimbookbattery/src/slimbookbattery.conf " + home_file)[0]))
+            home_file = os.path.join(HOMEDIR, ".config/slimbookbattery/ahorrodeenergia")
             print(str(subprocess.getstatusoutput(
-                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/default/ahorrodeenergia " + HOMEDIR + "/.config/slimbookbattery/custom/ahorrodeenergia")[
-                          0]))
+                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/default/ahorrodeenergia " + home_file)[0]))
+            home_file = os.path.join(HOMEDIR, ".config/slimbookbattery/equilibrado")
             print(str(subprocess.getstatusoutput(
-                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/default/equilibrado " + HOMEDIR + "/.config/slimbookbattery/custom/equilibrado")[
-                          0]))
+                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/default/equilibrado " + home_file)[0]))
+            home_file = os.path.join(HOMEDIR, ".config/slimbookbattery/maximorendimiento")
             print(str(subprocess.getstatusoutput(
-                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/default/maximorendimiento " + HOMEDIR + "/.config/slimbookbattery/custom/maximorendimiento")[
-                          0]))
+                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/default/maximorendimiento " + home_file)[0]))
 
             #
             if battery_mode == '1':
@@ -202,7 +200,8 @@ def main(args):  # Args will be like --> command_name value
 
             elif args[2] == "create":
                 os.system(
-                    'sudo cp /usr/share/slimbookbattery/src/service/slimbookbattery.service /lib/systemd/system/slimbookbattery.service')
+                    'sudo cp /usr/share/slimbookbattery/src/service/slimbookbattery.service '
+                    '/lib/systemd/system/slimbookbattery.service')
                 os.system('sudo chmod 755 /usr/share/slimbookbattery/src/service/slimbookbatteryservice.sh')
                 os.system('systemctl daemon-reload')
 
@@ -213,7 +212,7 @@ def main(args):  # Args will be like --> command_name value
 
 
 def notify(msg):
-    os.system('''set -x 
+    os.system('''set -x
                 display=":$(ls /tmp/.X11-unix/* | sed 's#/tmp/.X11-unix/X##' | head -n 1)"
                 user=''' + USER_NAME + '''
                 uid=$(id -u $user)
@@ -222,7 +221,7 @@ def notify(msg):
 
 
 def set_tdp(mode):
-    # This function enables tdpcontroller autostart an changes it's mode if battery application, 
+    # This function enables tdpcontroller autostart an changes it's mode if battery application,
     # battery autostart and sync tdp switch of the selected mode is on.
 
     # print('\n[TDP SETTINGS]')
@@ -274,7 +273,7 @@ def set_tdp(mode):
             else:
                 print('TDP Sync not active')
 
-        except:
+        except Exception:
             print('Could not sync TDP')
 
     else:
@@ -312,7 +311,7 @@ def mode_settings(mode):
         graphics_before = stout
 
     # If nvidia driver is installed and works WE SET IT MANUALLY
-    if graficaNvidia == True:
+    if graficaNvidia:
         print('Detected nvidia graphics profile: ' + graphics_before)
         print('Setting new profile ...')
         if mode == '1':
@@ -349,7 +348,7 @@ def mode_settings(mode):
             required_reboot = 1
 
     # If nvidia driver is not installed or does not work, we use TLP
-    elif graficaNvidia == False:
+    elif not graficaNvidia:
         print('Setting graphics frequency ...')
         # GRAPHICS AMD SETTINGS de
         RADEON_POWER_PROFILE_ON_BAT = 'default'
@@ -372,7 +371,7 @@ def mode_settings(mode):
 
             freq_available = freq_available.strip().split(' ')
 
-            # FRECUENCIAS PARA LOS MODOS  
+            # FRECUENCIAS PARA LOS MODOS
             if len(freq_available) > 1:
                 freqCorrecta = True
                 min_bat = 0
@@ -391,29 +390,40 @@ def mode_settings(mode):
                     print('Radeon graphics power profile: low')
                     RADEON_POWER_PROFILE_ON_BAT = 'low'
                     os.system(
-                        'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT=' + RADEON_POWER_PROFILE_ON_BAT + '" ' + file_equilibrado)
+                        'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
+                            RADEON_POWER_PROFILE_ON_BAT, file_equilibrado
+                        )
+                    )
                     os.system(
-                        'sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT=' + RADEON_DPM_STATE_ON_BAT + '" ' + file_equilibrado)
+                        'sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT={}" {}'.format(
+                            RADEON_DPM_STATE_ON_BAT, file_equilibrado
+                        )
+                    )
                     os.system(
-                        'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT=' + RADEON_DPM_PERF_LEVEL_ON_BAT + '" ' + file_ahorro)
+                        'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT={}" {}'.format(
+                            RADEON_DPM_PERF_LEVEL_ON_BAT, file_ahorro
+                        )
+                    )
 
                 # Intel integrated
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep -i Intel')[0] == 0:
                     print('Intel graphics power profile: low')
                     # MIN_BAT/MIN_AC
-                    # Si el valor que queremos se encuentra dentro del array se usará ese, sino se buscara dentro del array dentro del rango que se indica
+                    # Si el valor que queremos se encuentra dentro del array se usará ese,
+                    # sino se buscara dentro del array dentro del rango que se indica
                     for i in range(len(freq_available)):
                         if (int(freq_available[i]) > 0 and int(freq_available[i]) < 600):
                             min_bat = int(freq_available[i])
                             min_ac = int(freq_available[i])
                             break
 
-                            # Si el valor que se busca no se encuentra, el boolean freqCorrecta pasará a False y por lo tanto no se realizará ninguna modificación respecto a gráficas Intel
+                            # Si el valor que se busca no se encuentra, el boolean freqCorrecta pasará a False y
+                            # por lo tanto no se realizará ninguna modificación respecto a gráficas Intel
                     if min_bat == 0 or min_ac == 0:
                         freqCorrecta = False
 
                     # MAX_BAT/MAX_AC
-                    if freqCorrecta == True:
+                    if freqCorrecta:
                         for i in range(len(freq_available)):
                             if (int(freq_available[i]) >= 600 and int(freq_available[i]) < 800):
                                 max_bat = int(freq_available[i])
@@ -421,13 +431,13 @@ def mode_settings(mode):
                         if max_bat == 0:
                             freqCorrecta = False
 
-                        if int(freq_available[-1]) > 0 and freqCorrecta == True:
+                        if int(freq_available[-1]) > 0 and freqCorrecta:
                             max_ac = int(freq_available[-1])
                         if max_ac == 0:
                             freqCorrecta = False
 
                         # BOOST_BAT/BOOST_AC
-                        if freqCorrecta == True:
+                        if freqCorrecta:
                             for i in range(len(freq_available)):
                                 if (int(freq_available[i]) >= 800 and int(freq_available[i]) < int(freq_available[-1])):
                                     boost_bat = int(freq_available[i])
@@ -435,13 +445,14 @@ def mode_settings(mode):
                             if boost_bat == 0:
                                 freqCorrecta = False
 
-                            if int(freq_available[-1]) > 0 and freqCorrecta == True:
+                            if int(freq_available[-1]) > 0 and freqCorrecta:
                                 boost_ac = int(freq_available[-1])
                             if boost_ac == 0:
                                 freqCorrecta = False
 
-                    # Si el boolean sigue en True querrá decir que se han obtenido valores para min, max y boost y se llamará al script para poder realizar las modificaciones
-                    if freqCorrecta == True:
+                    # Si el boolean sigue en True querrá decir que se han obtenido valores para min, max y boost y
+                    # se llamará al script para poder realizar las modificaciones
+                    if freqCorrecta:
                         print('Setting GPU freq --> ' + str(min_bat), str(max_bat), str(boost_bat))
                         update_config(file_ahorro, 'INTEL_GPU_MIN_FREQ_ON_BAT', str(min_bat))
                         update_config(file_ahorro, 'INTEL_GPU_MIN_FREQ_ON_AC', str(min_ac))
@@ -459,11 +470,20 @@ def mode_settings(mode):
                     print('Radeon graphics power profile: default')
                     RADEON_POWER_PROFILE_ON_BAT = 'default'
                     os.system(
-                        'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT=' + RADEON_POWER_PROFILE_ON_BAT + '" ' + file_ahorro)
+                        'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
+                            RADEON_POWER_PROFILE_ON_BAT, file_ahorro
+                        )
+                    )
                     os.system(
-                        'sed -i "/RADEON_DPM_STATE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT=' + RADEON_POWER_PROFILE_ON_BAT + '" ' + file_ahorro)
+                        'sed -i "/RADEON_DPM_STATE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
+                            RADEON_POWER_PROFILE_ON_BAT, file_ahorro
+                        )
+                    )
                     os.system(
-                        'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT=' + RADEON_DPM_PERF_LEVEL_ON_BAT + '" ' + file_ahorro)
+                        'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
+                            RADEON_DPM_PERF_LEVEL_ON_BAT, file_ahorro
+                        )
+                    )
 
                 # Intel integrated
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep Intel')[0] == 0:
@@ -486,11 +506,20 @@ def mode_settings(mode):
                     RADEON_POWER_PROFILE_ON_BAT = 'mid'
                     # Radeon changes
                     os.system(
-                        'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT=' + RADEON_POWER_PROFILE_ON_BAT + '" ' + file_equilibrado)
+                        'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
+                            RADEON_POWER_PROFILE_ON_BAT, file_equilibrado
+                        )
+                    )
                     os.system(
-                        'sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT=' + RADEON_DPM_STATE_ON_BAT + '" ' + file_equilibrado)
+                        'sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT={}" {}'.format(
+                            RADEON_DPM_STATE_ON_BAT, file_equilibrado
+                        )
+                    )
                     os.system(
-                        'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT=' + RADEON_DPM_PERF_LEVEL_ON_BAT + '" ' + file_ahorro)
+                        'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT={}" {}'.format(
+                            RADEON_DPM_PERF_LEVEL_ON_BAT, file_ahorro
+                        )
+                    )
 
                 # Intel integrated
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep -i Intel')[0] == 0:
@@ -501,13 +530,14 @@ def mode_settings(mode):
                             # print('min_bat = '+str(min_bat))
                             min_ac = int(freq_available[i])
                             break
-                    # Si el valor que se busca no se encuentra, el boolean freqCorrecta pasará a False y por lo tanto no se realizará ninguna modificación respecto a gráficas Intel
+                    # Si el valor que se busca no se encuentra, el boolean freqCorrecta pasará a False y
+                    # por lo tanto no se realizará ninguna modificación respecto a gráficas Intel
                     if min_bat == 0:
                         freqCorrecta = False
                     if min_ac == 0:
                         freqCorrecta = False
 
-                    if freqCorrecta == True:
+                    if freqCorrecta:
                         for i in range(len(freq_available)):
                             if (int(freq_available[i]) >= 900 and int(freq_available[i]) < 1000):
                                 max_bat = int(freq_available[i])
@@ -516,15 +546,15 @@ def mode_settings(mode):
                     if max_bat == 0:
                         freqCorrecta = False
 
-                    if int(freq_available[-1]) > 0 and freqCorrecta == True:
+                    if int(freq_available[-1]) > 0 and freqCorrecta:
                         max_ac = int(freq_available[-1])
                     if max_ac == 0:
                         freqCorrecta = False
 
-                    if '1000' in freq_available and freqCorrecta == True:
+                    if '1000' in freq_available and freqCorrecta:
                         boost_bat = 1000
 
-                    if freqCorrecta == True:
+                    if freqCorrecta:
                         for i in range(len(freq_available)):
                             if (int(freq_available[i]) >= 1000 and int(freq_available[i]) < int(freq_available[-1])):
                                 boost_bat = int(freq_available[i])
@@ -533,13 +563,14 @@ def mode_settings(mode):
                         if boost_bat == 0:
                             freqCorrecta = False
 
-                    if int(freq_available[-1]) > 0 and freqCorrecta == True:
+                    if int(freq_available[-1]) > 0 and freqCorrecta:
                         boost_ac = int(freq_available[-1])
                     if boost_ac == 0:
                         freqCorrecta = False
 
-                    # Si el boolean sigue en True querrá decir que se han obtenido valores para min, max y boost y se llamará al script para poder realizar las modificaciones
-                    if freqCorrecta == True:
+                    # Si el boolean sigue en True querrá decir que se han obtenido valores para min, max y boost y
+                    # se llamará al script para poder realizar las modificaciones
+                    if freqCorrecta:
                         print('Setting GPU freq --> ' + str(min_bat), str(max_bat), str(boost_bat))
                         update_config(file_equilibrado, 'INTEL_GPU_MIN_FREQ_ON_BAT', str(min_bat))
                         update_config(file_equilibrado, 'INTEL_GPU_MIN_FREQ_ON_AC', str(min_ac))
@@ -555,11 +586,19 @@ def mode_settings(mode):
                     print('Radeon graphics power profile: #default')
                     RADEON_POWER_PROFILE_ON_BAT = 'default'
                     os.system(
-                        'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT=' + RADEON_POWER_PROFILE_ON_BAT + '" ' + file_equilibrado)
+                        'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
+                            RADEON_POWER_PROFILE_ON_BAT, file_equilibrado)
+                    )
                     os.system(
-                        'sed -i "/RADEON_DPM_STATE_ON_BAT=/ c#RADEON_DPM_STATE_ON_BAT=0' + RADEON_DPM_STATE_ON_BAT + '" ' + file_equilibrado)
+                        'sed -i "/RADEON_DPM_STATE_ON_BAT=/ c#RADEON_DPM_STATE_ON_BAT=0{}" {}'.format(
+                            RADEON_DPM_STATE_ON_BAT, file_equilibrado
+                        )
+                    )
                     os.system(
-                        'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ c#RADEON_DPM_PERF_LEVEL_ON_BAT=' + RADEON_DPM_PERF_LEVEL_ON_BAT + '" ' + file_ahorro)
+                        'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ c#RADEON_DPM_PERF_LEVEL_ON_BAT={}" {}'.format(
+                            RADEON_DPM_PERF_LEVEL_ON_BAT, file_ahorro
+                        )
+                    )
 
                 # Intel integrated
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep Intel')[0] == 0:
@@ -580,11 +619,20 @@ def mode_settings(mode):
                 RADEON_POWER_PROFILE_ON_BAT = 'high'
                 # Radeon changes
                 os.system(
-                    'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT=' + RADEON_POWER_PROFILE_ON_BAT + '" ' + file_equilibrado)
+                    'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
+                        RADEON_POWER_PROFILE_ON_BAT, file_equilibrado
+                    )
+                )
                 os.system(
-                    'sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT=' + RADEON_DPM_STATE_ON_BAT + '" ' + file_equilibrado)
+                    'sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT={}" {}'.format(
+                        RADEON_DPM_STATE_ON_BAT, file_equilibrado
+                    )
+                )
                 os.system(
-                    'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT=' + RADEON_DPM_PERF_LEVEL_ON_BAT + '" ' + file_ahorro)
+                    'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT={}" {}'.format(
+                        RADEON_DPM_PERF_LEVEL_ON_BAT, file_ahorro
+                    )
+                )
 
             # Intel integrated
             elif subprocess.getstatusoutput('lspci | grep VGA | grep Intel') == 0:
@@ -594,13 +642,14 @@ def mode_settings(mode):
                         min_bat = int(freq_available[i])
                         min_ac = int(freq_available[i])
                         break
-                # Si el valor que se busca no se encuentra, el boolean freqCorrecta pasará a False y por lo tanto no se realizará ninguna modificación respecto a gráficas Intel
+                # Si el valor que se busca no se encuentra, el boolean freqCorrecta pasará a False y
+                # por lo tanto no se realizará ninguna modificación respecto a gráficas Intel
                 if min_bat == 0:
                     freqCorrecta = False
                 if min_ac == 0:
                     freqCorrecta = False
 
-                if int(freq_available[-1]) > 0 and freqCorrecta == True:
+                if int(freq_available[-1]) > 0 and freqCorrecta:
                     max_ac = int(freq_available[-1])
                     max_bat = int(freq_available[-1])
                 if max_ac == 0:
@@ -608,7 +657,7 @@ def mode_settings(mode):
                 if max_bat == 0:
                     freqCorrecta = False
 
-                if int(freq_available[-1]) > 0 and freqCorrecta == True:
+                if int(freq_available[-1]) > 0 and freqCorrecta:
                     boost_ac = int(freq_available[-1])
                     boost_bat = int(freq_available[-1])
                 if boost_ac == 0:
@@ -616,8 +665,9 @@ def mode_settings(mode):
                 if boost_bat == 0:
                     freqCorrecta = False
 
-                # Si el boolean sigue en True querrá decir que se han obtenido valores para min, max y boost y se llamará al script para poder realizar las modificaciones
-                if freqCorrecta == True:
+                # Si el boolean sigue en True querrá decir que se han obtenido valores para
+                # min, max y boost y se llamará al script para poder realizar las modificaciones
+                if freqCorrecta:
                     update_config(file_max, 'INTEL_GPU_MIN_FREQ_ON_BAT', str(min_bat))
                     update_config(file_max, 'INTEL_GPU_MIN_FREQ_ON_AC', str(min_ac))
                     update_config(file_max, 'INTEL_GPU_MAX_FREQ_ON_BAT', str(max_bat))
@@ -665,14 +715,17 @@ def brightness_settings(mode):
                             os.system('''cp /usr/share/slimbookbattery/src/root /var/spool/cron/crontabs/root
                                         chmod 600 /var/spool/cron/crontabs/root')
                                         chgrp crontab /var/spool/cron/crontabs/root''')
-                        if subprocess.getstatusoutput('cat /var/spool/cron/crontabs/root | grep slimbookbattery')[
-                            0] == 0:
+                        if subprocess.getstatusoutput(
+                                'cat /var/spool/cron/crontabs/root | grep slimbookbattery'
+                        )[0] == 0:
                             subprocess.getoutput(
-                                'sed -i "/slimbookbattery/ c@reboot /usr/bin/slimbookbattery-pkexec autostart" /var/spool/cron/crontabs/root')
+                                'sed -i "/slimbookbattery/ c@reboot /usr/bin/slimbookbattery-pkexec autostart" '
+                                '/var/spool/cron/crontabs/root')
                             print('Crontab settings added')
                         else:
                             subprocess.getoutput(
-                                "sed -i '$a @reboot /usr/bin/slimbookbattery-pkexec autostart' /var/spool/cron/crontabs/root")
+                                "sed -i '$a @reboot /usr/bin/slimbookbattery-pkexec autostart' "
+                                "/var/spool/cron/crontabs/root")
                             print('Crontab settings added')
         else:
             # CRONTAB EDIT
@@ -683,7 +736,8 @@ def brightness_settings(mode):
                             chgrp crontab /var/spool/cron/crontabs/root''')
             if os.system('cat /var/spool/cron/crontabs/root | grep slimbookbattery') == 0:
                 os.system(
-                    'sed -i "/slimbookbattery/ c#@reboot /usr/bin/slimbookbattery-pkexec autostart" /var/spool/cron/crontabs/root')
+                    'sed -i "/slimbookbattery/ c#@reboot /usr/bin/slimbookbattery-pkexec autostart" '
+                    '/var/spool/cron/crontabs/root')
                 print('Crontab settings commented')
 
     else:  # Disabling crontab settings
@@ -694,7 +748,8 @@ def brightness_settings(mode):
                         chgrp crontab /var/spool/cron/crontabs/root''')
         if os.system('cat /var/spool/cron/crontabs/root | grep slimbookbattery') == 0:
             os.system(
-                'sed -i "/slimbookbattery/ c#@reboot /usr/bin/slimbookbattery-pkexec autostart" /var/spool/cron/crontabs/root')
+                'sed -i "/slimbookbattery/ c#@reboot /usr/bin/slimbookbattery-pkexec autostart" '
+                '/var/spool/cron/crontabs/root')
             print('Crontab settings commented')
 
 
@@ -702,9 +757,8 @@ def update_config(file, variable, value):
     try:
         call = subprocess.getoutput('cat ' + file)
         patron = re.compile(variable + '\=(.*)')
-        var_value = patron.search(call)[0]
         last_value = patron.search(call)[1]
-    except:
+    except Exception:
         last_value = ''
     # print(last_value, value)
 
