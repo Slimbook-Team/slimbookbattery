@@ -2,46 +2,47 @@
 # -*- coding: utf-8 -*-
 #
 import configparser
+import getpass
 import os
+import shutil
 import subprocess
-import sys
 
-USERNAME = subprocess.getstatusoutput("logname")
-
-if USERNAME[0] == 0 and USERNAME[1] != 'root' and subprocess.getstatusoutput('getent passwd ' + USERNAME[1]) == 0:
-    USER_NAME = USERNAME[1]
-else:
+USER_NAME = getpass.getuser()
+if USER_NAME == 'root':
     USER_NAME = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
 
-HOMEDIR = subprocess.getoutput("echo ~" + USER_NAME)
+HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 
-CURRPATH = os.path.dirname(os.path.realpath(__file__))
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_CONF = os.path.join(CURRENT_PATH, 'slimbookbattery.conf')
+CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
+if not os.path.isdir(CONFIG_FOLDER):
+    os.makedirs(CONFIG_FOLDER)
+CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
 
-default = CURRPATH + '/slimbookbattery.conf'
-config_file = HOMEDIR + '/.config/slimbookbattery/slimbookbattery.conf'
 
-print('Config check executed as ' + USER_NAME)
-
-
-def main(args):
-    check()
-    check2()
-    if subprocess.getoutput('whoami') == 'root':
+def main():
+    check_config_file()
+    check_tlp_files()
+    if getpass.getuser() == 'root':
         print('Giving permisions ...')
-        os.system('sudo chmod 777 -R ' + HOMEDIR + '/.config/slimbookbattery')
+        for dirpath, dirnames, filenames in os.walk(CONFIG_FOLDER):
+            for filename in filenames:
+                path = os.path.join(dirpath, filename)
+                os.chmod(path, 0o777)
         print('Done')
     else:
         print('Done')
 
 
-def check():  # Args will be like --> command_name value
+def check_config_file():
     print('Checking Slimbook Battery Configuration')
-    if os.path.isfile(config_file):
+    if os.path.isfile(CONFIG_FILE):
         config = configparser.ConfigParser()
-        config.read(config_file)
+        config.read(CONFIG_FILE)
 
         default_config = configparser.ConfigParser()
-        default_config.read(default)
+        default_config.read(DEFAULT_CONF)
         incidences = False
 
         for section in default_config.sections():
@@ -55,11 +56,11 @@ def check():  # Args will be like --> command_name value
                 if not config.has_option(section, var):
                     incidences = True
                     print('Not found: ' + var)
-                    config.set(section, var, config.get(section, var))
+                    config.set(section, var, default_config.get(section, var))
 
         if incidences:
             try:
-                configfile = open(config_file, 'w')
+                configfile = open(CONFIG_FILE, 'w')
                 config.write(configfile)
                 configfile.close()
                 print('Incidences corrected.')
@@ -69,34 +70,39 @@ def check():  # Args will be like --> command_name value
             print('Incidences not found.')
     else:
         print('Creating config file ...')
-        os.system('''mkdir -p ''' + HOMEDIR + '''/.config/slimbookbattery/ && cp ''' + default + ''' ''' + config_file)
+        shutil.copy(DEFAULT_CONF, CONFIG_FILE)
 
 
-def check2():
+def check_tlp_files():
     print("Checking Slimbook Battery's TLP Configuration")
     # Slimbookbattery tlp conf files
-    incidences = False
 
     files = ['ahorrodeenergia', 'equilibrado', 'maximorendimiento']
 
     # Checks if default files are the same in the app folder and in the system,
     # if something changed all will be restored
     for file in files:
-        if os.path.isfile(HOMEDIR + '/.config/slimbookbattery/default/' + file):
-            print('Found ' + file)
-            usr_file = os.path.join('/usr/share/slimbookbattery/custom/', file)
-            home_file = os.path.join(HOMEDIR, '.config/slimbookbattery', file)
+        incidences = False
+        home_file = os.path.join(CONFIG_FOLDER, file)
+        usr_file = os.path.join(CURRENT_PATH, '../custom', file)
 
+        if os.path.isfile(home_file):
+            print('Found ' + file)
             if subprocess.getstatusoutput('diff {} {}'.format(usr_file, home_file)) != 0:
                 incidences = True
         else:
             incidences = True
 
-    if incidences:
-        print('Setting default an custom files ...')
-        os.system('''cp -r /usr/share/slimbookbattery/custom ''' + HOMEDIR + '''/.config/slimbookbattery/
-                    cp -r /usr/share/slimbookbattery/default ''' + HOMEDIR + '''/.config/slimbookbattery/
-                    ''')
+        if incidences:
+            print('Setting default an custom files ...')
+            if os.path.isfile(usr_file):
+                shutil.copy(usr_file, home_file)
+            else:
+                default_file = os.path.join(CURRENT_PATH, '../default', file)
+                if os.path.isfile(default_file):
+                    shutil.copy(default_file, home_file)
 
 
-main(sys.argv)
+if __name__ == '__main__':
+    print('Config check executed as ' + USER_NAME)
+    main()
