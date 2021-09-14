@@ -172,7 +172,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.set_default_icon(pixbuf)
 
-        # self.set_icon_from_file('/usr/share/pixmaps/slimbookbatterypreferences.png')
         dimensiones = subprocess.getoutput("xdpyinfo | grep 'dimensions:'")
         dimensiones = dimensiones.split()
         dimensiones = dimensiones[1]
@@ -230,14 +229,10 @@ class Preferences(Gtk.ApplicationWindow):
         win_grid.attach(hbox, 0, 4, 1, 1)
         win_grid.attach(label77, 0, 4, 1, 1)
 
-        # posible bug con esto - si no detecta bien los ficheros puede reestablecer los valores
-
         if subprocess.getstatusoutput('ls ' + user_home + '/.config/slimbookbattery/default/equilibrado')[0] != 0:
             print('Copiying configuration files ...')
             subprocess.getoutput('cp /usr/share/slimbookbattery/default ' + user_home + '/.config/slimbookbattery/')
             subprocess.getoutput('cp /usr/share/slimbookbattery/custom ' + user_home + '/.config/slimbookbattery/')
-
-        # self.load_notebook()
 
         # NOTEBOOK ***************************************************************
 
@@ -283,8 +278,6 @@ class Preferences(Gtk.ApplicationWindow):
         evnt_close.connect('button-press-event', self.close)
 
         win_grid.attach(evnt_close, 0, 0, 1, 4)
-
-        # win_box.pack_start(mid_img, True, True, 0)
         win_grid.attach(notebook, 0, 3, 1, 1)
 
         # GENERAL PAGE  **********************************************************
@@ -457,10 +450,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.load_components(rbutton1, rbutton2, rbutton3)
 
         # LOW MODE PAGE **********************************************************
-        # LOW MODE PAGE **********************************************************
-        # vbox7 = Gtk.VBox(spacing=5)
-        # vbox7.set_border_width(5)
-        # notebook.append_page(vbox7, Gtk.Label.new(_('Energy Saving')))
 
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
@@ -487,7 +476,7 @@ class Preferences(Gtk.ApplicationWindow):
             scrolled_window1.add_with_viewport(low_page_grid)
             notebook.append_page(scrolled_window1, Gtk.Label.new(_('Energy Saving')))
         else:
-            notebook.append_page(low_page_grid, Gtk.Label.new(_('General')))
+            notebook.append_page(low_page_grid, Gtk.Label.new(_('Energy Saving')))
 
         # ********* LOW MODE COMPONENTS COLUMN 1 *********************************
         print('\nLOADING LOW MODE COMPONENTS ...')
@@ -1040,7 +1029,7 @@ class Preferences(Gtk.ApplicationWindow):
                                         self.switchBlacklistPrintUSB, self.switchBlacklistWWANUSB,
                                         self.switchShutdownSuspendUSB)
 
-        # MID MODE PAGE **********************************************************
+
         # MID MODE PAGE **********************************************************
 
 
@@ -1277,7 +1266,6 @@ class Preferences(Gtk.ApplicationWindow):
             low_grid.attach(label33, label_col, row, 4, 1)
 
             if subprocess.getstatusoutput('which ' + tdpcontroller)[0] == 0:  # if TDP controller is installed
-                # print('Found '+tdpcontroller)
                 # LABEL 7
                 row = row + 1
                 label33 = Gtk.Label(label=_('Synchronice battery mode with TDP mode:'))
@@ -1379,7 +1367,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         if subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')[0] == 0:
             row = row + 1
-            # print('Current desktop: Gnome')
             # LABEL 2
             label33 = Gtk.Label(label=_('Disable animations:'))
             label33.set_halign(Gtk.Align.START)
@@ -1592,7 +1579,6 @@ class Preferences(Gtk.ApplicationWindow):
                                         self.switchBlacklistBUSB2, self.switchBlacklistPrintUSB2,
                                         self.switchBlacklistWWANUSB2, self.switchShutdownSuspendUSB2)
 
-        # HIGH MODE PAGE *********************************************************
 
         # HIGH MODE PAGE **********************************************************
         print('\nLOADING HIGH MODE COMPONENTS ...')
@@ -1827,7 +1813,6 @@ class Preferences(Gtk.ApplicationWindow):
             low_grid.attach(label33, label_col, row, 4, 1)
 
             if subprocess.getstatusoutput('which ' + tdpcontroller)[0] == 0:  # if TDP controller is installed
-                # print('Found '+tdpcontroller)
                 # LABEL 7
                 row = row + 1
                 label33 = Gtk.Label(label=_('Synchronice battery mode with TDP mode:'))
@@ -1840,7 +1825,7 @@ class Preferences(Gtk.ApplicationWindow):
 
                 self.check_autostart_switchTDP(self.switchTDP3)
                 low_grid.attach(self.switchTDP3, button_col, row, 1, 1)
-                # print(tdpcontroller)
+
             else:
                 print('TDP Controller not installed')
                 # LABEL 7
@@ -1929,7 +1914,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         if subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')[0] == 0:
             row = row + 1
-            # print('Gnome')
             # LABEL 2
             label33 = Gtk.Label(label=_('Disable animations:'))
             label33.set_halign(Gtk.Align.START)
@@ -2239,7 +2223,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         # BATTERY INFO PAGE ******************************************************
 
-
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
         logo.set_valign(Gtk.Align.START)
@@ -2504,9 +2487,6 @@ class Preferences(Gtk.ApplicationWindow):
             height=60,
             preserve_aspect_ratio=True)
         iconApp = Gtk.Image.new_from_pixbuf(pixbuf)
-        # iconApp.set_alignment(0.5, 0)
-
-        # info_grid.attach(iconApp, 0, 0, 5, 1)
 
         # Title
         label77 = Gtk.Label(label='')
@@ -2556,7 +2536,6 @@ class Preferences(Gtk.ApplicationWindow):
             preserve_aspect_ratio=True)
 
         twitter = Gtk.Image.new_from_pixbuf(pixbuf)
-        # twitter.set_alignment(0.5, 0)
 
         hbox.pack_start(twitter, False, False, 0)
 
@@ -2572,7 +2551,6 @@ class Preferences(Gtk.ApplicationWindow):
             preserve_aspect_ratio=True)
 
         facebook = Gtk.Image.new_from_pixbuf(pixbuf)
-        # facebook.set_alignment(0.5, 0)
         hbox.pack_start(facebook, False, False, 0)
 
         label77 = Gtk.Label(label=' ')
@@ -2590,7 +2568,6 @@ class Preferences(Gtk.ApplicationWindow):
             print()
 
         instagram = Gtk.Image.new_from_pixbuf(pixbuf)
-        # instagram.set_alignment(0.5, 0)
         hbox.pack_start(instagram, False, False, 0)
         label77 = Gtk.Label(label=' ')
         label77.set_markup("<span><b><a href='https://www.instagram.com/slimbookes/?hl=en'>@slimbookes</a></b></span>")
@@ -2690,13 +2667,13 @@ class Preferences(Gtk.ApplicationWindow):
         label77 = Gtk.Label(label=' ')
         label77.set_markup("<span><b>" + (_("Send an e-mail to: ")) + "dev@slimbook.es</b></span>")
         label77.set_justify(Gtk.Justification.CENTER)
-        #info_grid.attach(label77, 0, 14, 5, 1) avocado
+
         
         # (12, 0)
         self.buttonReportFile = Gtk.Button(label=(_('Generate report file')))
         self.buttonReportFile.connect("clicked", self.on_buttonReportFile_clicked)
         self.buttonReportFile.set_halign(Gtk.Align.CENTER)
-        #info_grid.attach(self.buttonReportFile, 0, 15, 5, 1)
+ 
 
         hbox = Gtk.HBox()
         hbox.add(label77)
@@ -2733,7 +2710,6 @@ class Preferences(Gtk.ApplicationWindow):
 
     # CLASS FUNCTIONS ***********************************
     def brightness_switch_changed(self, switchBrightness, state, scale):
-        # print(str(state))
         if state:
             scale.set_sensitive(True)
         else:
@@ -2954,7 +2930,6 @@ class Preferences(Gtk.ApplicationWindow):
 
             self.gen_blacklist(mode)
 
-            # switch1.set_text(str(USBBlacklist))
             switch1.set_sensitive(True)
 
             switch2.set_sensitive(True)
@@ -3198,8 +3173,6 @@ class Preferences(Gtk.ApplicationWindow):
         # Autostart (system)
         variable = config['CONFIGURATION']['autostart']
 
-        # print("/home/" + user + "/.config/autostart/slimbookbattery-autostart.desktop")
-
         if (os.path.isfile(user_home + "/.config/autostart/slimbookbattery-autostart.desktop")):
             self.switchAutostart.set_active(True)
             self.autostart_inicial = '1'
@@ -3294,7 +3267,7 @@ class Preferences(Gtk.ApplicationWindow):
                 config.set('SETTINGS', 'limit_cpu_ahorro', '1')
 
             elif name == (_('medium')):
-                # os.system('/usr/share/slimbookbattery/bin/limitcpu.x 2')
+
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
@@ -3317,7 +3290,7 @@ class Preferences(Gtk.ApplicationWindow):
                 config.set('SETTINGS', 'limit_cpu_ahorro', '2')
 
             elif name == (_('none')):
-                # os.system('/usr/share/slimbookbattery/bin/limitcpu.x 3')
+     
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
@@ -3562,7 +3535,6 @@ class Preferences(Gtk.ApplicationWindow):
                 config.set('SETTINGS', 'limit_cpu_equilibrado', '1')
 
             elif name == (_('medium')):
-                # os.system('/usr/share/slimbookbattery/bin/limitcpu.x 2')
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
@@ -3585,7 +3557,6 @@ class Preferences(Gtk.ApplicationWindow):
                 config.set('SETTINGS', 'limit_cpu_equilibrado', '2')
 
             elif name == (_('none')):
-                # os.system('/usr/share/slimbookbattery/bin/limitcpu.x 3')
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
@@ -4114,7 +4085,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         state = ''
         autostart = ''
-        # mode = ''
         workMode = ''
         icono = ''
 
@@ -4172,7 +4142,7 @@ class Preferences(Gtk.ApplicationWindow):
                 subprocess.getstatusoutput(
                     'pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE ' + workMode)
 
-                # Icon
+        # Icon
         if self.switchIcon.get_state():
             # print('\tIcon: on')
             icono = '1'
@@ -4216,8 +4186,6 @@ class Preferences(Gtk.ApplicationWindow):
         print()
         fichero = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
         config.read(fichero)
-
-        # os.system("pkexec slimbookbattery-pkexec restart_tlp")
 
         # Saving interface new values **************************************************************
 
@@ -4350,6 +4318,7 @@ def reboot_process(process_name, path, start):
             print('Done')
         else:
             print("Couldn't launch process")
+
     else:
         print(process_name + ' was not running')
 
