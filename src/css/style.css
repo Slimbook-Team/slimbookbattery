@@ -10,8 +10,31 @@
 #modes {
     font-size: x-large;
     font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+#notebook {
+    margin-left: 90px;
+    margin-right: 90px;
     margin-top: 40px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+}
+
+/* WHEN LOW RESOLUTION */
+#notebook_min {
+    margin-left: 90px;
+    margin-right: 90px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#smaller_label label {
+    font-size: small;
+}
+
+#title {
+    padding-top: 30px;
 }
 
 #radio_grid{
@@ -37,9 +60,14 @@
     background-image: linear-gradient(to right, rgb(211, 24, 24) 0%, transparent 100%);
 } */
 
+
+scrolledwindow *{
+    border: none;
+    border-image: none;
+}
  
 window>grid>box>button {
-
+    margin: 10px;
     background: rgb(23, 24, 23);
     border: 1px solid rgb(39, 161, 15);
     border-style: outset;
@@ -51,7 +79,6 @@ window>grid>box>button:hover {
     outline-offset: -2px;
     outline-width: 2px;
 }
-
 
 window>grid>box button:hover, window>grid>box button:checked{
     /* background-image: radial-gradient(ellipse at center,green 0%, transparent 100%); */
@@ -79,7 +106,6 @@ combobox>box>button:disabled {
     color: white;
 }
 
-
 radio, radiobutton, radiobutton:checked, radiobutton:selected{
     color: green;
     background: transparent;
@@ -95,10 +121,13 @@ window label, scale *{
 }
 
 /* WINDOW */
-
 window{
     background-color: rgb(0, 0, 0);
     /* background-image: radial-gradient(ellipse at center,green 80%, transparent 100%); */
+}
+
+stack {
+    margin-top: -1px;
 }
 
 /* NOTEBOOK */
@@ -121,13 +150,6 @@ notebook stack button:hover {
     background-repeat: no-repeat;
 }
 
-notebook {
-    margin-left: 90px;
-    margin-right: 90px;
-    margin-top: 40px;
-    margin-bottom: 10px;
-}
-
 notebook > *{
     background-color: transparent;
 }
@@ -137,11 +159,14 @@ notebook header, notebook, stack{
 }
 
 notebook stack {
-    padding: 20px;
-    padding-top: 30px;
     background-image: url('../../images/interface/stack-background.png');
     background-repeat: no-repeat;
     background-size: 100% 100%;
+}
+
+stack>grid>grid, scrolledwindow grid{
+    padding: 20px;
+    padding-top: 20px;
 }
 
 /* TABS */

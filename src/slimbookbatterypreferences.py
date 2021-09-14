@@ -48,6 +48,8 @@ except Exception:
 
 err_trace = []
 
+
+
 user = getpass.getuser()
 user_home = expanduser("~")
 currpath = os.path.dirname(os.path.realpath(__file__))
@@ -79,6 +81,9 @@ class colors:  # You may need to change color settings
 
 
 class Preferences(Gtk.ApplicationWindow):
+
+    min_resolution = False
+
     state_actual = ''
     autostart_inicial = ''
     modo_actual = ''
@@ -93,9 +98,11 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.set_position(Gtk.WindowPosition.CENTER)  # // Allow movement
 
-        self.set_resizable(False)
+        self.set_size_request(1100, 400)
 
         self.set_decorated(False)
+        self.set_resizable(False)
+        self.set_has_resize_grip(False)
 
         # Movement
         self.is_in_drag = False
@@ -115,6 +122,8 @@ class Preferences(Gtk.ApplicationWindow):
         except Exception as e:
             print(e)
             self.child_process.terminate()
+
+        print(str(self.get_size()))
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -172,14 +181,12 @@ class Preferences(Gtk.ApplicationWindow):
         ancho = dimensiones[0]
         alto = dimensiones[1]
 
-        self.set_default_size(1100, 400)
-
         if (int(ancho) >= 1920) and (int(alto) >= 1080):
             print(_('Full window is displayed'))
         else:
-            self.set_default_size(1100, 400)
+            self.resize(1100, 650)
+            self.min_resolution = True
 
-        self.set_resizable(False)
 
         win_grid = Gtk.Grid(column_homogeneous=True,
                             column_spacing=0,
@@ -207,8 +214,10 @@ class Preferences(Gtk.ApplicationWindow):
         hbox.pack_start(self.RestoreValues, True, True, 0)
         hbox.pack_start(self.btnAccept, True, True, 0)
         hbox.set_halign(Gtk.Align.END)
-        hbox.set_name('win_bttns')
-
+        
+        if self.min_resolution == True:
+            hbox.set_name('smaller_label')
+            
         label77 = Gtk.Label(label='')
         label77.set_halign(Gtk.Align.START)
         label77.set_name('version')
@@ -233,13 +242,25 @@ class Preferences(Gtk.ApplicationWindow):
         # NOTEBOOK ***************************************************************
 
         notebook = Gtk.Notebook.new()
+        if self.min_resolution == True:
+            notebook.set_name('notebook_min')
+        else:
+            notebook.set_name('notebook')
+
         notebook.set_tab_pos(Gtk.PositionType.TOP)
 
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename = os.path.join(imagespath, 'slimbookbattery-header-2.png'),
-            width = 825,
-            height = 225,
-            preserve_aspect_ratio = True)
+        if self.min_resolution == True:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                filename = os.path.join(imagespath, 'slimbookbattery-header-2.png'),
+                width = 775,
+                height = 175,
+                preserve_aspect_ratio = True)
+        else:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                filename = os.path.join(imagespath, 'slimbookbattery-header-2.png'),
+                width = 825,
+                height = 225,
+                preserve_aspect_ratio = True)
 
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
@@ -268,11 +289,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # GENERAL PAGE  **********************************************************
 
-        vbox1 = Gtk.VBox(spacing=5)
-        vbox1.set_border_width(5)
-        print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
-
-        notebook.append_page(vbox1, Gtk.Label.new(_('General')))
+        print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))      
 
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
@@ -288,7 +305,9 @@ class Preferences(Gtk.ApplicationWindow):
 
         general_page_grid.attach(general_grid, 0, 0, 2, 1)
 
-        vbox1.pack_start(general_page_grid, False, False, 1)
+
+        # General page won't have scroll
+        notebook.append_page(general_page_grid, Gtk.Label.new(_('General')))
 
         # ********* GENERAL PAGE COMPONENENTS ************************************
 
@@ -439,9 +458,9 @@ class Preferences(Gtk.ApplicationWindow):
 
         # LOW MODE PAGE **********************************************************
         # LOW MODE PAGE **********************************************************
-        vbox7 = Gtk.VBox(spacing=5)
-        vbox7.set_border_width(5)
-        notebook.append_page(vbox7, Gtk.Label.new(_('Energy Saving')))
+        # vbox7 = Gtk.VBox(spacing=5)
+        # vbox7.set_border_width(5)
+        # notebook.append_page(vbox7, Gtk.Label.new(_('Energy Saving')))
 
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
@@ -455,11 +474,20 @@ class Preferences(Gtk.ApplicationWindow):
                             row_homogeneous=False,
                             column_spacing=30,
                             row_spacing=20)
+  
+        low_page_grid.attach(low_grid, 0, 0, 2, 1)
 
-        low_page_grid.attach(low_grid, 0, 0, 2, 4)
+        if self.min_resolution == True:
+            scrolled_window1 = Gtk.ScrolledWindow()
+            scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+            
+            scrolled_window1.set_min_content_height(400)
+            scrolled_window1.set_min_content_width(1000)
 
-        low_grid.set_name('low_grid')
-        vbox7.pack_start(low_page_grid, True, True, 0)
+            scrolled_window1.add_with_viewport(low_page_grid)
+            notebook.append_page(scrolled_window1, Gtk.Label.new(_('Energy Saving')))
+        else:
+            notebook.append_page(low_page_grid, Gtk.Label.new(_('General')))
 
         # ********* LOW MODE COMPONENTS COLUMN 1 *********************************
         print('\nLOADING LOW MODE COMPONENTS ...')
@@ -468,11 +496,18 @@ class Preferences(Gtk.ApplicationWindow):
         label_width2 = 4
         scale_width = 2
 
-        label_col = 0
-        button_col = 4
+        
 
-        label_col2 = 5
-        button_col2 = 10
+        if self.min_resolution == True:
+            label_col = 0
+            button_col = 5
+            label_col2 = 0
+            button_col2 = 5
+        else:
+            label_col = 0
+            button_col = 4
+            label_col2 = 5
+            button_col2 = 10
         row = 1
 
         # LABEL 0
@@ -676,6 +711,8 @@ class Preferences(Gtk.ApplicationWindow):
             row = row + 2
             label33 = Gtk.Label(label='')
             label33.set_markup('<big><b>' + (_('CPU TDP Settings')) + '</b></big>')
+            if self.min_resolution == True:
+                label33.set_name('title')
             label33.set_halign(Gtk.Align.START)
             low_grid.attach(label33, label_col, row, 4, 1)
 
@@ -730,10 +767,15 @@ class Preferences(Gtk.ApplicationWindow):
 
         # ********* LOW MODE COMPONENTS COLUMN 2 *********************************
 
-        row = 1
+        if not self.min_resolution == True:
+            row = 1
+        else:
+            row = row+1
 
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>' + (_('Persistent changes:')) + '</b></big>')
+        if self.min_resolution == True:
+            label33.set_name('title')
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, 5, 1)
         # 1 ------------- BRIGHTNESS *
@@ -1000,9 +1042,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # MID MODE PAGE **********************************************************
         # MID MODE PAGE **********************************************************
-        vbox7 = Gtk.VBox(spacing=5)
-        vbox7.set_border_width(5)
-        notebook.append_page(vbox7, Gtk.Label.new(_('Balanced')))
+
 
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
@@ -1019,8 +1059,17 @@ class Preferences(Gtk.ApplicationWindow):
 
         low_page_grid.attach(low_grid, 0, 0, 2, 4)
 
-        low_grid.set_name('low_grid')
-        vbox7.pack_start(low_page_grid, True, True, 0)
+        if self.min_resolution == True:
+            scrolled_window1 = Gtk.ScrolledWindow()
+            scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+            
+            scrolled_window1.set_min_content_height(400)
+            scrolled_window1.set_min_content_width(1000)
+
+            scrolled_window1.add_with_viewport(low_page_grid)
+            notebook.append_page(scrolled_window1, Gtk.Label.new(_('Balanced')))
+        else:
+            notebook.append_page(low_page_grid, Gtk.Label.new(_('Balanced')))
 
         # ********* MID MODE COMPONENTS COLUMN 1 *********************************
         print('\nLOADING BALANCED MODE COMPONENTS ...')
@@ -1222,6 +1271,8 @@ class Preferences(Gtk.ApplicationWindow):
             row = row + 2
             label33 = Gtk.Label(label='')
             label33.set_markup('<big><b>' + (_('CPU TDP Settings')) + '</b></big>')
+            if self.min_resolution == True:
+                label33.set_name('title')
             label33.set_halign(Gtk.Align.START)
             low_grid.attach(label33, label_col, row, 4, 1)
 
@@ -1275,10 +1326,15 @@ class Preferences(Gtk.ApplicationWindow):
 
         # ********* MID MODE COMPONENTS COLUMN 2 *********************************
 
-        row = 1
+        if not self.min_resolution == True:
+            row = 1
+        else:
+            row = row+1
 
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>' + (_('Persistent changes:')) + '</b></big>')
+        if self.min_resolution == True:
+            label33.set_name('title')
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, 5, 1)
         # 1 ------------- BRIGHTNESS *
@@ -1541,10 +1597,6 @@ class Preferences(Gtk.ApplicationWindow):
         # HIGH MODE PAGE **********************************************************
         print('\nLOADING HIGH MODE COMPONENTS ...')
 
-        vbox7 = Gtk.VBox(spacing=5)
-        vbox7.set_border_width(5)
-        notebook.append_page(vbox7, Gtk.Label.new(_('Maximum Performance')))
-
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
         logo.set_valign(Gtk.Align.START)
@@ -1560,8 +1612,17 @@ class Preferences(Gtk.ApplicationWindow):
 
         low_page_grid.attach(low_grid, 0, 0, 2, 4)
 
-        low_grid.set_name('low_grid')
-        vbox7.pack_start(low_page_grid, True, True, 0)
+        if self.min_resolution == True:
+            scrolled_window1 = Gtk.ScrolledWindow()
+            scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+            
+            scrolled_window1.set_min_content_height(400)
+            scrolled_window1.set_min_content_width(1000)
+
+            scrolled_window1.add_with_viewport(low_page_grid)
+            notebook.append_page(scrolled_window1, Gtk.Label.new(_('Maximum Performance')))
+        else:
+            notebook.append_page(low_page_grid, Gtk.Label.new(_('Maximum Performance')))
 
         # ********* HIGH MODE COMPONENTS COLUMN 1 *********************************
 
@@ -1760,6 +1821,8 @@ class Preferences(Gtk.ApplicationWindow):
             row = row + 2
             label33 = Gtk.Label(label='')
             label33.set_markup('<big><b>' + (_('CPU TDP Settings')) + '</b></big>')
+            if self.min_resolution == True:
+                label33.set_name('title')
             label33.set_halign(Gtk.Align.START)
             low_grid.attach(label33, label_col, row, 4, 1)
 
@@ -1812,10 +1875,15 @@ class Preferences(Gtk.ApplicationWindow):
                 low_grid.attach(label33, label_col, row, label_width, 1)
 
         # ********* HIGH MODE COMPONENTS COLUMN 2 *********************************
-        row = 1
+        if not self.min_resolution == True:
+            row = 1
+        else:
+            row = row+1
 
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>' + (_('Persistent changes:')) + '</b></big>')
+        if self.min_resolution == True:
+            label33.set_name('title')
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, 5, 1)
         # 1 ------------- BRIGHTNESS *
@@ -2069,10 +2137,6 @@ class Preferences(Gtk.ApplicationWindow):
                                         self.switchBlacklistWWANUSB3, self.switchShutdownSuspendUSB3)
 
         # CYCLES PAGE ************************************************************
-        vbox2 = Gtk.VBox(spacing=5)
-        vbox2.set_border_width(5)
-
-        notebook.append_page(vbox2, Gtk.Label.new(_('Cycles')))
 
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
@@ -2088,7 +2152,17 @@ class Preferences(Gtk.ApplicationWindow):
 
         cycles_page_grid.attach(cycles_grid, 0, 3, 2, 1)
 
-        vbox2.pack_start(cycles_page_grid, False, False, 1)
+        if self.min_resolution == True:
+            scrolled_window1 = Gtk.ScrolledWindow()
+            scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+            
+            scrolled_window1.set_min_content_height(400)
+            scrolled_window1.set_min_content_width(1000)
+
+            scrolled_window1.add_with_viewport(cycles_page_grid)
+            notebook.append_page(scrolled_window1, Gtk.Label.new(_('Cycles')))
+        else:
+            notebook.append_page(cycles_page_grid, Gtk.Label.new(_('Cycles')))
 
         # ********* CYCLES COMPONENTS ********************************************
         # (0, 0)
@@ -2165,10 +2239,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         # BATTERY INFO PAGE ******************************************************
 
-        vbox6 = Gtk.VBox(spacing=5)
-        vbox6.set_border_width(5)
-
-        notebook.append_page(vbox6, Gtk.Label.new(_('Battery')))
 
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
@@ -2184,7 +2254,17 @@ class Preferences(Gtk.ApplicationWindow):
 
         cycles_page_grid.attach(battery_grid, 0, 2, 2, 1)
 
-        vbox6.pack_start(cycles_page_grid, True, True, 0)
+        if self.min_resolution == True:
+            scrolled_window1 = Gtk.ScrolledWindow()
+            scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+            
+            scrolled_window1.set_min_content_height(400)
+            scrolled_window1.set_min_content_width(1000)
+
+            scrolled_window1.add_with_viewport(cycles_page_grid)
+            notebook.append_page(scrolled_window1, Gtk.Label.new(_('Battery')))
+        else:
+            notebook.append_page(cycles_page_grid, Gtk.Label.new(_('Battery')))
 
         # ********* BATTERY COMPONENTS *******************************************
 
@@ -2380,10 +2460,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         # INFO PAGE **************************************************************
 
-        vbox7 = Gtk.VBox(spacing=5)
-        vbox7.set_border_width(5)
-        notebook.append_page(vbox7, Gtk.Label.new(_('Information')))
-
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
         logo.set_valign(Gtk.Align.START)
@@ -2391,15 +2467,31 @@ class Preferences(Gtk.ApplicationWindow):
         info_page_grid = Gtk.Grid(column_homogeneous=True,
                                   column_spacing=0,
                                   row_spacing=20)
+        
+
 
         info_grid = Gtk.Grid(column_homogeneous=True,
                              column_spacing=0,
                              row_spacing=15)
+        if self.min_resolution == True:
+            info_grid.set_name('smaller_label')
+
 
         info_page_grid.attach(info_grid, 0, 0, 2, 4)
+        
 
-        info_grid.set_name('info_grid')
-        vbox7.pack_start(info_page_grid, True, True, 0)
+
+        if self.min_resolution == True:
+            scrolled_window1 = Gtk.ScrolledWindow()
+            scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+            
+            scrolled_window1.set_min_content_height(400)
+            scrolled_window1.set_min_content_width(1000)
+
+            scrolled_window1.add_with_viewport(info_page_grid)
+            notebook.append_page(scrolled_window1, Gtk.Label.new(_('Information')))
+        else:
+            notebook.append_page(info_page_grid, Gtk.Label.new(_('Information')))
 
         # ********* APPLICATION INFO COMPONENTS ***********************************
 
