@@ -181,7 +181,7 @@ class Preferences(Gtk.ApplicationWindow):
         ancho = dimensiones[0]
         alto = dimensiones[1]
 
-        if (int(ancho) >= 1920) and (int(alto) >= 1080):
+        if (int(ancho) >= 1550) and (int(alto) >= 850):
             print(_('Full window is displayed'))
         else:
             self.resize(1100, 650)
