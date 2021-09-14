@@ -14,9 +14,9 @@ if os.path.exists(tlp) or os.path.exists(tlp2):
         pgrep = subprocess.getoutput("pgrep slimbookbatterypreferences")
         numProcRunning = pgrep.split('\n')
         if len(numProcRunning) > 1:
-            print("Slimbook Battery it's in execution")
+            print("Slimbook Battery is in execution")
         else:
-            preference_py = os.path.join(current_path, '../src/slimbookbatterypreferences.py')
+            preference_py = os.path.join(current_path, '../share/slimbookbattery/src/slimbookbatterypreferences.py')
             os.system('python3 {}'.format(preference_py))
 
 exit(0)
