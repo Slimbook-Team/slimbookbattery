@@ -3,20 +3,32 @@
 
 
 import os
+import sys
 import subprocess
 
+args = sys.argv
 tlp = "/usr/bin/tlp"
 tlp2 = "/usr/sbin/tlp"
 current_path = os.path.dirname(os.path.realpath(__file__))
 
-if os.path.exists(tlp) or os.path.exists(tlp2):
-    if __name__ == "__main__":
-        pgrep = subprocess.getoutput("pgrep slimbookbatterypreferences")
-        numProcRunning = pgrep.split('\n')
-        if len(numProcRunning) > 1:
-            print("Slimbook Battery is in execution")
-        else:
-            preference_py = os.path.join(current_path, '../share/slimbookbattery/src/slimbookbatterypreferences.py')
-            os.system('python3 {}'.format(preference_py))
+if len(args)>1:
+    if args[1]=='-h':
+        print('Slimbook Batery Options:')
+        print('-v: Application version.')
+    elif args[1]=='-v':
+        version_line = subprocess.getstatusoutput("cat /usr/share/slimbookbattery/src/changelog |head -n1| egrep -o '\(.*\)'")
+        if version_line[0] == 0:
+            print('Slimbook Battery '+version_line[1])
+
+else:
+    if os.path.exists(tlp) or os.path.exists(tlp2):
+        if __name__ == "__main__":
+            pgrep = subprocess.getoutput("pgrep slimbookbatterypreferences")
+            numProcRunning = pgrep.split('\n')
+            if len(numProcRunning) > 1:
+                print("Slimbook Battery is in execution")
+            else:
+                preference_py = os.path.join(current_path, '../share/slimbookbattery/src/slimbookbatterypreferences.py')
+                os.system('python3 {}'.format(preference_py))
 
 exit(0)
