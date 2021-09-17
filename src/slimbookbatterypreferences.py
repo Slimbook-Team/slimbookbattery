@@ -33,22 +33,18 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf
 from os.path import expanduser
 
+idiomas = ['en']
 try:
     entorno_usu = locale.getlocale()[0]
-    if entorno_usu.find("en") >= 0 or entorno_usu.find("es") >= 0 or entorno_usu.find("it") >= 0 or entorno_usu.find(
-            "pt") >= 0 or entorno_usu.find("gl") >= 0:
-        idiomas = [entorno_usu]
-    else:
-        idiomas = ['en']
+    for lang in ["en", "es", "it", "pt", "gl"]:
+        if entorno_usu.find(lang) >= 0:
+            idiomas = [entorno_usu]
+            break
     print('Language: ', entorno_usu)
 except Exception:
-    idiomas = ['en']
-
-# idiomas = ['pt']
+    print('Locale exception')
 
 err_trace = []
-
-
 
 user = getpass.getuser()
 user_home = expanduser("~")
@@ -69,7 +65,6 @@ if not os.path.isfile(config_file):
 config = configparser.ConfigParser()
 config.read(config_file)
 
-
 class colors:  # You may need to change color settings
     RED = '\033[31m'
     ENDC = '\033[m'
@@ -78,7 +73,6 @@ class colors:  # You may need to change color settings
     YELLOW = '\033[33m'
     BLUE = '\033[34m'
     BOLD = "\033[;1m"
-
 
 class Preferences(Gtk.ApplicationWindow):
 
@@ -160,15 +154,12 @@ class Preferences(Gtk.ApplicationWindow):
         return False
 
     def set_ui(self):
+
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename=os.path.join(imagespath, 'normal.png'),
             width=825,
             height=225,
             preserve_aspect_ratio=True)
-
-        logo = Gtk.Image.new_from_pixbuf(pixbuf)
-        logo.set_halign(Gtk.Align.START)
-        logo.set_valign(Gtk.Align.START)
 
         self.set_default_icon(pixbuf)
 
@@ -185,7 +176,6 @@ class Preferences(Gtk.ApplicationWindow):
         else:
             self.resize(1100, 650)
             self.min_resolution = True
-
 
         win_grid = Gtk.Grid(column_homogeneous=True,
                             column_spacing=0,
@@ -283,10 +273,6 @@ class Preferences(Gtk.ApplicationWindow):
         # GENERAL PAGE  **********************************************************
 
         print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))      
-
-        logo = Gtk.Image.new_from_pixbuf(pixbuf)
-        logo.set_halign(Gtk.Align.START)
-        logo.set_valign(Gtk.Align.START)
 
         general_page_grid = Gtk.Grid(column_homogeneous=True,
                                      column_spacing=0,
@@ -450,11 +436,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.load_components(rbutton1, rbutton2, rbutton3)
 
         # LOW MODE PAGE **********************************************************
-
-        logo = Gtk.Image.new_from_pixbuf(pixbuf)
-        logo.set_halign(Gtk.Align.START)
-        logo.set_valign(Gtk.Align.START)
-
         low_page_grid = Gtk.Grid(column_homogeneous=True,
                                  column_spacing=0,
                                  row_spacing=20)
@@ -484,8 +465,6 @@ class Preferences(Gtk.ApplicationWindow):
         label_width = 3
         label_width2 = 4
         scale_width = 2
-
-        
 
         if self.min_resolution == True:
             label_col = 0
@@ -682,18 +661,23 @@ class Preferences(Gtk.ApplicationWindow):
         tdpcontroller = config['TDP']['tdpcontroller']
         if config['TDP']['tdpcontroller'] == '':
 
-            if subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1 | grep -i intel")[0] == 0:
-                tdpcontroller = 'slimbookintelcontroller'
-            elif subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1 | grep -i amd")[0] == 0:
-                tdpcontroller = 'slimbookamdcontroller'
-            else:
-                print('Could not find TDP contoller for ')
+            proc = subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1")
+            if  proc[0] == 0 :
+                if proc[1].find('intel'):
+                    tdpcontroller = 'slimbookintelcontroller'
+                elif proc[1].find('amd'):
+                    tdpcontroller = 'slimbookamdcontroller'
+                else:
+                    print('Could not find TDP contoller for your processor')
 
-            config.set('TDP', 'tdpcontroller', tdpcontroller)
-            # This step is done at the end of function
-            configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-            config.write(configfile)
-            configfile.close()
+                config.set('TDP', 'tdpcontroller', tdpcontroller)
+                
+                print('TDP Controller found: '+tdpcontroller)
+
+                # This step is done at the end of function
+                configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
+                config.write(configfile)
+                configfile.close()
 
         if tdpcontroller != '':
 
@@ -737,18 +721,22 @@ class Preferences(Gtk.ApplicationWindow):
 
                 # LABEL 7
                 row = row + 1
-                link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
+                self.link = ''
                 if tdpcontroller == 'slimbookintelcontroller':
-                    if idiomas[0].find('es'):
-                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
-                else:
-                    if idiomas[0].find('es'):
-                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
+                    if idiomas[0].find('es') != -1:
+                        self.link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
                     else:
-                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
+                        print(idiomas)
+                        self.link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
+                else:
+                    if idiomas[0].find('es') != -1:
+                        self.link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
+                    else:
+                        print(idiomas)
+                        self.link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
 
                 label33 = Gtk.Label()
-                label33.set_markup("<a href='" + link + "'>" + _('Learn more about TDP Controller') + "</a>")
+                label33.set_markup("<a href='" + self.link + "'>" + _('Learn more about TDP Controller') + "</a>")
                 label33.set_name('link')
                 label33.set_halign(Gtk.Align.START)
                 low_grid.attach(label33, label_col, row, label_width, 1)
@@ -1029,13 +1017,7 @@ class Preferences(Gtk.ApplicationWindow):
                                         self.switchBlacklistPrintUSB, self.switchBlacklistWWANUSB,
                                         self.switchShutdownSuspendUSB)
 
-
         # MID MODE PAGE **********************************************************
-
-
-        logo = Gtk.Image.new_from_pixbuf(pixbuf)
-        logo.set_halign(Gtk.Align.START)
-        logo.set_valign(Gtk.Align.START)
 
         low_page_grid = Gtk.Grid(column_homogeneous=True,
                                  column_spacing=0,
@@ -1248,14 +1230,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.check_autostart_switchWifiNIU(self.switchWifiNIU2)
         low_grid.attach(self.switchWifiNIU2, button_col, row, 1, 1)
         # 8 ------------- TDP ADJUST
-        tdpcontroller = ''
-        if subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1 | grep -i intel")[0] == 0:
-            tdpcontroller = 'slimbookintelcontroller'
-        elif subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1 | grep -i amd")[0] == 0:
-            tdpcontroller = 'slimbookamdcontroller'
-        else:
-            print('Could not find TDP contoller for ')
-
+ 
         if tdpcontroller != '':
             row = row + 2
             label33 = Gtk.Label(label='')
@@ -1294,20 +1269,9 @@ class Preferences(Gtk.ApplicationWindow):
                 # self.check_autostart_switchTDP(self.switchTDP)
                 low_grid.attach(self.switchTDP2, button_col, row, 1, 1)
 
-                # LABEL 7
-                row = row + 1
-                link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
-                if tdpcontroller == 'slimbookintelcontroller':
-                    if idiomas[0].find('es'):
-                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
-                else:
-                    if idiomas[0].find('es'):
-                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
-                    else:
-                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
 
                 label33 = Gtk.Label()
-                label33.set_markup("<a href='" + link + "'>" + _('Learn more about TDP Controller') + "</a>")
+                label33.set_markup("<a href='" + self.link + "'>" + _('Learn more about TDP Controller') + "</a>")
                 label33.set_name('link')
                 label33.set_halign(Gtk.Align.START)
                 low_grid.attach(label33, label_col, row, label_width, 1)
@@ -1583,10 +1547,6 @@ class Preferences(Gtk.ApplicationWindow):
         # HIGH MODE PAGE **********************************************************
         print('\nLOADING HIGH MODE COMPONENTS ...')
 
-        logo = Gtk.Image.new_from_pixbuf(pixbuf)
-        logo.set_halign(Gtk.Align.START)
-        logo.set_valign(Gtk.Align.START)
-
         low_page_grid = Gtk.Grid(column_homogeneous=True,
                                  column_spacing=0,
                                  row_spacing=20)
@@ -1795,13 +1755,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.check_autostart_switchWifiNIU(self.switchWifiNIU3)
         low_grid.attach(self.switchWifiNIU3, button_col, row, 1, 1)
         # 8 ------------- TDP ADJUST
-        tdpcontroller = ''
-        if subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1 | grep -i intel")[0] == 0:
-            tdpcontroller = 'slimbookintelcontroller'
-        elif subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1 | grep -i amd")[0] == 0:
-            tdpcontroller = 'slimbookamdcontroller'
-        else:
-            print('Could not find TDP contoller for ')
 
         if tdpcontroller != '':
             row = row + 2
@@ -1842,19 +1795,8 @@ class Preferences(Gtk.ApplicationWindow):
                 low_grid.attach(self.switchTDP3, button_col, row, 1, 1)
 
                 # LABEL 7
-                row = row + 1
-                link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
-                if tdpcontroller == 'slimbookintelcontroller':
-                    if idiomas[0].find('es'):
-                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
-                else:
-                    if idiomas[0].find('es'):
-                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
-                    else:
-                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
-
                 label33 = Gtk.Label()
-                label33.set_markup("<a href='" + link + "'>" + _('Learn more about TDP Controller') + "</a>")
+                label33.set_markup("<a href='" + self.link + "'>" + _('Learn more about TDP Controller') + "</a>")
                 label33.set_name('link')
                 label33.set_halign(Gtk.Align.START)
                 low_grid.attach(label33, label_col, row, label_width, 1)
@@ -2122,10 +2064,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         # CYCLES PAGE ************************************************************
 
-        logo = Gtk.Image.new_from_pixbuf(pixbuf)
-        logo.set_halign(Gtk.Align.START)
-        logo.set_valign(Gtk.Align.START)
-
         cycles_page_grid = Gtk.Grid(column_homogeneous=True,
                                     column_spacing=0,
                                     row_spacing=20)
@@ -2222,10 +2160,6 @@ class Preferences(Gtk.ApplicationWindow):
         cycles_grid.attach(self.scaleTimeWarnings, 1, 4, 1, 1)
 
         # BATTERY INFO PAGE ******************************************************
-
-        logo = Gtk.Image.new_from_pixbuf(pixbuf)
-        logo.set_halign(Gtk.Align.START)
-        logo.set_valign(Gtk.Align.START)
 
         cycles_page_grid = Gtk.Grid(column_homogeneous=True,
                                     column_spacing=0,
@@ -2443,10 +2377,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         # INFO PAGE **************************************************************
 
-        logo = Gtk.Image.new_from_pixbuf(pixbuf)
-        logo.set_halign(Gtk.Align.START)
-        logo.set_valign(Gtk.Align.START)
-
         info_page_grid = Gtk.Grid(column_homogeneous=True,
                                   column_spacing=0,
                                   row_spacing=20)
@@ -2587,16 +2517,6 @@ class Preferences(Gtk.ApplicationWindow):
         label77.set_markup(msg)
         label77.set_justify(Gtk.Justification.CENTER)
         info_grid.attach(label77, 0, 7, 5, 1)
-
-        # (7, 0)
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'logo.png'),
-            width=299,
-            height=180,
-            preserve_aspect_ratio=True)
-
-        logo = Gtk.Image.new_from_pixbuf(pixbuf)
-        # logo.set_alignment(0.5, 0)
 
         hbox = Gtk.HBox()
         hbox.set_halign(Gtk.Align.CENTER)
@@ -3212,7 +3132,7 @@ class Preferences(Gtk.ApplicationWindow):
             self.comboBoxWorkMode.set_active(0)
 
         elif subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_DEFAULT_MODE=BAT'")[0] == 0:
-            print('\tWorkMode: supuesto BAT')
+            print('\tWorkMode: BAT')
             self.comboBoxWorkMode.set_active(1)
 
         else:

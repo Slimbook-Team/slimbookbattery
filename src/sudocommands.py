@@ -39,7 +39,8 @@ if USERNAME[0] == 0 and USERNAME[1] != 'root' and subprocess.getstatusoutput('ge
 else:
     USER_NAME = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
 
-print(str(subprocess.getstatusoutput('echo ' + USER_NAME + '>> /etc/sudocmd.log')))
+
+print(str(subprocess.getstatusoutput('echo $(date) ' + USER_NAME + '>> /etc/sudocmd.log')))
 
 HOMEDIR = subprocess.getoutput("echo ~" + USER_NAME)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -58,12 +59,15 @@ config_tdp = ConfigParser()
 config_tdp.read(tdp_config_file)
 
 idiomas = ['en']
-entorno_usu = locale.getlocale()[0]
-for lang in ["en", "es", "it", "pt", "gl"]:
-    if entorno_usu.find(lang) >= 0:
-        idiomas = [entorno_usu]
-        break
-print('Language: ', entorno_usu)
+try:
+    entorno_usu = locale.getlocale()[0]
+    for lang in ["en", "es", "it", "pt", "gl"]:
+        if entorno_usu.find(lang) >= 0:
+            idiomas = [entorno_usu]
+            break
+    print('Language: ', entorno_usu)
+except Exception:
+    print('Locale exception')
 
 t = gettext.translation('sudocommands',
                         currpath + '/locale',
@@ -82,7 +86,6 @@ class colors:  # You may need to change color settings
     YELLOW = '\033[33m'
     BLUE = '\033[34m'
     BOLD = "\033[;1m"
-
 
 def main(args):  # Args will be like --> command_name value
 
@@ -223,8 +226,6 @@ def notify(msg):
 def set_tdp(mode):
     # This function enables tdpcontroller autostart an changes it's mode if battery application,
     # battery autostart and sync tdp switch of the selected mode is on.
-
-    # print('\n[TDP SETTINGS]')
     print(colors.GREEN + '\n[TDP SETTINGS]' + colors.ENDC)
     print('Battery Mode: ' + mode)
 
@@ -281,7 +282,6 @@ def set_tdp(mode):
 
 
 def change_config(args):  # For general page options
-    # print('[CHANGE CONFIGURATION]')
     print(colors.GREEN + '\n[CHANGE CONFIGURATION]' + colors.ENDC)
     files = ['/etc/tlp.conf',
              HOMEDIR + '/.config/slimbookbattery/custom/ahorrodeenergia',
@@ -294,7 +294,6 @@ def change_config(args):  # For general page options
 
 def mode_settings(mode):
     required_reboot = 0
-    # print('\n[MODE SETTINGS]')
     print(colors.GREEN + '\n[MODE SETTINGS]' + colors.ENDC)
     file_ahorro = HOMEDIR + '/.config/slimbookbattery/custom/ahorrodeenergia'
     file_equilibrado = HOMEDIR + '/.config/slimbookbattery/custom/equilibrado'
@@ -385,7 +384,7 @@ def mode_settings(mode):
 
             # if config['SETTINGS']['graphics_ahorro'] == '1' and os.system('lscpu | grep model | grep Radeon'):
             if config['SETTINGS']['graphics_ahorro'] == '1':
-                # Radeon integrated
+                # Radeon 
                 if subprocess.getstatusoutput('lscpu | grep -i model | grep  -i Radeon')[0] == 0:
                     print('Radeon graphics power profile: low')
                     RADEON_POWER_PROFILE_ON_BAT = 'low'
@@ -405,7 +404,7 @@ def mode_settings(mode):
                         )
                     )
 
-                # Intel integrated
+                # Intel 
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep -i Intel')[0] == 0:
                     print('Intel graphics power profile: low')
                     # MIN_BAT/MIN_AC
@@ -465,7 +464,7 @@ def mode_settings(mode):
                 else:
                     print('Graphics 404')
             else:
-                # Radeon integrated
+                # Radeon 
                 if subprocess.getstatusoutput('lscpu | grep -i model | grep -i Radeon')[0] == 0:
                     print('Radeon graphics power profile: default')
                     RADEON_POWER_PROFILE_ON_BAT = 'default'
@@ -485,7 +484,7 @@ def mode_settings(mode):
                         )
                     )
 
-                # Intel integrated
+                # Intel 
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep Intel')[0] == 0:
                     print('Intel graphics power profile: #low')
                     os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_BAT=/ c#INTEL_GPU_MIN_FREQ_ON_BAT=0" ' + file_ahorro)
@@ -521,7 +520,7 @@ def mode_settings(mode):
                         )
                     )
 
-                # Intel integrated
+                # Intel 
                 elif subprocess.getstatusoutput('lspci | grep VGA | grep -i Intel')[0] == 0:
                     print('Intel graphics power profile: mid')
                     for i in range(len(freq_available)):
@@ -581,7 +580,7 @@ def mode_settings(mode):
                     else:
                         print('Freq not found')
             else:
-                # Radeon integrated
+                # Radeon 
                 if subprocess.getstatusoutput('lscpu | grep -i model | grep -i Radeon')[0] == 0:
                     print('Radeon graphics power profile: #default')
                     RADEON_POWER_PROFILE_ON_BAT = 'default'
@@ -613,7 +612,7 @@ def mode_settings(mode):
                         'sed -i "/INTEL_GPU_BOOST_FREQ_ON_AC=/ c#INTEL_GPU_BOOST_FREQ_ON_AC=0" ' + file_equilibrado)
 
         if mode == '3':
-            # Radeon integrated
+            # Radeon 
             if subprocess.getstatusoutput('lscpu | grep -i model | grep -i Radeon')[0] == 0:
                 print('Radeon graphics power profile: high')
                 RADEON_POWER_PROFILE_ON_BAT = 'high'
@@ -679,7 +678,6 @@ def mode_settings(mode):
 
 
 def brightness_settings(mode):
-    # print('\n[BRIGTHNESS SETTINS]')
     print(colors.GREEN + '\n[BRIGTNESS SETTINGS]' + colors.ENDC)
     set_brightness = ''
 

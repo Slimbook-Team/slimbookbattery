@@ -166,7 +166,7 @@ notebook stack {
 
 stack>grid>grid, scrolledwindow grid{
     padding: 20px;
-    padding-top: 20px;
+    padding-top: 30px;
 }
 
 /* TABS */
