@@ -22,6 +22,9 @@ if len(args)>1:
         version_line = subprocess.getstatusoutput("cat /usr/share/slimbookbattery/src/changelog |head -n1| egrep -o '\(.*\)'")
         if version_line[0] == 0:
             print('Slimbook Battery '+version_line[1])
+        else:
+            print('Version not found.')
+
 
 else:
     if os.path.exists(tlp) or os.path.exists(tlp2):
