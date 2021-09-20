@@ -283,7 +283,7 @@ class Preferences(Gtk.ApplicationWindow):
                                 row_spacing=25)
 
         general_page_grid.attach(general_grid, 0, 0, 1, 1)
-        general_page_grid.set_valign(Gtk.Align.CENTER)
+        general_page_grid.set_halign(Gtk.Align.CENTER)
 
         # General page won't have scroll
         notebook.append_page(general_page_grid, Gtk.Label.new(_('General')))
@@ -2070,8 +2070,9 @@ class Preferences(Gtk.ApplicationWindow):
                                     row_spacing=20)
 
         cycles_grid = Gtk.Grid(column_homogeneous=True,
-                               column_spacing=0,
+                               column_spacing=40,
                                row_spacing=20)
+        cycles_grid.set_halign(Gtk.Align.CENTER)
 
         cycles_page_grid.attach(cycles_grid, 0, 3, 2, 1)
 
@@ -2169,6 +2170,7 @@ class Preferences(Gtk.ApplicationWindow):
         battery_grid = Gtk.Grid(column_homogeneous=True,
                                 column_spacing=0,
                                 row_spacing=20)
+        battery_grid.set_halign(Gtk.Align.CENTER)
 
         cycles_page_grid.attach(battery_grid, 0, 2, 2, 1)
 
