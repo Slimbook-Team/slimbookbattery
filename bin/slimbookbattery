@@ -9,12 +9,15 @@ import subprocess
 args = sys.argv
 tlp = "/usr/bin/tlp"
 tlp2 = "/usr/sbin/tlp"
+
 current_path = os.path.dirname(os.path.realpath(__file__))
 
 if len(args)>1:
     if args[1]=='-h':
-        print('Slimbook Batery Options:')
-        print('-v: Application version.')
+        print('Slimbook Battery Commandline Interface:')
+        print('For support go to: https://github.com/slimbook/slimbookbattery')
+        print('\n\t-h: This help.')
+        print('\t-v: Application version.')
     elif args[1]=='-v':
         version_line = subprocess.getstatusoutput("cat /usr/share/slimbookbattery/src/changelog |head -n1| egrep -o '\(.*\)'")
         if version_line[0] == 0:
