@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2021-09-20 11:51+0200\n"
+"POT-Creation-Date: 2021-09-20 12:24+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,20 +101,20 @@ msgid "Note: this setting affect to performance"
 msgstr ""
 
 #: slimbookbatterypreferences.py:514 slimbookbatterypreferences.py:1082
-#: slimbookbatterypreferences.py:1609 slimbookbatterypreferences.py:3167
-#: slimbookbatterypreferences.py:3434 slimbookbatterypreferences.py:3695
+#: slimbookbatterypreferences.py:1609 slimbookbatterypreferences.py:3159
+#: slimbookbatterypreferences.py:3426 slimbookbatterypreferences.py:3687
 msgid "maximum"
 msgstr ""
 
 #: slimbookbatterypreferences.py:515 slimbookbatterypreferences.py:1083
-#: slimbookbatterypreferences.py:1610 slimbookbatterypreferences.py:3190
-#: slimbookbatterypreferences.py:3458 slimbookbatterypreferences.py:3719
+#: slimbookbatterypreferences.py:1610 slimbookbatterypreferences.py:3182
+#: slimbookbatterypreferences.py:3450 slimbookbatterypreferences.py:3711
 msgid "medium"
 msgstr ""
 
 #: slimbookbatterypreferences.py:516 slimbookbatterypreferences.py:1084
-#: slimbookbatterypreferences.py:1611 slimbookbatterypreferences.py:3213
-#: slimbookbatterypreferences.py:3480 slimbookbatterypreferences.py:3742
+#: slimbookbatterypreferences.py:1611 slimbookbatterypreferences.py:3205
+#: slimbookbatterypreferences.py:3472 slimbookbatterypreferences.py:3734
 msgid "none"
 msgstr ""
 
@@ -426,51 +426,35 @@ msgstr ""
 msgid "The software is provided  as is , without warranty of any kind."
 msgstr ""
 
-#: slimbookbatterypreferences.py:2613
-msgid "Share:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:2613
-msgid "You are free to:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:2614
-msgid " --copy and redistribute the material in any medium or format"
-msgstr ""
-
-#: slimbookbatterypreferences.py:2615
-msgid "Slimbook Copyright - License Creative Commons BY-NC-ND"
-msgstr ""
-
-#: slimbookbatterypreferences.py:2881 slimbookbatterypreferences.py:2890
-#: slimbookbatterypreferences.py:2899 slimbookbatterypreferences.py:2908
-#: slimbookbatterypreferences.py:2917 slimbookbatterypreferences.py:2926
-#: slimbookbatterypreferences.py:2935 slimbookbatterypreferences.py:2949
-#: slimbookbatterypreferences.py:2960 slimbookbatterypreferences.py:2964
-#: slimbookbatterypreferences.py:2973 slimbookbatterypreferences.py:2982
-#: slimbookbatterypreferences.py:2991 slimbookbatterypreferences.py:3000
-#: slimbookbatterypreferences.py:3009 slimbookbatterypreferences.py:3018
-#: slimbookbatterypreferences.py:3031
+#: slimbookbatterypreferences.py:2873 slimbookbatterypreferences.py:2882
+#: slimbookbatterypreferences.py:2891 slimbookbatterypreferences.py:2900
+#: slimbookbatterypreferences.py:2909 slimbookbatterypreferences.py:2918
+#: slimbookbatterypreferences.py:2927 slimbookbatterypreferences.py:2941
+#: slimbookbatterypreferences.py:2952 slimbookbatterypreferences.py:2956
+#: slimbookbatterypreferences.py:2965 slimbookbatterypreferences.py:2974
+#: slimbookbatterypreferences.py:2983 slimbookbatterypreferences.py:2992
+#: slimbookbatterypreferences.py:3001 slimbookbatterypreferences.py:3010
+#: slimbookbatterypreferences.py:3023
 msgid "Unknown"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2945 slimbookbatterypreferences.py:2956
+#: slimbookbatterypreferences.py:2937 slimbookbatterypreferences.py:2948
 msgid " hours"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2947 slimbookbatterypreferences.py:2958
+#: slimbookbatterypreferences.py:2939 slimbookbatterypreferences.py:2950
 msgid " min"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2962
+#: slimbookbatterypreferences.py:2954
 msgid "Fully charged"
 msgstr ""
 
-#: slimbookbatterypreferences.py:4179
+#: slimbookbatterypreferences.py:4171
 msgid "Report file generated"
 msgstr ""
 
-#: slimbookbatterypreferences.py:4181 slimbookbatterypreferences.py:4183
+#: slimbookbatterypreferences.py:4173 slimbookbatterypreferences.py:4175
 msgid "Report file canceled"
 msgstr ""
 
