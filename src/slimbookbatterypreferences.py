@@ -442,7 +442,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         low_grid = Gtk.Grid(column_homogeneous=True,
                             row_homogeneous=False,
-                            column_spacing=30,
+                            column_spacing=25,
                             row_spacing=20)
   
         low_page_grid.attach(low_grid, 0, 0, 2, 1)
