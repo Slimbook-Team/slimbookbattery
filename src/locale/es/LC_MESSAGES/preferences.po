@@ -473,3 +473,20 @@ msgstr " o comprando un Slimbook ;)"
 #: slimbookbatterypreferences.py:2538
 msgid "Help us with translations!"
 msgstr "Ayúdanos con las traducciones!"
+
+#: slimbookbatterypreferences.py:686 slimbookbatterypreferences.py:1237
+#: slimbookbatterypreferences.py:1762
+msgid "CPU TDP Settings"
+msgstr "Ajustes de TDP de la CPU"
+
+#: slimbookbatterypreferences.py:696 slimbookbatterypreferences.py:710
+#: slimbookbatterypreferences.py:1246 slimbookbatterypreferences.py:1261
+#: slimbookbatterypreferences.py:1771 slimbookbatterypreferences.py:1786
+msgid "Synchronice battery mode with TDP mode:"
+msgstr "Sincroniza los modos de batería y TDP"
+
+#: slimbookbatterypreferences.py:739 slimbookbatterypreferences.py:1274
+#: slimbookbatterypreferences.py:1800
+msgid "Learn more about TDP Controller"
+msgstr "Leer más sobre el controlador de TDP"
+
