@@ -461,3 +461,15 @@ msgstr "Aceptar"
 
 msgid "Cancel"
 msgstr "Cancelar"
+
+#: slimbookbatterypreferences.py:2568
+msgid "If you want you can support the developement of this app and several more to come by joining us on "
+msgstr "Si quieres puedes ayudarnos con el desarrollo de esta y otras aplicaciones uniéndote a nuestro "
+
+#: slimbookbatterypreferences.py:2570
+msgid " or buying a brand new Slimbook ;)"
+msgstr " o comprando un Slimbook ;)"
+
+#: slimbookbatterypreferences.py:2538
+msgid "Help us with translations!"
+msgstr "Ayúdanos con las traducciones!"
