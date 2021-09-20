@@ -2607,15 +2607,7 @@ class Preferences(Gtk.ApplicationWindow):
         label77.set_justify(Gtk.Justification.CENTER)
         info_grid.attach(label77, 0, 16, 5, 1)
 
-        # (13, 0)
-        label77 = Gtk.Label(label='')
-        label77.set_markup(
-            '<b>' + (_('You are free to:')) + '</b>\n<span size="smaller"><b>' + (_('Share:')) + '</b>' + (
-                _(' --copy and redistribute the material in any medium or format')) + '\n' + (
-                _('Slimbook Copyright - License Creative Commons BY-NC-ND')) + '</span>')
-        label77.set_justify(Gtk.Justification.CENTER)
-        info_grid.attach(label77, 0, 17, 5, 1)
-
+        
         # (14, 0)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename=os.path.join(imagespath, 'cc.png'),
