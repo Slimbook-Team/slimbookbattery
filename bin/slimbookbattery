@@ -34,7 +34,7 @@ else:
             if len(numProcRunning) > 1:
                 print("Slimbook Battery is in execution")
             else:
-                preference_py = os.path.join(current_path, '../share/slimbookbattery/src/slimbookbatterypreferences.py')
+                preference_py = '/usr/share/slimbookbattery/src/slimbookbatterypreferences.py'
                 os.system('python3 {}'.format(preference_py))
 
 exit(0)
