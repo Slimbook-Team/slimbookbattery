@@ -501,7 +501,7 @@ class Preferences(Gtk.ApplicationWindow):
         icon = Gtk.Image()
         icon_path = os.path.join(imagespath, 'warning.png')
         icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: this setting affect to performance'))
+        icon.set_tooltip_text(_('Note: this setting affects to performance'))
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,
@@ -615,7 +615,7 @@ class Preferences(Gtk.ApplicationWindow):
         icon = Gtk.Image()
         icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: power save can cause an unstable wifi link.'))
+        icon.set_tooltip_text(_('Note: power save can cause an unstable wifi connection.'))
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,
@@ -1187,7 +1187,7 @@ class Preferences(Gtk.ApplicationWindow):
         icon = Gtk.Image()
         icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: power save can cause an unstable wifi link.'))
+        icon.set_tooltip_text(_('Note: power save can cause an unstable wifi connection.'))
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,
@@ -1596,7 +1596,7 @@ class Preferences(Gtk.ApplicationWindow):
         icon = Gtk.Image()
         icon_path = os.path.join(imagespath, 'warning.png')
         icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: this setting affect to performance'))
+        icon.set_tooltip_text(_('Note: this setting affects to performance'))
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,
@@ -1713,7 +1713,7 @@ class Preferences(Gtk.ApplicationWindow):
         icon = Gtk.Image()
         icon_path = os.path.join(imagespath, 'help.png')
         icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: power save can cause an unstable wifi link.'))
+        icon.set_tooltip_text(_('Note: power save can cause an unstable wifi connection.'))
         icon.set_halign(Gtk.Align.START)
         table_icon.attach(icon, 1, 2, 0, 1,
                           xpadding=10,

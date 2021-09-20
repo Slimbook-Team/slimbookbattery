@@ -370,7 +370,7 @@ def rebootNvidia():
                                message_format=(_('Slimbook Battery')))
     dialog.set_image(icon_MsgDialog)
     dialog.format_secondary_text(
-        _('The changes have been applied, but it is necessary to restart so that some of them may take effect.'))
+        _('The changes have been applied, but it is necessary to restart so that some of them may take effect. Do you want to restart?'))
     response = dialog.run()
     if response == Gtk.ResponseType.YES:
         os.system('reboot')

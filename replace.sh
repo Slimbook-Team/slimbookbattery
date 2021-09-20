@@ -5,7 +5,7 @@
 oldvalue=''
 newvalue=''
 
-file='slimbookbattery'
+file='preferences'
 
 i=0
 
@@ -19,12 +19,12 @@ egrep 'msgid|msgstr' ./locale/en/LC_MESSAGES/$file.po | while read -r line ; do
   
   
   if [ $((i%2)) -eq 0 ]; then # Si la linea es par (msgid)...
-    echo
-    echo $line
+    #echo
+    #echo $line
     oldvalue=$(echo $line | grep -oP '\"\K[^"]+')	
 
   else # Si la linea es impar (msgid + msgstr)...
-    echo $line
+    #echo $line
     newvalue=$(echo $line | grep -oP '\"\K[^"]+')
     
     #grep -rl "'$oldvalue'" . | xargs sed -i "'s/$oldvalue/$newvalue/g"
@@ -39,20 +39,20 @@ egrep 'msgid|msgstr' ./locale/en/LC_MESSAGES/$file.po | while read -r line ; do
       esc=true
 
       if echo "$oldvalue" | grep -q "/"; then
-        echo 'Found /'
+        #echo 'Found /'
         esc=false             
       fi
       if echo "$oldvalue" | grep -q "'"; then
-        echo "Found '"
+        #echo "Found '"
         esc=false
       fi
       if $esc; then
         if echo "$newvalue" | grep -q "/"; then
-        echo 'Found /'
+        #echo 'Found /'
           esc=false               
         fi
         if echo "$newvalue" | grep -q "'"; then
-          echo "Found '"
+          #echo "Found '"
           esc=false
         fi
       fi
@@ -83,8 +83,8 @@ egrep 'msgid|msgstr' ./locale/en/LC_MESSAGES/$file.po | while read -r line ; do
             }
 
           done
-      else
-        echo "\033[0;31mCheck special chars $oldvalue \033[0m"
+      # else
+        #echo "\033[0;31mCheck special chars $oldvalue \033[0m"
         
       fi
     fi
@@ -92,7 +92,7 @@ egrep 'msgid|msgstr' ./locale/en/LC_MESSAGES/$file.po | while read -r line ; do
   
   i=$((i + 1))
 done
-echo "Not changed: $not_changed"
+# echo "Not changed: $not_changed"
 
 
 

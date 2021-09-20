@@ -97,7 +97,7 @@ msgid "Limit CPU profile:"
 msgstr ""
 
 #: slimbookbatterypreferences.py:504 slimbookbatterypreferences.py:1599
-msgid "Note: this setting affect to performance"
+msgid "Note: this setting affects to performance"
 msgstr ""
 
 #: slimbookbatterypreferences.py:514 slimbookbatterypreferences.py:1082
