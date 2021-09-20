@@ -282,8 +282,8 @@ class Preferences(Gtk.ApplicationWindow):
                                 column_spacing=0,
                                 row_spacing=25)
 
-        general_page_grid.attach(general_grid, 0, 0, 2, 1)
-
+        general_page_grid.attach(general_grid, 0, 0, 1, 1)
+        general_page_grid.set_valign(Gtk.Align.CENTER)
 
         # General page won't have scroll
         notebook.append_page(general_page_grid, Gtk.Label.new(_('General')))
@@ -1269,7 +1269,7 @@ class Preferences(Gtk.ApplicationWindow):
                 # self.check_autostart_switchTDP(self.switchTDP)
                 low_grid.attach(self.switchTDP2, button_col, row, 1, 1)
 
-
+                row = row + 1
                 label33 = Gtk.Label()
                 label33.set_markup("<a href='" + self.link + "'>" + _('Learn more about TDP Controller') + "</a>")
                 label33.set_name('link')
@@ -1795,6 +1795,7 @@ class Preferences(Gtk.ApplicationWindow):
                 low_grid.attach(self.switchTDP3, button_col, row, 1, 1)
 
                 # LABEL 7
+                row = row + 1
                 label33 = Gtk.Label()
                 label33.set_markup("<a href='" + self.link + "'>" + _('Learn more about TDP Controller') + "</a>")
                 label33.set_name('link')
@@ -2939,7 +2940,7 @@ class Preferences(Gtk.ApplicationWindow):
             if cmd[0] == 0:
                 timeTo = cmd[1]
                 timeTo = timeTo.split()
-                print(timeTo)
+                #print(timeTo)
                 if timeTo[4] == 'hours':
                     timeTo = timeTo[3] + (_(' hours'))
                 else:

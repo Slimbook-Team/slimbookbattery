@@ -21,6 +21,14 @@ class Splash(Gtk.Window):
                             row_homogeneous=True)
         self.add(maingrid)
         self.set_name('splash_dialog')
+        
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=os.path.join(imagespath, 'normal.png'),
+            width=825,
+            height=225,
+            preserve_aspect_ratio=True)
+
+        self.set_default_icon(pixbuf)
 
         # Set window transparent
         screen = self.get_screen()

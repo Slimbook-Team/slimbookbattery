@@ -3,8 +3,6 @@
 
 #DEBHELPER#
 
-set -e
-
 echo "Debian postinst $1 :"
 
 if python3 /usr/share/slimbookbattery/src/check_config.py; then

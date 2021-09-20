@@ -288,7 +288,7 @@ RADEON_DPM_PERF_LEVEL_ON_BAT=auto
 # Default: off (AC), on (BAT)
 
 WIFI_PWR_ON_AC=off
-WIFI_PWR_ON_BAT=on
+WIFI_PWR_ON_BAT=off
 #slimbook (2 lines)
 
 # Disable wake on LAN: Y/N.
