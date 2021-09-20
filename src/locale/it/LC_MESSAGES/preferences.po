@@ -102,7 +102,7 @@ msgid "Limit CPU profile:"
 msgstr "Limita profilo CPU:"
 
 #: preferences.py:345 preferences.py:792 preferences.py:1247
-msgid "Note: this setting affect to performance"
+msgid "Note: this setting affects to performance"
 msgstr "Nota: questa impostazione influisce sulle prestazioni"
 
 #: preferences.py:354 preferences.py:801 preferences.py:1256

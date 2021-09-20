@@ -106,7 +106,7 @@ msgid "Disable animations:"
 msgstr "Desativar animações:"
 
 #: preferences.py:345 preferences.py:792 preferences.py:1247
-msgid "Note: this setting affect to performance"
+msgid "Note: this setting affects to performance"
 msgstr "Nota: esta configuração afeta o desempenho"
 
 #: preferences.py:354 preferences.py:801 preferences.py:1256
