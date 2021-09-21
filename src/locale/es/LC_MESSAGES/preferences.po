@@ -490,3 +490,6 @@ msgstr "Sincroniza los modos de batería y TDP"
 msgid "Learn more about TDP Controller"
 msgstr "Leer más sobre el controlador de TDP"
 
+#: preferences.py:341 preferences.py:1014 preferences.py:1485
+msgid "Disable animations:"
+msgstr "Desactivar animaciones:"
