@@ -17,30 +17,26 @@ HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_CONF = os.path.join(CURRENT_PATH, 'slimbookbattery.conf')
 CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
-if not os.path.isdir(CONFIG_FOLDER):
-    os.makedirs(CONFIG_FOLDER)
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
 
 uid, gid =  pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
 
 def main():    
-    if not os.path.isdir(CONFIG_FOLDER):
+
+
+    if not (os.path.isdir(CONFIG_FOLDER) == True):
+        print('Creating config folder ...')
         os.umask(0)
         os.makedirs(CONFIG_FOLDER, mode=0o766) # creates with perms 
         os.chown(CONFIG_FOLDER, uid, gid) # set user:group 
+        print(subprocess.getoutput('ls -la '+CONFIG_FOLDER))
+    else:
+        print('Configuration folder ('+CONFIG_FOLDER+') found!')
 
     check_config_file()
     check_tlp_files()
 
-    if getpass.getuser() == 'root':
-        print('Giving permisions ...')
-        for dirpath, dirnames, filenames in os.walk(CONFIG_FOLDER):
-            for filename in filenames:
-                path = os.path.join(dirpath, filename)
-                os.chmod(path, 0o777)
-        print('Done')
-    else:
-        print('Done')
+    
 
 
 def check_config_file():
@@ -114,14 +110,15 @@ def check_tlp_files():
     if incidences:
         print('\nResetting default and custom files ...')
         
-        # If /app/default
         if os.path.isdir(app_default_dir):
-            #shutil.rmtree(CONFIG_FOLDER)
+
             if not (os.path.isdir(usr_default_dir) and os.path.isdir(usr_custom_dir)):       
                     print('Creating directories')
-                    os.mkdir(usr_default_dir)
-                    os.mkdir(usr_custom_dir)
-
+                    os.makedirs(usr_default_dir, mode=0o766)
+                    os.chown(usr_default_dir, uid, gid) # set user:group 
+                    os.mkdir(usr_custom_dir, mode=0o766)
+                    os.chown(usr_custom_dir, uid, gid) # set user:group 
+ 
             for file in files:
                 app_default_file = os.path.join(app_default_dir, file)
                 shutil.copy(app_default_file, usr_default_dir)
