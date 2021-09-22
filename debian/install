@@ -1,4 +1,3 @@
-bin/* /bin/
 bin/* /usr/bin/
 debian/changelog /usr/share/slimbookbattery/
 slimbookbattery.desktop /usr/share/applications/

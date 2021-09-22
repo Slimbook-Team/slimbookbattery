@@ -23,6 +23,7 @@ import getpass
 import gettext
 import locale
 import math
+import shutil
 import os
 import subprocess
 import time
@@ -48,12 +49,12 @@ err_trace = []
 
 user = getpass.getuser()
 user_home = expanduser("~")
-currpath = os.path.dirname(os.path.realpath(__file__))
-imagespath = os.path.normpath(os.path.join(currpath, '..', 'images'))
+current_path = os.path.dirname(os.path.realpath(__file__))
+imagespath = os.path.normpath(os.path.join(current_path, '..', 'images'))
 config_file = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
 
 t = gettext.translation('preferences',
-                        currpath + '/locale',
+                        current_path + '/locale',
                         languages=idiomas,
                         fallback=True)
 
@@ -96,7 +97,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.set_decorated(False)
         self.set_resizable(False)
-        self.set_has_resize_grip(False)
+
 
         # Movement
         self.is_in_drag = False
@@ -109,7 +110,7 @@ class Preferences(Gtk.ApplicationWindow):
         # Center
         # self.connect('realize', self.on_realize)
 
-        self.child_process = subprocess.Popen(currpath + '/splash.py', stdout=subprocess.PIPE)
+        self.child_process = subprocess.Popen(current_path + '/splash.py', stdout=subprocess.PIPE)
 
         try:
             self.set_ui()
@@ -117,7 +118,7 @@ class Preferences(Gtk.ApplicationWindow):
             print(e)
             self.child_process.terminate()
 
-        print(str(self.get_size()))
+        #print(str(self.get_size()))
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -210,7 +211,7 @@ class Preferences(Gtk.ApplicationWindow):
         label77 = Gtk.Label(label='')
         label77.set_halign(Gtk.Align.START)
         label77.set_name('version')
-        version_line = subprocess.getstatusoutput("cat " + currpath + "/changelog |head -n1| egrep -o '\(.*\)'")
+        version_line = subprocess.getstatusoutput("cat " + current_path + "/changelog |head -n1| egrep -o '\(.*\)'")
         if version_line[0] == 0:
             version = version_line[1]
             label77.set_markup('<span font="10">Version ' + version[1:len(version) - 1] + '</span>')
@@ -3407,7 +3408,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         print('\n')
 
-        print('COnfig: ' + config['SETTINGS']['limit_cpu_ahorro'])
+        #print('Config: ' + config['SETTINGS']['limit_cpu_ahorro'])
 
         # This step is done at the end of function
         configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
@@ -4069,19 +4070,19 @@ class Preferences(Gtk.ApplicationWindow):
 
         # Checking autostart
 
-        if autostart == '1' and self.autostart_inicial == '0':
+        if autostart == '1' and self.autostart_inicial == '0' :
             print('Enabling autostart ...')
-            if os.path.isfile('~/.config/autostart'):
-                print(subprocess.getoutput(
-                    "cp /usr/share/slimbookbattery/src/slimbookbattery-autostart.desktop ~/.config/autostart/"))
-            else:
-                subprocess.getoutput('mkdir ~/.config/autostart')
-                print(subprocess.getoutput(
-                    "cp /usr/share/slimbookbattery/src/slimbookbattery-autostart.desktop ~/.config/autostart/"))
+
+            if not os.path.isdir(user_home + '/.config/autostart'):
+                os.mkdir(user_home+'/.config/autostart')
+            
+            shutil.copy(current_path + "/slimbookbattery-autostart.desktop", user_home+"/.config/autostart/")
+            config.set('CONFIGURATION','autostart', '1')
 
         elif autostart == '0' and self.autostart_inicial == '1':
             print('Disabling autostart ...')
-            os.system("rm -rf ~/.config/autostart/slimbookbattery-autostart.desktop")
+            config.set('CONFIGURATION','autostart', '0')
+            os.remove(user_home + "/.config/autostart/slimbookbattery-autostart.desktop")
 
         # UPDATING .CONF
 
@@ -4095,7 +4096,7 @@ class Preferences(Gtk.ApplicationWindow):
         config.write(configfile)
         configfile.close()
 
-        print('pkexec slimbookbattry-pkexec change_config TLP_DEFAULT_MODE ' + workMode)
+        # print('pkexec slimbookbattry-pkexec change_config TLP_DEFAULT_MODE ' + workMode)
 
         # Mode setting
         print()
@@ -4131,7 +4132,7 @@ class Preferences(Gtk.ApplicationWindow):
         command = 'pkexec slimbookbattery-pkexec apply'
         subprocess.Popen(command.split(' '))
 
-        reboot_process('slimbookbatteryindicator.py', currpath + '/slimbookbatteryindicator.py', True)
+        reboot_process('slimbookbatteryindicator.py', current_path + '/slimbookbatteryindicator.py', True)
 
         # This process wil only reboot if is running if not, and option is on, it will be launched
         actual_mode = config['CONFIGURATION']['modo_actual']
@@ -4248,7 +4249,7 @@ def reboot_process(process_name, path, start):
 
 
 style_provider = Gtk.CssProvider()
-style_provider.load_from_path(currpath + '/css/style.css')
+style_provider.load_from_path(current_path + '/css/style.css')
 
 Gtk.StyleContext.add_provider_for_screen(
     Gdk.Screen.get_default(), style_provider,

@@ -9,13 +9,18 @@ if python3 /usr/share/slimbookbattery/src/check_config.py; then
   echo 'Configuration OK'
 fi
 
-if chmod -R 755 /usr/share/slimbookbattery/src/*.py; then
-  echo 'Permissions given.'
+if chmod -R 766 /home/*/.config/slimbookbattery; then
+  echo 'Read/Write permissions given to config files.'
 
 fi
 
 if chmod -R 755 /usr/share/slimbookbattery/src/*.sh; then
-  echo 'Permissions given.'
+  echo 'Exec permissions given.'
+
+fi
+
+if chmod -R 755 /usr/share/slimbookbattery/src/*.py; then
+  echo 'Exec permissions given to src.'
 
 fi
 
@@ -24,9 +29,21 @@ if sudo systemctl enable tlp.service; then
   echo 'Tlp service enabled'
 fi
 
+echo 'Checking users autostart files'
+for user in $(ls /home)
+do
+  echo 
+  echo $user
+
+  if test -f /home/$user/.config/autostart/slimbookbattery-autostart.desktop; then
+      echo "Restoring /home/$user/.config/autostart/slimbookbattery-autostart.desktop"
+      cp /usr/share/slimbookbattery/src/slimbookbattery-autostart.desktop /home/$user/.config/autostart/slimbookbattery-autostart.desktop
+  fi
+
+done
+
 files=(
 /lib/systemd/system/slimbookbattery.service
-/home/*/.config/autostart/slimbookbattery-autostart.desktop
 )
 
 # Checks if files exist and removes them

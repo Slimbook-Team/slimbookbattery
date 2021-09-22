@@ -4,6 +4,7 @@
 import configparser
 import getpass
 import os
+import pwd
 import shutil
 import subprocess
 
@@ -20,10 +21,17 @@ if not os.path.isdir(CONFIG_FOLDER):
     os.makedirs(CONFIG_FOLDER)
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
 
+uid, gid =  pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
 
-def main():
+def main():    
+    if not os.path.isdir(CONFIG_FOLDER):
+        os.umask(0)
+        os.makedirs(CONFIG_FOLDER, mode=0o766) # creates with perms 
+        os.chown(CONFIG_FOLDER, uid, gid) # set user:group 
+
     check_config_file()
     check_tlp_files()
+
     if getpass.getuser() == 'root':
         print('Giving permisions ...')
         for dirpath, dirnames, filenames in os.walk(CONFIG_FOLDER):
@@ -70,37 +78,59 @@ def check_config_file():
             print('Incidences not found.')
     else:
         print('Creating config file ...')
-        shutil.copy(DEFAULT_CONF, CONFIG_FILE)
+        shutil.copy(DEFAULT_CONF, CONFIG_FOLDER)
 
 
+
+# Checks if the user's default config files exist an if they are like the app version's default files.
+# If files or directories don't exist they are created. 
 def check_tlp_files():
-    print("Checking Slimbook Battery's TLP Configuration")
-    # Slimbookbattery tlp conf files
+    print("\nChecking Slimbook Battery's TLP Configuration")
+    
+    incidences = False
+    usr_custom_dir = os.path.join(CONFIG_FOLDER,'custom/')
+    usr_default_dir = os.path.join(CONFIG_FOLDER,'default/')
+    app_default_dir = os.path.join(CURRENT_PATH, '../default/')
 
     files = ['ahorrodeenergia', 'equilibrado', 'maximorendimiento']
 
     # Checks if default files are the same in the app folder and in the system,
     # if something changed all will be restored
     for file in files:
-        incidences = False
-        home_file = os.path.join(CONFIG_FOLDER, file)
-        usr_file = os.path.join(CURRENT_PATH, '../custom', file)
 
-        if os.path.isfile(home_file):
-            print('Found ' + file)
-            if subprocess.getstatusoutput('diff {} {}'.format(usr_file, home_file)) != 0:
+        app_default_file = os.path.join(usr_default_dir, file)
+        usr_default_file = os.path.join(usr_default_dir, file)
+
+        # If user default is different from app default -- updates
+        if os.path.isfile(usr_default_file) and os.path.isfile(app_default_file):
+            print('\n\tChecking ' + file)
+            if subprocess.getstatusoutput('diff {} {}'.format(app_default_dir, usr_default_dir))[0] != 0:
+                print('\tDefault files have changed, updating:')
                 incidences = True
         else:
+            print('\n' + usr_default_file + ' does not exist.')
             incidences = True
 
-        if incidences:
-            print('Setting default an custom files ...')
-            if os.path.isfile(usr_file):
-                shutil.copy(usr_file, home_file)
-            else:
-                default_file = os.path.join(CURRENT_PATH, '../default', file)
-                if os.path.isfile(default_file):
-                    shutil.copy(default_file, home_file)
+    if incidences:
+        print('\nResetting default and custom files ...')
+        
+        # If /app/default
+        if os.path.isdir(app_default_dir):
+            #shutil.rmtree(CONFIG_FOLDER)
+            if not (os.path.isdir(usr_default_dir) and os.path.isdir(usr_custom_dir)):       
+                    print('Creating directories')
+                    os.mkdir(usr_default_dir)
+                    os.mkdir(usr_custom_dir)
+
+            for file in files:
+                app_default_file = os.path.join(app_default_dir, file)
+                shutil.copy(app_default_file, usr_default_dir)
+                shutil.copy(app_default_file, usr_custom_dir)
+       
+        else:
+            print('Base default file not found')
+    else:
+        print('\n\tIncidences not found.')
 
 
 if __name__ == '__main__':

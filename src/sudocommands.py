@@ -18,8 +18,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import gettext
+
 # This file will be executed as sudo by pkexec
+import gettext
 import os
 import re
 import subprocess
@@ -39,8 +40,7 @@ if USERNAME[0] == 0 and USERNAME[1] != 'root' and subprocess.getstatusoutput('ge
 else:
     USER_NAME = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
 
-
-print(str(subprocess.getstatusoutput('echo $(date) ' + USER_NAME + '>> /etc/sudocmd.log')))
+#subprocess.getstatusoutput('echo $(date) ' + USER_NAME + '>> /var/slimbookbattery.log')
 
 HOMEDIR = subprocess.getoutput("echo ~" + USER_NAME)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
