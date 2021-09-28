@@ -234,20 +234,17 @@ def set_tdp(mode):
 
         tdp_switch = ''
         tdp_mode = ''
+        tdp_switch = 'saving_tdpsync'
 
-        if mode == '1':
-            tdp_switch = 'saving_tdpsync'
+        if mode == '1':           
             tdp_mode = 'low'
 
-        elif mode == '2':
-            tdp_switch = 'balanced_tdpsync'
+        elif mode == '2':            
             tdp_mode = 'medium'
 
-        elif mode == '3':
-            tdp_switch = 'power_tdpsync'
+        elif mode == '3':           
             tdp_mode = 'high'
 
-        # print('TDP switch '+tdp_switch, config['TDP'][tdp_switch], mode)
 
         try:
             if config['TDP'][tdp_switch] == '1':
@@ -336,9 +333,15 @@ def mode_settings(mode):
                 if not graphics_before == 'nvidia':
                     os.system('prime-select nvidia')
 
-        elif mode == '3':
-            if not graphics_before == 'nvidia':
-                os.system('prime-select nvidia')
+        elif mode == '3': #need to check
+            if config['SETTINGS']['graphics_maxrendimiento'] == '1' and graphics_before != 'on-demand':
+                if not graphics_before == 'on-demand':
+                    os.system('prime-select intel')
+                    os.system('prime-select on-demand')
+
+            elif config['SETTINGS']['graphics_maxrendimiento'] == '0' and graphics_before != 'nvidia':
+                if not graphics_before == 'nvidia':
+                    os.system('prime-select nvidia')
 
         graphics_after = subprocess.getoutput('prime-select query')
         print('Graphics before --> ' + graphics_before + ' // Graphics after --> ' + graphics_after)
