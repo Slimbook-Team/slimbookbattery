@@ -22,6 +22,7 @@ import configparser
 import gettext
 import locale
 import os
+from datetime import date, datetime
 import signal
 import subprocess
 from os.path import expanduser
@@ -45,15 +46,15 @@ else:
 print('Slimbook Battery Indicator, executed as: ' + str(subprocess.getoutput('whoami')))
 print('Language: ', entorno_usu)
 
-currpath = os.path.dirname(os.path.realpath(__file__))
-imagespath = os.path.normpath(os.path.join(currpath, '..', 'images'))
+current_path = os.path.dirname(os.path.realpath(__file__))
+imagespath = os.path.normpath(os.path.join(current_path, '..', 'images'))
 
 # Ruta del usuario actual
 user_home = expanduser("~")
 
-fichero_conf = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
+config_file = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
 config = configparser.ConfigParser()
-config.read(fichero_conf)
+config.read(config_file)
 
 ENERGY_SAVING = imagespath + '/indicator/normal.png'
 EQUILIBRADO = imagespath + '/indicator/balanced_normal.png'
@@ -70,11 +71,11 @@ indicator.set_icon_full(DISABLED, 'Icon disabled')
 proceso = None
 alert = None
 
-currpath = os.path.dirname(os.path.realpath(__file__))
-imagespath = os.path.normpath(os.path.join(currpath, '..', 'images'))
+current_path = os.path.dirname(os.path.realpath(__file__))
+imagespath = os.path.normpath(os.path.join(current_path, '..', 'images'))
 
 t = gettext.translation('slimbookbattery',
-                        currpath + '/locale',
+                        current_path + '/locale',
                         languages=idiomas,
                         fallback=True, )
 
@@ -97,16 +98,14 @@ class Indicator(Gtk.Application):
 
     def __init__(self):
 
-        icono = int(config['CONFIGURATION']['icono'])
+        if config['CONFIGURATION']['plug_warn'] == '1':
+            check_plug()
 
-        # Si el valor del icono obenido de la configuración es 1 nos mostrará el indicados de la
-        # aplicación para poder interactuar, en caso contrario estará oculto.
+        icono = int(config['CONFIGURATION']['icono'])
         if icono == 1:
             indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
-            # print('Icon: on')
         elif icono == 0:
             indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
-            # print('Icon: off')
 
         indicator.set_menu(build_menu())
         notify.init(APPINDICATOR_ID)
@@ -138,6 +137,44 @@ class Indicator(Gtk.Application):
             print(_("strappstatus4"))
 
         print()
+
+def check_plug():
+    last = config.get('CONFIGURATION', 'plugged')
+    if not last == '':
+        last=last.split('-')
+        last_date = []
+        for value in last:
+            last_date.append(int(value))
+            
+        last_date = date(last_date[0], last_date[1], last_date[2])
+
+        today = date.today()
+        print(today)
+
+        last_plug = abs(last_date - today).days
+
+        if last_plug >=15:
+            status = (subprocess.getstatusoutput("cat /sys/class/power_supply/BAT0/status"))
+
+            if status[0]==0 and status[1]!='Discharging':
+                os.system('notify-send --icon '+os.path.join(current_path, '../images/normal.png')+' "Slimbook Battery" "'+
+                _('It seems that you have been connected to AC for at least 15 days, we reccomend you to disconnect your charger, and discharge battery')+'"')
+            else:
+                print('Resetting last unplugged date')
+                config.set('CONFIGURATION', 'plugged', str(date.today()))
+                configfile = open(config_file, 'w')
+                config.write(configfile)
+                configfile.close()
+
+        print('Time since last time disconnection: '+str(last_plug)+' days')
+    else:
+        print('No date saved')
+
+        config.set('CONFIGURATION', 'plugged', str(date.today()))
+        # This step is done at the end of function
+        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
+        config.write(configfile)
+        configfile.close()
 
 
 def build_menu():
@@ -264,7 +301,7 @@ def modo_max_rendimiento(self):
 
 def modo_avanzado(self):
     print('preferencias')
-    os.system(currpath + '/slimbookbatterypreferences.py')
+    os.system(current_path + '/slimbookbatterypreferences.py')
 
 
 def modo_apagado(self):
@@ -388,7 +425,7 @@ def update_config(section, variable, value):
     config.set(str(section), str(variable), str(value))
 
     # Writing our configuration file
-    with open(fichero_conf, 'w') as configfile:
+    with open(config_file, 'w') as configfile:
         config.write(configfile)
 
     print("\n- Variable |" + variable + "| updated in .conf, actual value: " + value)

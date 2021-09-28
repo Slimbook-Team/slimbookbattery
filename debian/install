@@ -11,3 +11,4 @@ policykit/* /usr/share/polkit-1/actions/
 src/locale/* /usr/share/slimbookbattery/locale/
 debian/changelog /usr/share/slimbookbattery/src/
 LICENSE /usr/share/slimbookbattery/
+udev-rules/* /etc/udev/rules.d
