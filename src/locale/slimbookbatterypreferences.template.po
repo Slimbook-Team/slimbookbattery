@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2021-09-20 12:24+0200\n"
+"POT-Creation-Date: 2021-09-28 15:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,446 +15,443 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: slimbookbatterypreferences.py:89
+#: slimbookbatterypreferences.py:90
 msgid "Slimbook Battery Preferences"
 msgstr ""
 
-#: slimbookbatterypreferences.py:175
+#: slimbookbatterypreferences.py:176
 msgid "Full window is displayed"
 msgstr ""
 
-#: slimbookbatterypreferences.py:186
+#: slimbookbatterypreferences.py:187
 msgid "Restore default values"
 msgstr ""
 
-#: slimbookbatterypreferences.py:191
+#: slimbookbatterypreferences.py:192
 msgid "Cancel"
 msgstr ""
 
-#: slimbookbatterypreferences.py:196
+#: slimbookbatterypreferences.py:197
 msgid "Accept"
 msgstr ""
 
-#: slimbookbatterypreferences.py:275
+#: slimbookbatterypreferences.py:276
 msgid " Height: "
 msgstr ""
 
-#: slimbookbatterypreferences.py:275
+#: slimbookbatterypreferences.py:276
 msgid "Width: "
 msgstr ""
 
-#: slimbookbatterypreferences.py:289
+#: slimbookbatterypreferences.py:290
 msgid "General"
 msgstr ""
 
-#: slimbookbatterypreferences.py:301
+#: slimbookbatterypreferences.py:305
 msgid "Application On - Off:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:312
+#: slimbookbatterypreferences.py:317
 msgid "Autostart application:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:323
-msgid "Working mode in case of battery failure"
-msgstr ""
-
-#: slimbookbatterypreferences.py:348
+#: slimbookbatterypreferences.py:330
 msgid "Icon on the taskbar (require restart app):"
 msgstr ""
 
-#: slimbookbatterypreferences.py:354
+#: slimbookbatterypreferences.py:336
 msgid "Note: If you have the autostart activated and the icon hide, the app will be executed with the icon hide (once you restart the system)"
 msgstr ""
 
-#: slimbookbatterypreferences.py:378
-msgid "Actual energy mode:"
+#: slimbookbatterypreferences.py:352
+msgid "Working mode in case of battery failure"
 msgstr ""
 
-#: slimbookbatterypreferences.py:384 slimbookbatterypreferences.py:458
-#: slimbookbatterypreferences.py:460
-msgid "Energy Saving"
+#: slimbookbatterypreferences.py:380
+msgid "Remember to disconnect charger:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:388 slimbookbatterypreferences.py:1041
-#: slimbookbatterypreferences.py:1043
-msgid "Balanced"
+#: slimbookbatterypreferences.py:386
+msgid "Note: It is very important not to use your laptop always connected to AC, this option will notify you to disconnect charger if you stay 15 days connected.)"
 msgstr ""
 
-#: slimbookbatterypreferences.py:392 slimbookbatterypreferences.py:1569
-#: slimbookbatterypreferences.py:1571
-msgid "Maximum Performance"
+#: slimbookbatterypreferences.py:437
+msgid "Synchronice battery mode with CPU TDP mode:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:484 slimbookbatterypreferences.py:1053
-#: slimbookbatterypreferences.py:1580
-msgid "Battery mode parameters (disabled when you connect AC power):"
-msgstr ""
-
-#: slimbookbatterypreferences.py:494 slimbookbatterypreferences.py:1062
-#: slimbookbatterypreferences.py:1589
-msgid "Limit CPU profile:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:504 slimbookbatterypreferences.py:1599
-msgid "Note: this setting affects to performance"
-msgstr ""
-
-#: slimbookbatterypreferences.py:514 slimbookbatterypreferences.py:1082
-#: slimbookbatterypreferences.py:1609 slimbookbatterypreferences.py:3159
-#: slimbookbatterypreferences.py:3426 slimbookbatterypreferences.py:3687
-msgid "maximum"
-msgstr ""
-
-#: slimbookbatterypreferences.py:515 slimbookbatterypreferences.py:1083
-#: slimbookbatterypreferences.py:1610 slimbookbatterypreferences.py:3182
-#: slimbookbatterypreferences.py:3450 slimbookbatterypreferences.py:3711
-msgid "medium"
-msgstr ""
-
-#: slimbookbatterypreferences.py:516 slimbookbatterypreferences.py:1084
-#: slimbookbatterypreferences.py:1611 slimbookbatterypreferences.py:3205
-#: slimbookbatterypreferences.py:3472 slimbookbatterypreferences.py:3734
-msgid "none"
-msgstr ""
-
-#: slimbookbatterypreferences.py:541 slimbookbatterypreferences.py:1107
-#: slimbookbatterypreferences.py:1635
-msgid "CPU scaling governor saving profile:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:561 slimbookbatterypreferences.py:1135
-#: slimbookbatterypreferences.py:1663
-msgid "Graphic card saving profile (Nvidia-AMD-Intel):"
-msgstr ""
-
-#: slimbookbatterypreferences.py:579 slimbookbatterypreferences.py:1151
-#: slimbookbatterypreferences.py:1677
-msgid "Sound power saving profile:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:589 slimbookbatterypreferences.py:1161
-#: slimbookbatterypreferences.py:1687
-msgid "Note: this setting can cause slight clicks in sound output"
-msgstr ""
-
-#: slimbookbatterypreferences.py:608 slimbookbatterypreferences.py:1180
-#: slimbookbatterypreferences.py:1706
-msgid "Wi-Fi power saving profile:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:618 slimbookbatterypreferences.py:1190
-#: slimbookbatterypreferences.py:1716
-msgid "Note: power save can cause an unstable wifi link."
-msgstr ""
-
-#: slimbookbatterypreferences.py:635 slimbookbatterypreferences.py:1207
-#: slimbookbatterypreferences.py:1733
-msgid "Bluetooth disabled when not in use:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:649 slimbookbatterypreferences.py:1221
-#: slimbookbatterypreferences.py:1746
-msgid "Wi-Fi disabled when not in use:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:686 slimbookbatterypreferences.py:1237
-#: slimbookbatterypreferences.py:1762
-msgid "CPU TDP Settings"
-msgstr ""
-
-#: slimbookbatterypreferences.py:696 slimbookbatterypreferences.py:710
-#: slimbookbatterypreferences.py:1246 slimbookbatterypreferences.py:1261
-#: slimbookbatterypreferences.py:1771 slimbookbatterypreferences.py:1786
-msgid "Synchronice battery mode with TDP mode:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:739 slimbookbatterypreferences.py:1274
-#: slimbookbatterypreferences.py:1800
+#: slimbookbatterypreferences.py:468
 msgid "Learn more about TDP Controller"
 msgstr ""
 
-#: slimbookbatterypreferences.py:753 slimbookbatterypreferences.py:1287
-#: slimbookbatterypreferences.py:1812
-msgid "Persistent changes:"
+#: slimbookbatterypreferences.py:483
+msgid "Actual energy mode:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:764 slimbookbatterypreferences.py:1298
-#: slimbookbatterypreferences.py:1823
-msgid "Set screen brightness:"
+#: slimbookbatterypreferences.py:489 slimbookbatterypreferences.py:563
+#: slimbookbatterypreferences.py:565
+msgid "Energy Saving"
 msgstr ""
 
-#: slimbookbatterypreferences.py:774 slimbookbatterypreferences.py:1308
-#: slimbookbatterypreferences.py:1833
-msgid "Note: this option reduces the battery consumption considerably"
+#: slimbookbatterypreferences.py:493 slimbookbatterypreferences.py:1146
+#: slimbookbatterypreferences.py:1148
+msgid "Balanced"
 msgstr ""
 
-#: slimbookbatterypreferences.py:804 slimbookbatterypreferences.py:1335
-#: slimbookbatterypreferences.py:1861
-msgid "Disable animations:"
+#: slimbookbatterypreferences.py:497 slimbookbatterypreferences.py:1674
+#: slimbookbatterypreferences.py:1676
+msgid "Maximum Performance"
 msgstr ""
 
-#: slimbookbatterypreferences.py:818 slimbookbatterypreferences.py:1348
-#: slimbookbatterypreferences.py:1874
-msgid "Bluetooth does not boot on start:"
+#: slimbookbatterypreferences.py:589 slimbookbatterypreferences.py:1158
+#: slimbookbatterypreferences.py:1685
+msgid "Battery mode parameters (disabled when you connect AC power):"
 msgstr ""
 
-#: slimbookbatterypreferences.py:833 slimbookbatterypreferences.py:1363
-#: slimbookbatterypreferences.py:1885
-msgid "Wi-Fi does not boot on start:"
+#: slimbookbatterypreferences.py:599 slimbookbatterypreferences.py:1167
+#: slimbookbatterypreferences.py:1694
+msgid "Limit CPU profile:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:848 slimbookbatterypreferences.py:1376
-#: slimbookbatterypreferences.py:1896
-msgid "Disable Wi-Fi when LAN is connected:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:863 slimbookbatterypreferences.py:1391
-#: slimbookbatterypreferences.py:1911
-msgid "Autosuspend USB Ports:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:874 slimbookbatterypreferences.py:1402
-#: slimbookbatterypreferences.py:1922
-msgid "Note: Set autosuspend mode for all USB devices upon system start or a change of power source. Input devices like mice and keyboards as well as scanners are excluded by default"
-msgstr ""
-
-#: slimbookbatterypreferences.py:895 slimbookbatterypreferences.py:1422
-#: slimbookbatterypreferences.py:1942
-msgid "Excluded USB IDs from USB autosuspend:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:934 slimbookbatterypreferences.py:1461
-#: slimbookbatterypreferences.py:1982
-msgid "Note: You need to write in the Text Box the USB IDs (separate with spaces) to exclude from autosuspend"
-msgstr ""
-
-#: slimbookbatterypreferences.py:957 slimbookbatterypreferences.py:1483
-#: slimbookbatterypreferences.py:2005
-msgid "Exclude bluetooth devices from USB autosuspend:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:971 slimbookbatterypreferences.py:1498
-#: slimbookbatterypreferences.py:2020
-msgid "Exclude printer devices from USB autosuspend:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:985 slimbookbatterypreferences.py:1512
-#: slimbookbatterypreferences.py:2035
-msgid "Exclude Ethernet devices from USB autosuspend:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:1000 slimbookbatterypreferences.py:1527
-#: slimbookbatterypreferences.py:2049
-msgid "Disable USB autosuspend mode upon system shutdown:"
-msgstr ""
-
-#: slimbookbatterypreferences.py:1072
+#: slimbookbatterypreferences.py:609 slimbookbatterypreferences.py:1177
+#: slimbookbatterypreferences.py:1704
 msgid "Note: this setting affects to performance"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2086 slimbookbatterypreferences.py:2088
+#: slimbookbatterypreferences.py:619 slimbookbatterypreferences.py:1187
+#: slimbookbatterypreferences.py:1714 slimbookbatterypreferences.py:3278
+#: slimbookbatterypreferences.py:3545 slimbookbatterypreferences.py:3806
+msgid "maximum"
+msgstr ""
+
+#: slimbookbatterypreferences.py:620 slimbookbatterypreferences.py:1188
+#: slimbookbatterypreferences.py:1715 slimbookbatterypreferences.py:3301
+#: slimbookbatterypreferences.py:3569 slimbookbatterypreferences.py:3830
+msgid "medium"
+msgstr ""
+
+#: slimbookbatterypreferences.py:621 slimbookbatterypreferences.py:1189
+#: slimbookbatterypreferences.py:1716 slimbookbatterypreferences.py:3324
+#: slimbookbatterypreferences.py:3591 slimbookbatterypreferences.py:3853
+msgid "none"
+msgstr ""
+
+#: slimbookbatterypreferences.py:646 slimbookbatterypreferences.py:1212
+#: slimbookbatterypreferences.py:1740
+msgid "CPU scaling governor saving profile:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:666 slimbookbatterypreferences.py:1240
+#: slimbookbatterypreferences.py:1768
+msgid "Graphic card saving profile (Nvidia-AMD-Intel):"
+msgstr ""
+
+#: slimbookbatterypreferences.py:684 slimbookbatterypreferences.py:1256
+#: slimbookbatterypreferences.py:1785
+msgid "Sound power saving profile:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:694 slimbookbatterypreferences.py:1266
+#: slimbookbatterypreferences.py:1795
+msgid "Note: this setting can cause slight clicks in sound output"
+msgstr ""
+
+#: slimbookbatterypreferences.py:713 slimbookbatterypreferences.py:1285
+#: slimbookbatterypreferences.py:1814
+msgid "Wi-Fi power saving profile:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:723 slimbookbatterypreferences.py:1295
+#: slimbookbatterypreferences.py:1824
+msgid "Note: power save can cause an unstable wifi connection."
+msgstr ""
+
+#: slimbookbatterypreferences.py:740 slimbookbatterypreferences.py:1312
+#: slimbookbatterypreferences.py:1841
+msgid "Bluetooth disabled when not in use:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:754 slimbookbatterypreferences.py:1326
+#: slimbookbatterypreferences.py:1854
+msgid "Wi-Fi disabled when not in use:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:858 slimbookbatterypreferences.py:1392
+#: slimbookbatterypreferences.py:1920
+msgid "Persistent changes:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:869 slimbookbatterypreferences.py:1403
+#: slimbookbatterypreferences.py:1931
+msgid "Set screen brightness:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:879 slimbookbatterypreferences.py:1413
+#: slimbookbatterypreferences.py:1941
+msgid "Note: this option reduces the battery consumption considerably"
+msgstr ""
+
+#: slimbookbatterypreferences.py:909 slimbookbatterypreferences.py:1440
+#: slimbookbatterypreferences.py:1969
+msgid "Disable animations:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:923 slimbookbatterypreferences.py:1453
+#: slimbookbatterypreferences.py:1982
+msgid "Bluetooth does not boot on start:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:938 slimbookbatterypreferences.py:1468
+#: slimbookbatterypreferences.py:1993
+msgid "Wi-Fi does not boot on start:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:953 slimbookbatterypreferences.py:1481
+#: slimbookbatterypreferences.py:2004
+msgid "Disable Wi-Fi when LAN is connected:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:968 slimbookbatterypreferences.py:1496
+#: slimbookbatterypreferences.py:2019
+msgid "Autosuspend USB Ports:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:979 slimbookbatterypreferences.py:1507
+#: slimbookbatterypreferences.py:2030
+msgid "Note: Set autosuspend mode for all USB devices upon system start or a change of power source. Input devices like mice and keyboards as well as scanners are excluded by default"
+msgstr ""
+
+#: slimbookbatterypreferences.py:1000 slimbookbatterypreferences.py:1527
+#: slimbookbatterypreferences.py:2050
+msgid "Excluded USB IDs from USB autosuspend:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:1039 slimbookbatterypreferences.py:1566
+#: slimbookbatterypreferences.py:2090
+msgid "Note: You need to write in the Text Box the USB IDs (separate with spaces) to exclude from autosuspend"
+msgstr ""
+
+#: slimbookbatterypreferences.py:1062 slimbookbatterypreferences.py:1588
+#: slimbookbatterypreferences.py:2113
+msgid "Exclude bluetooth devices from USB autosuspend:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:1076 slimbookbatterypreferences.py:1603
+#: slimbookbatterypreferences.py:2128
+msgid "Exclude printer devices from USB autosuspend:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:1090 slimbookbatterypreferences.py:1617
+#: slimbookbatterypreferences.py:2143
+msgid "Exclude Ethernet devices from USB autosuspend:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:1105 slimbookbatterypreferences.py:1632
+#: slimbookbatterypreferences.py:2157
+msgid "Disable USB autosuspend mode upon system shutdown:"
+msgstr ""
+
+#: slimbookbatterypreferences.py:2195 slimbookbatterypreferences.py:2197
 msgid "Cycles"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2092
+#: slimbookbatterypreferences.py:2201
 msgid "Enable cycle alerts"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2107
+#: slimbookbatterypreferences.py:2216
 msgid "Max battery value:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2121
+#: slimbookbatterypreferences.py:2230
 msgid "Min battery value:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2135
+#: slimbookbatterypreferences.py:2244
 msgid "Number of times:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2150
+#: slimbookbatterypreferences.py:2259
 msgid "Time between Warnings:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2183 slimbookbatterypreferences.py:2185
-#: slimbookbatterypreferences.py:2197
+#: slimbookbatterypreferences.py:2293 slimbookbatterypreferences.py:2295
+#: slimbookbatterypreferences.py:2307
 msgid "Battery"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2208
+#: slimbookbatterypreferences.py:2318
 msgid "Manufacturer:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2219
+#: slimbookbatterypreferences.py:2329
 msgid "Battery model:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2230
+#: slimbookbatterypreferences.py:2340
 msgid "Technology:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2241
+#: slimbookbatterypreferences.py:2351
 msgid "Remaining battery:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2252
+#: slimbookbatterypreferences.py:2362
 msgid "Maximum capacity:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2263
+#: slimbookbatterypreferences.py:2373
 msgid "Status:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2275 slimbookbatterypreferences.py:2287
+#: slimbookbatterypreferences.py:2385 slimbookbatterypreferences.py:2397
 msgid "Time to full:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2281
+#: slimbookbatterypreferences.py:2391
 msgid "Time to empty:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2293
+#: slimbookbatterypreferences.py:2403
 msgid "Time to full-empty charge:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2304
+#: slimbookbatterypreferences.py:2414
 msgid "Rechargeable:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2315
+#: slimbookbatterypreferences.py:2425
 msgid "Power supply:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2326
+#: slimbookbatterypreferences.py:2436
 msgid "Energy full:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2337
+#: slimbookbatterypreferences.py:2447
 msgid "Energy full design:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2348
+#: slimbookbatterypreferences.py:2458
 msgid "Energy rate:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2359
+#: slimbookbatterypreferences.py:2469
 msgid "Voltage:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2370
+#: slimbookbatterypreferences.py:2480
 msgid "Last update of the battery information:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2406 slimbookbatterypreferences.py:2408
+#: slimbookbatterypreferences.py:2516 slimbookbatterypreferences.py:2518
 msgid "Information"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2435
+#: slimbookbatterypreferences.py:2545
 msgid "Slimbook Battery is a battery optimization application for portable devices and can increase the battery"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2437
+#: slimbookbatterypreferences.py:2547
 msgid "life up to 50%. For this purpose, the third-party software is used to manage and configure the system resources."
 msgstr ""
 
-#: slimbookbatterypreferences.py:2447
+#: slimbookbatterypreferences.py:2557
 msgid "Special thanks to TLP (© 2019, linrunner), Nvidia, AMD and Intel for offering us the necessary tools to make it possible!"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2455
+#: slimbookbatterypreferences.py:2565
 msgid "If this application has been useful to you, consider saying it in our social networks or even buy a SLIMBOOK ;)"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2513
+#: slimbookbatterypreferences.py:2623
 msgid "IMPORTANT NOTE:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2514
+#: slimbookbatterypreferences.py:2624
 msgid " If you have any software, widget or application that changes the CPU profile, battery"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2515
+#: slimbookbatterypreferences.py:2625
 msgid "optimization or similar, it may affect the operation of this application. Use it under your responsibility."
 msgstr ""
 
-#: slimbookbatterypreferences.py:2525
+#: slimbookbatterypreferences.py:2635
 msgid "Visit SLIMBOOK website"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2532
+#: slimbookbatterypreferences.py:2642
 msgid "Tutorial to learn to use Slimbook Battery"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2532
+#: slimbookbatterypreferences.py:2642
 msgid "strurlwebsite"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2538
+#: slimbookbatterypreferences.py:2648
 msgid "Help us with translations!"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2568
+#: slimbookbatterypreferences.py:2678
 msgid "If you want you can support the developement of this app and several more to come by joining us on "
 msgstr ""
 
-#: slimbookbatterypreferences.py:2570
+#: slimbookbatterypreferences.py:2680
 msgid " or buying a brand new Slimbook ;)"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2579
+#: slimbookbatterypreferences.py:2689
 msgid "Info:"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2580
+#: slimbookbatterypreferences.py:2690
 msgid "Contact with us if you find something wrong. We would appreciate that you attach the file that is generated"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2582
+#: slimbookbatterypreferences.py:2692
 msgid "by clicking the button below"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2589
+#: slimbookbatterypreferences.py:2699
 msgid "Send an e-mail to: "
 msgstr ""
 
-#: slimbookbatterypreferences.py:2594
+#: slimbookbatterypreferences.py:2704
 msgid "Generate report file"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2606
+#: slimbookbatterypreferences.py:2716
 msgid "The software is provided  as is , without warranty of any kind."
 msgstr ""
 
-#: slimbookbatterypreferences.py:2873 slimbookbatterypreferences.py:2882
-#: slimbookbatterypreferences.py:2891 slimbookbatterypreferences.py:2900
-#: slimbookbatterypreferences.py:2909 slimbookbatterypreferences.py:2918
-#: slimbookbatterypreferences.py:2927 slimbookbatterypreferences.py:2941
-#: slimbookbatterypreferences.py:2952 slimbookbatterypreferences.py:2956
-#: slimbookbatterypreferences.py:2965 slimbookbatterypreferences.py:2974
-#: slimbookbatterypreferences.py:2983 slimbookbatterypreferences.py:2992
-#: slimbookbatterypreferences.py:3001 slimbookbatterypreferences.py:3010
-#: slimbookbatterypreferences.py:3023
+#: slimbookbatterypreferences.py:2985 slimbookbatterypreferences.py:2994
+#: slimbookbatterypreferences.py:3003 slimbookbatterypreferences.py:3012
+#: slimbookbatterypreferences.py:3021 slimbookbatterypreferences.py:3030
+#: slimbookbatterypreferences.py:3039 slimbookbatterypreferences.py:3053
+#: slimbookbatterypreferences.py:3064 slimbookbatterypreferences.py:3068
+#: slimbookbatterypreferences.py:3077 slimbookbatterypreferences.py:3086
+#: slimbookbatterypreferences.py:3095 slimbookbatterypreferences.py:3104
+#: slimbookbatterypreferences.py:3113 slimbookbatterypreferences.py:3122
+#: slimbookbatterypreferences.py:3135
 msgid "Unknown"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2937 slimbookbatterypreferences.py:2948
+#: slimbookbatterypreferences.py:3049 slimbookbatterypreferences.py:3060
 msgid " hours"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2939 slimbookbatterypreferences.py:2950
+#: slimbookbatterypreferences.py:3051 slimbookbatterypreferences.py:3062
 msgid " min"
 msgstr ""
 
-#: slimbookbatterypreferences.py:2954
+#: slimbookbatterypreferences.py:3066
 msgid "Fully charged"
 msgstr ""
 
-#: slimbookbatterypreferences.py:4171
+#: slimbookbatterypreferences.py:4295
 msgid "Report file generated"
 msgstr ""
 
-#: slimbookbatterypreferences.py:4173 slimbookbatterypreferences.py:4175
+#: slimbookbatterypreferences.py:4297 slimbookbatterypreferences.py:4299
 msgid "Report file canceled"
 msgstr ""
 

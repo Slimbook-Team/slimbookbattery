@@ -168,3 +168,7 @@ msgstr "Los cambios han sido aplicados, pero es necesario reiniciar para que alg
 #: slimbookbattery.py:663
 msgid "System will not restart"
 msgstr "El sistema no se reiniciará"
+
+#: slimbookbatteryindicator.py:161
+msgid "It seems that you have been connected to AC for at least 15 days, we reccomend you to disconnect your charger, and discharge battery"
+msgstr "Parece que llevas conectado al cargador, al menos 15 dias, te recomendamos desconectar el cargador y hacer un ciclo de descarga de la batería."
