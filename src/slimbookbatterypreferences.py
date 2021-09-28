@@ -423,18 +423,10 @@ class Preferences(Gtk.ApplicationWindow):
 
         if tdpcontroller != '':
 
-            # row = row +1
-            # label33 = Gtk.Label(label='')
-            # label33.set_markup('<big><b>' + (_('CPU TDP Settings')) + '</b></big>')
-            # if self.min_resolution == True:
-            #     label33.set_name('title')
-            # label33.set_halign(Gtk.Align.START)
-            # general_grid.attach(label33, col_3, row, 2, 1)
-
             row = row+1
 
             # LABEL 7
-            label33 = Gtk.Label(label=_('Synchronice battery mode with TDP mode:'))
+            label33 = Gtk.Label(label=_('Synchronice battery mode with CPU TDP mode:'))
             label33.set_halign(Gtk.Align.START)
             general_grid.attach(label33, col_3, row, label_width, 1)
 
@@ -447,10 +439,10 @@ class Preferences(Gtk.ApplicationWindow):
             if not subprocess.getstatusoutput('which ' + tdpcontroller)[0] == 0:  # if TDP controller is installed:
                 print('TDP Controller not installed')
                 self.switchTDP.set_sensitive(False)
+                self.switchTDP.set_state(False)
 
                 # LABEL 7
                 row = row + 1
-                self.link = ''
                 if tdpcontroller == 'slimbookintelcontroller':
                     if idiomas[0].find('es') != -1:
                         self.link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
@@ -467,7 +459,7 @@ class Preferences(Gtk.ApplicationWindow):
                 label33 = Gtk.Label()
                 label33.set_markup("<a href='" + self.link + "'>" + _('Learn more about TDP Controller') + "</a>")
                 label33.set_name('link')
-                label33.set_halign(alignment_2)
+                label33.set_halign(alignment_1)
                 general_grid.attach(label33, col_3, row, label_width, 1)
 
     # ***************** BUTTONS **********************************************
@@ -762,90 +754,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchWifiNIU.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU)
         low_grid.attach(self.switchWifiNIU, button_col, row, 1, 1)
-        # # 8 ------------- TDP ADJUST
-        # tdpcontroller = config['TDP']['tdpcontroller']
-        # if config['TDP']['tdpcontroller'] == '':
 
-        #     proc = subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1")
-        #     if  proc[0] == 0 :
-        #         if proc[1].find('intel'):
-        #             tdpcontroller = 'slimbookintelcontroller'
-        #         elif proc[1].find('amd'):
-        #             tdpcontroller = 'slimbookamdcontroller'
-        #         else:
-        #             print('Could not find TDP contoller for your processor')
-
-        #         config.set('TDP', 'tdpcontroller', tdpcontroller)
-                
-        #         print('TDP Controller found: '+tdpcontroller)
-
-        #         # This step is done at the end of function
-        #         configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        #         config.write(configfile)
-        #         configfile.close()
-
-        # if tdpcontroller != '':
-
-        #     row = row + 2
-        #     label33 = Gtk.Label(label='')
-        #     label33.set_markup('<big><b>' + (_('CPU TDP Settings')) + '</b></big>')
-        #     if self.min_resolution == True:
-        #         label33.set_name('title')
-        #     label33.set_halign(Gtk.Align.START)
-        #     low_grid.attach(label33, label_col, row, 4, 1)
-
-        #     if subprocess.getstatusoutput('which ' + tdpcontroller)[0] == 0:  # if TDP controller is installed
-        #         # print('Found '+tdpcontroller)
-        #         # LABEL 7
-        #         row = row + 1
-        #         label33 = Gtk.Label(label=_('Synchronice battery mode with TDP mode:'))
-        #         label33.set_halign(Gtk.Align.START)
-        #         low_grid.attach(label33, label_col, row, label_width, 1)
-
-        #         # BUTTON 7
-        #         self.switchTDP = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        #         self.switchTDP.set_name('saving_tdpsync')
-        #         self.check_autostart_switchTDP(self.switchTDP)
-        #         low_grid.attach(self.switchTDP, button_col, row, 1, 1)
-        #         # print(tdpcontroller)
-        #     else:
-        #         print('TDP Controller not installed')
-        #         # LABEL 7
-        #         row = row + 1
-        #         label33 = Gtk.Label(label=_('Synchronice battery mode with TDP mode:'))
-        #         label33.set_halign(Gtk.Align.START)
-        #         low_grid.attach(label33, label_col, row, label_width, 1)
-
-        #         # BUTTON 7
-        #         self.switchTDP = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        #         self.switchTDP.set_name('saving_tdpsync')
-
-        #         self.switchTDP.set_sensitive(False)
-        #         # self.check_autostart_switchTDP(self.switchTDP)
-        #         low_grid.attach(self.switchTDP, button_col, row, 1, 1)
-
-        #         # LABEL 7
-        #         row = row + 1
-        #         self.link = ''
-        #         if tdpcontroller == 'slimbookintelcontroller':
-        #             if idiomas[0].find('es') != -1:
-        #                 self.link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
-        #             else:
-        #                 print(idiomas)
-        #                 self.link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
-        #         else:
-        #             if idiomas[0].find('es') != -1:
-        #                 self.link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
-        #             else:
-        #                 print(idiomas)
-        #                 self.link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
-
-        #         label33 = Gtk.Label()
-        #         label33.set_markup("<a href='" + self.link + "'>" + _('Learn more about TDP Controller') + "</a>")
-        #         label33.set_name('link')
-        #         label33.set_halign(Gtk.Align.START)
-        #         low_grid.attach(label33, label_col, row, label_width, 1)
-                # print(tdpcontroller)
 
         # ********* LOW MODE COMPONENTS COLUMN 2 *********************************
 
@@ -1334,53 +1243,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchWifiNIU2.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU2)
         low_grid.attach(self.switchWifiNIU2, button_col, row, 1, 1)
-        # 8 ------------- TDP ADJUST
- 
-        # if tdpcontroller != '':
-        #     row = row + 2
-        #     label33 = Gtk.Label(label='')
-        #     label33.set_markup('<big><b>' + (_('CPU TDP Settings')) + '</b></big>')
-        #     if self.min_resolution == True:
-        #         label33.set_name('title')
-        #     label33.set_halign(Gtk.Align.START)
-        #     low_grid.attach(label33, label_col, row, 4, 1)
-
-        #     if subprocess.getstatusoutput('which ' + tdpcontroller)[0] == 0:  # if TDP controller is installed
-        #         # LABEL 7
-        #         row = row + 1
-        #         label33 = Gtk.Label(label=_('Synchronice battery mode with TDP mode:'))
-        #         label33.set_halign(Gtk.Align.START)
-        #         low_grid.attach(label33, label_col, row, label_width, 1)
-
-        #         # BUTTON 7
-        #         self.switchTDP2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        #         self.switchTDP2.set_name('balanced_tdpsync')
-
-        #         self.check_autostart_switchTDP(self.switchTDP2)
-        #         low_grid.attach(self.switchTDP2, button_col, row, 1, 1)
-        #         # print(tdpcontroller)
-        #     else:
-        #         print('TDP Controller not installed')
-        #         # LABEL 7
-        #         row = row + 1
-        #         label33 = Gtk.Label(label=_('Synchronice battery mode with TDP mode:'))
-        #         label33.set_halign(Gtk.Align.START)
-        #         low_grid.attach(label33, label_col, row, label_width, 1)
-
-        #         # BUTTON 7
-        #         self.switchTDP2 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        #         self.switchTDP2.set_name('balanced_tdpsync')
-        #         self.switchTDP2.set_sensitive(False)
-        #         # self.check_autostart_switchTDP(self.switchTDP)
-        #         low_grid.attach(self.switchTDP2, button_col, row, 1, 1)
-
-        #         row = row + 1
-        #         label33 = Gtk.Label()
-        #         label33.set_markup("<a href='" + self.link + "'>" + _('Learn more about TDP Controller') + "</a>")
-        #         label33.set_name('link')
-        #         label33.set_halign(Gtk.Align.START)
-        #         low_grid.attach(label33, label_col, row, label_width, 1)
-
+       
         # ********* MID MODE COMPONENTS COLUMN 2 *********************************
 
         if not self.min_resolution == True:
@@ -1862,54 +1725,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchWifiNIU3.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU3)
         low_grid.attach(self.switchWifiNIU3, button_col, row, 1, 1)
-        # 8 ------------- TDP ADJUST
-
-        # if tdpcontroller != '':
-        #     row = row + 2
-        #     label33 = Gtk.Label(label='')
-        #     label33.set_markup('<big><b>' + (_('CPU TDP Settings')) + '</b></big>')
-        #     if self.min_resolution == True:
-        #         label33.set_name('title')
-        #     label33.set_halign(Gtk.Align.START)
-        #     low_grid.attach(label33, label_col, row, 4, 1)
-
-        #     if subprocess.getstatusoutput('which ' + tdpcontroller)[0] == 0:  # if TDP controller is installed
-        #         # LABEL 7
-        #         row = row + 1
-        #         label33 = Gtk.Label(label=_('Synchronice battery mode with TDP mode:'))
-        #         label33.set_halign(Gtk.Align.START)
-        #         low_grid.attach(label33, label_col, row, label_width, 1)
-
-        #         # BUTTON 7
-        #         self.switchTDP3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        #         self.switchTDP3.set_name('power_tdpsync')
-
-        #         self.check_autostart_switchTDP(self.switchTDP3)
-        #         low_grid.attach(self.switchTDP3, button_col, row, 1, 1)
-
-        #     else:
-        #         print('TDP Controller not installed')
-        #         # LABEL 7
-        #         row = row + 1
-        #         label33 = Gtk.Label(label=_('Synchronice battery mode with TDP mode:'))
-        #         label33.set_halign(Gtk.Align.START)
-        #         low_grid.attach(label33, label_col, row, label_width, 1)
-
-        #         # BUTTON 7
-        #         self.switchTDP3 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        #         self.switchTDP3.set_name('power_tdpsync')
-        #         self.switchTDP3.set_sensitive(False)
-        #         # self.check_autostart_switchTDP(self.switchTDP)
-        #         low_grid.attach(self.switchTDP3, button_col, row, 1, 1)
-
-        #         # LABEL 7
-        #         row = row + 1
-        #         label33 = Gtk.Label()
-        #         label33.set_markup("<a href='" + self.link + "'>" + _('Learn more about TDP Controller') + "</a>")
-        #         label33.set_name('link')
-        #         label33.set_halign(Gtk.Align.START)
-        #         low_grid.attach(label33, label_col, row, label_width, 1)
-
+        
         # ********* HIGH MODE COMPONENTS COLUMN 2 *********************************
         if not self.min_resolution == True:
             row = 1
