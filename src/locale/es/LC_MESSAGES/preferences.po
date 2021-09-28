@@ -504,3 +504,6 @@ msgstr "Recordar desconectar el cargador:"
 
 msgid "Synchronice battery mode with CPU TDP mode:"
 msgstr "Sincroniza el TDP de la CPU con el modo de batería:"
+
+msgid "Note: power save can cause an unstable wifi connection."
+msgstr "Nota: el ahorro de energía puede causar inestabilidad en la conexión wi-fi."
