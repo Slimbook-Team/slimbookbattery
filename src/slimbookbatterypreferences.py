@@ -4103,7 +4103,8 @@ class Preferences(Gtk.ApplicationWindow):
 
         response = saveDialog.run()
         saveDialog.set_name('save_dialog')
-        if response == Gtk.ResponseType.OK:
+        print(str(response))
+        if response == 1:
             ruta = saveDialog.get_filename() + '/report_' + time.strftime("%d-%m-%y_%H:%M") + '.txt'
             escritorio = subprocess.getoutput("echo $XDG_CURRENT_DESKTOP")
             if subprocess.getstatusoutput(

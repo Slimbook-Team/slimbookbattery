@@ -75,6 +75,7 @@ def check_config_file():
     else:
         print('Creating config file ...')
         shutil.copy(DEFAULT_CONF, CONFIG_FOLDER)
+        os.chown(CONFIG_FILE, uid, gid) # set user:group 
 
 
 
@@ -123,6 +124,8 @@ def check_tlp_files():
                 app_default_file = os.path.join(app_default_dir, file)
                 shutil.copy(app_default_file, usr_default_dir)
                 shutil.copy(app_default_file, usr_custom_dir)
+                os.chown(os.path.join(usr_default_dir, file), uid, gid) # set user:group 
+                os.chown(os.path.join(usr_custom_dir, file), uid, gid) # set user:group 
        
         else:
             print('Base default file not found')

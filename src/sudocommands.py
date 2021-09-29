@@ -292,6 +292,7 @@ def change_config(args):  # For general page options
 def mode_settings(mode):
     required_reboot = 0
     print(colors.GREEN + '\n[MODE SETTINGS]' + colors.ENDC)
+
     file_ahorro = HOMEDIR + '/.config/slimbookbattery/custom/ahorrodeenergia'
     file_equilibrado = HOMEDIR + '/.config/slimbookbattery/custom/equilibrado'
     file_max = HOMEDIR + '/.config/slimbookbattery/custom/maximorendimiento'
@@ -352,177 +353,155 @@ def mode_settings(mode):
     # If nvidia driver is not installed or does not work, we use TLP
     elif not graficaNvidia:
         print('Setting graphics frequency ...')
-        # GRAPHICS AMD SETTINGS de
-        RADEON_POWER_PROFILE_ON_BAT = 'default'
-        RADEON_DPM_STATE_ON_BAT = 'battery'
-        RADEON_DPM_PERF_LEVEL_ON_BAT = 'auto'
 
-        # GRAPHICS INTEL SETTINGS
-        freq_table = ''
-        freq_available = ''
-
-        if os.path.isfile('/sys/kernel/debug/dri/0/i915_ring_freq_table'):
-            freq_table = subprocess.getoutput('cat /sys/kernel/debug/dri/0/i915_ring_freq_table')
-            freq_table = freq_table.split('\n')
-            freq_table.pop(0)
-            freq_available = ''
-
-            for i in freq_table:
-                valor = i.split()
-                freq_available = freq_available + ' ' + valor[0]
-
-            freq_available = freq_available.strip().split(' ')
-            print('Available frequencies: '+str(freq_available))
-
-            # FRECUENCIAS PARA LOS MODOS
-            if len(freq_available) > 1:
-                freqCorrecta = True
-
-                min_bat = 0
-                min_ac = 0
-
-                max_bat = 0
-                max_ac = 0
-
-                boost_bat = 0
-                boost_ac = 0
-
-            if mode == '1':
+        if mode == '1':
                 variable = 'graphics_ahorro'
                 profile = 'low'
                 limit = (0,600,600,800)
                 file = file_ahorro
                 
-            elif mode == '2':
-                variable = 'graphics_equilibrado'
-                profile = 'mid'
-                limit = (0,600,900,1000)
-                file = file_equilibrado
+        elif mode == '2':
+            variable = 'graphics_equilibrado'
+            profile = 'mid'
+            limit = (0,600,900,1000)
+            file = file_equilibrado
 
-            elif mode == '3':
-                variable = 'graphics_maxrendimiento'
-                profile = 'high'
-                limit = (0,600,900,1000)
-                file = file_max
-            
-            else:
-                print('Mode must be 1,2 or 3, found: '+mode)
+        elif mode == '3':
+            variable = 'graphics_maxrendimiento'
+            profile = 'high'
+            limit = (0,600,900,1000)
+            file = file_max
+        
+        else:
+            print('Mode must be 1,2 or 3, found: '+mode)
 
+        # GRAPHICS AMD SETTINGS de
+        RADEON_POWER_PROFILE_ON_BAT = 'default'
+        RADEON_DPM_STATE_ON_BAT = 'battery'
+        RADEON_DPM_PERF_LEVEL_ON_BAT = 'auto'
 
-            if config['SETTINGS'][variable] == '1':
-                # Radeon 
-                if subprocess.getstatusoutput('lscpu | grep -i model | grep  -i Radeon')[0] == 0:
-                    print('Radeon graphics power profile: '+profile)
-                    RADEON_POWER_PROFILE_ON_BAT = profile
-                    os.system(
-                        'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
-                            RADEON_POWER_PROFILE_ON_BAT, file
-                        )
-                    )
-                    os.system(
-                        'sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT={}" {}'.format(
-                            RADEON_DPM_STATE_ON_BAT, file
-                        )
-                    )
-                    os.system(
-                        'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT={}" {}'.format(
-                            RADEON_DPM_PERF_LEVEL_ON_BAT, file
-                        )
-                    )
-                # Intel 
-                elif subprocess.getstatusoutput('lspci | grep VGA | grep -i Intel')[0] == 0:
-                    print('Intel graphics power profile: '+profile)
-                    # MIN_BAT/MIN_AC
-                    for i in range(len(freq_available)):
-                        if (int(freq_available[i]) > limit[0] and int(freq_available[i]) < limit[1]):
-                            min_bat = int(freq_available[i])
-                            min_ac = int(freq_available[i])
-                            break
-
-                            # Si el valor que se busca no se encuentra, el boolean freqCorrecta pasará a False y
-                            # por lo tanto no se realizará ninguna modificación respecto a gráficas Intel
-                    if min_bat == 0 or min_ac == 0:
-                        freqCorrecta = False
-
-                    # MAX_BAT/MAX_AC
-                    if freqCorrecta:
-                        for i in range(len(freq_available)):
-
-                            if (int(freq_available[i]) >= limit[2] and int(freq_available[i]) < limit[3]):
-
-                                max_bat = int(freq_available[i])
-                                break
-
-                        if int(freq_available[-1]) > 0:
-                            max_ac = int(freq_available[-1])
-
-                        if max_bat == 0 or max_ac == 0:
-                            freqCorrecta = False
-
-                    # BOOST_BAT/BOOST_AC
-                    if freqCorrecta:
-                        for i in range(len(freq_available)):
-
-                            if (int(freq_available[i]) >= limit[3] and int(freq_available[i]) < int(freq_available[-1])):
-                                boost_bat = int(freq_available[i])
-                                break
-
-                        if int(freq_available[-1]) > 0 and freqCorrecta:
-                            boost_ac = int(freq_available[-1])
-
-                        if boost_bat == 0 or boost_ac == 0:
-                            freqCorrecta = False
-
-                    
-                    # Si el boolean sigue en True querrá decir que se han obtenido valores para min, max y boost
-                    if freqCorrecta:
-                        print('Setting GPU frequencies on bat --> ' + str(min_bat), str(max_bat), str(boost_bat))
-                        update_config(file, 'INTEL_GPU_MIN_FREQ_ON_BAT', str(min_bat))
-                        update_config(file, 'INTEL_GPU_MIN_FREQ_ON_AC', str(min_ac))
-                        update_config(file, 'INTEL_GPU_MAX_FREQ_ON_BAT', str(max_bat))
-                        update_config(file, 'INTEL_GPU_MAX_FREQ_ON_AC', str(max_ac))
-                        update_config(file, 'INTEL_GPU_BOOST_FREQ_ON_BAT', str(boost_bat))
-                        update_config(file, 'INTEL_GPU_BOOST_FREQ_ON_AC', str(boost_ac))
-                    else:
-                        print('Frequency not changed')
-                else:
-                    print('Graphics 404')
-            else:
-                # Radeon 
-                if subprocess.getstatusoutput('lscpu | grep -i model | grep -i Radeon')[0] == 0:
-                    print('Radeon graphics power profile: default')
-                    RADEON_POWER_PROFILE_ON_BAT = 'default'
-                    os.system(
-                        'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
-                            RADEON_POWER_PROFILE_ON_BAT, file
-                        )
-                    )
-                    os.system(
-                        'sed -i "/RADEON_DPM_STATE_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
-                            RADEON_POWER_PROFILE_ON_BAT, file
-                        )
-                    )
-                    os.system(
-                        'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ c#RADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
-                            RADEON_DPM_PERF_LEVEL_ON_BAT, file
-                        )
-                    )
-
-                # Intel 
-                elif subprocess.getstatusoutput('lspci | grep VGA | grep Intel')[0] == 0:
-                    print('Intel graphics power profile: #'+profile)
-                    os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_BAT=/ c#INTEL_GPU_MIN_FREQ_ON_BAT=0" ' + file)
-                    os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_AC=/ c#INTEL_GPU_MIN_FREQ_ON_AC=0" ' + file)
-                    os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_BAT=/ c#INTEL_GPU_MAX_FREQ_ON_BAT=0" ' + file)
-                    os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_AC=/ c#INTEL_GPU_MAX_FREQ_ON_AC=0" ' + file)
-                    os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_BAT=/ c#INTEL_GPU_BOOST_FREQ_ON_BAT=0" ' + file)
-                    os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_AC=/ c#INTEL_GPU_BOOST_FREQ_ON_AC=0" ' + file)
-                else:
-                    print('Graphics 404')
-    else:
-        print('Frequencies table not found.')
         
 
+            
+        # RADEON 
+        if subprocess.getstatusoutput('lscpu | grep -i model | grep  -i Radeon')[0] == 0:
+            print('Radeon graphics power profile: '+profile)
+            if config['SETTINGS'][variable] == '1':
+                RADEON_POWER_PROFILE_ON_BAT = profile
+
+            os.system(
+                'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
+                    RADEON_POWER_PROFILE_ON_BAT, file
+                )
+            )
+            os.system(
+                'sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT={}" {}'.format(
+                    RADEON_DPM_STATE_ON_BAT, file
+                )
+            )
+            os.system(
+                'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT={}" {}'.format(
+                    RADEON_DPM_PERF_LEVEL_ON_BAT, file
+                )
+            )
+        # INTEL 
+        elif subprocess.getstatusoutput('lspci | grep VGA | grep -i Intel')[0] == 0:
+            # GRAPHICS INTEL SETTINGS
+            freq_table = ''
+            freq_available = ''
+            freqCorrecta = True
+
+            min_bat = 0
+            min_ac = 0
+
+            max_bat = 0
+            max_ac = 0
+
+            boost_bat = 0
+            boost_ac = 0
+            
+            if os.path.isfile('/sys/kernel/debug/dri/0/i915_ring_freq_table'):
+                freq_table = subprocess.getoutput('cat /sys/kernel/debug/dri/0/i915_ring_freq_table')
+                freq_table = freq_table.split('\n')
+                freq_table.pop(0)
+                freq_available = ''
+
+                for i in freq_table:
+                    valor = i.split()
+                    freq_available = freq_available + ' ' + valor[0]
+
+                freq_available = freq_available.strip().split(' ')
+                print('Available frequencies: '+str(freq_available))
+
+            # FRECUENCIAS PARA LOS MODOS
+            if not len(freq_available) > 1:
+                freqCorrecta = False
+                
+            print('Intel graphics power profile: '+profile)
+            if config['SETTINGS'][variable] == '1':
+                # MIN_BAT/MIN_AC
+                for i in range(len(freq_available)):
+                    if (int(freq_available[i]) > limit[0] and int(freq_available[i]) < limit[1]):
+                        min_bat = int(freq_available[i])
+                        min_ac = int(freq_available[i])
+                        break
+
+                # Si el valor que se busca no se encuentra, el boolean freqCorrecta pasará a False y
+                # por lo tanto no se realizará ninguna modificación respecto a gráficas Intel
+                if min_bat == 0 or min_ac == 0:
+                    freqCorrecta = False
+
+                # MAX_BAT/MAX_AC
+                if freqCorrecta:
+                    for i in range(len(freq_available)):
+
+                        if (int(freq_available[i]) >= limit[2] and int(freq_available[i]) < limit[3]):
+
+                            max_bat = int(freq_available[i])
+                            break
+
+                    if int(freq_available[-1]) > 0:
+                        max_ac = int(freq_available[-1])
+
+                    if max_bat == 0 or max_ac == 0:
+                        freqCorrecta = False
+
+                # BOOST_BAT/BOOST_AC
+                if freqCorrecta:
+                    for i in range(len(freq_available)):
+
+                        if (int(freq_available[i]) >= limit[3] and int(freq_available[i]) < int(freq_available[-1])):
+                            boost_bat = int(freq_available[i])
+                            break
+
+                    if int(freq_available[-1]) > 0 and freqCorrecta:
+                        boost_ac = int(freq_available[-1])
+
+                    if boost_bat == 0 or boost_ac == 0:
+                        freqCorrecta = False
+
+                
+                # Si el boolean sigue en True querrá decir que se han obtenido valores para min, max y boost
+                if freqCorrecta:
+                    print('Setting GPU frequencies on bat --> ' + str(min_bat), str(max_bat), str(boost_bat))
+                    update_config(file, 'INTEL_GPU_MIN_FREQ_ON_BAT', str(min_bat))
+                    update_config(file, 'INTEL_GPU_MIN_FREQ_ON_AC', str(min_ac))
+                    update_config(file, 'INTEL_GPU_MAX_FREQ_ON_BAT', str(max_bat))
+                    update_config(file, 'INTEL_GPU_MAX_FREQ_ON_AC', str(max_ac))
+                    update_config(file, 'INTEL_GPU_BOOST_FREQ_ON_BAT', str(boost_bat))
+                    update_config(file, 'INTEL_GPU_BOOST_FREQ_ON_AC', str(boost_ac))
+                else:
+                    print('Frequency not changed')
+            else:
+                print('Intel graphics power profile: #'+profile)
+                os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_BAT=/ c#INTEL_GPU_MIN_FREQ_ON_BAT=0" ' + file)
+                os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_AC=/ c#INTEL_GPU_MIN_FREQ_ON_AC=0" ' + file)
+                os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_BAT=/ c#INTEL_GPU_MAX_FREQ_ON_BAT=0" ' + file)
+                os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_AC=/ c#INTEL_GPU_MAX_FREQ_ON_AC=0" ' + file)
+                os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_BAT=/ c#INTEL_GPU_BOOST_FREQ_ON_BAT=0" ' + file)
+                os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_AC=/ c#INTEL_GPU_BOOST_FREQ_ON_AC=0" ' + file)
+        else:
+            print('Graphics 404')
     return required_reboot
 
 
