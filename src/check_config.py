@@ -22,12 +22,23 @@ CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
 uid, gid =  pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
 
 def main():    
+    print(uid, os.stat(HOMEDIR+'/.config/slimbookbattery').st_uid)
+    f_uid = os.stat(HOMEDIR+'/.config/slimbookbattery').st_uid
+    f_gid = os.stat(HOMEDIR+'/.config/slimbookbattery').st_gid
+    if not uid == f_uid or not gid == f_gid:
+        print('Setting folder ownership')
 
+        for dirpath, dirnames, filenames in os.walk(CONFIG_FOLDER):
+            print(dirpath)
+            os.chown(dirpath, uid, gid)
+            for filename in filenames:
+                print(os.path.join(dirpath, filename))
+                os.chown(os.path.join(dirpath, filename), uid, gid)
 
     if not (os.path.isdir(CONFIG_FOLDER) == True):
         print('Creating config folder ...')
         os.umask(0)
-        os.makedirs(CONFIG_FOLDER, mode=0o766) # creates with perms 
+        os.makedirs(CONFIG_FOLDER, mode=0o766) # creates with perms
         os.chown(CONFIG_FOLDER, uid, gid) # set user:group 
         print(subprocess.getoutput('ls -la '+CONFIG_FOLDER))
     else:
@@ -61,6 +72,10 @@ def check_config_file():
                     incidences = True
                     print('Not found: ' + var)
                     config.set(section, var, default_config.get(section, var))
+                # else:
+                #     print('\tFound: '+var)
+
+            print()
 
         if incidences:
             try:
@@ -72,6 +87,8 @@ def check_config_file():
                 print('Incidences could not be corrected.')
         else:
             print('Incidences not found.')
+
+        
     else:
         print('Creating config file ...')
         shutil.copy(DEFAULT_CONF, CONFIG_FOLDER)

@@ -24,6 +24,8 @@ import gettext
 import os
 import re
 import subprocess
+import shutil
+import pwd
 import sys
 from configparser import ConfigParser
 
@@ -52,11 +54,7 @@ config_file = HOMEDIR + '/.config/slimbookbattery/slimbookbattery.conf'
 config = ConfigParser()
 config.read(config_file)
 
-tdpcontroller = config['TDP']['tdpcontroller']
-tdp_config_file = HOMEDIR + '/.config/' + tdpcontroller + '/' + tdpcontroller + '.conf'
 
-config_tdp = ConfigParser()
-config_tdp.read(tdp_config_file)
 
 idiomas = ['en']
 try:
@@ -96,6 +94,7 @@ def main(args):  # Args will be like --> command_name value
     print("Arguments: " + arguments + "\n")
 
     if (len(args)) > 1:
+        uid, gid =  pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
         battery_mode = config.get('CONFIGURATION', 'modo_actual')
 
         if args[1] == "apply":  # Applies selected mode conf and turns on/off tlp
@@ -151,33 +150,26 @@ def main(args):  # Args will be like --> command_name value
 
         if args[1] == "restore":
 
-            # Copies selected DEFAULT conf to CUSTOM conf (also slimbookbattery.conf)
-            home_file = os.path.join(HOMEDIR, ".config/slimbookbattery/slimbookbattery.conf")
-            print(str(subprocess.getstatusoutput(
-                "sudo cp /usr/share/slimbookbattery/src/slimbookbattery.conf " + home_file)[0]))
-            home_file = os.path.join(HOMEDIR, ".config/slimbookbattery/ahorrodeenergia")
-            print(str(subprocess.getstatusoutput(
-                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/default/ahorrodeenergia " + home_file)[0]))
-            home_file = os.path.join(HOMEDIR, ".config/slimbookbattery/equilibrado")
-            print(str(subprocess.getstatusoutput(
-                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/default/equilibrado " + home_file)[0]))
-            home_file = os.path.join(HOMEDIR, ".config/slimbookbattery/maximorendimiento")
-            print(str(subprocess.getstatusoutput(
-                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/default/maximorendimiento " + home_file)[0]))
+            print("Resetting modes conf")
+            modes = ('ahorrodeenergia', 'equilibrado', 'maximorendimiento')
+            
+            for mode in modes:
+                custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/custom/", mode)
+                default_file = os.path.join(HOMEDIR, ".config/slimbookbattery/default/", mode)
 
-            #
-            if battery_mode == '1':
-                print('Power saving mode selected')
-                subprocess.getstatusoutput(
-                    "sudo cp " + HOMEDIR + "/.config/slimbookbattery/custom/ahorrodeenergia /etc/tlp.conf")
+                os.remove(custom_file)
+                shutil.copy(default_file, custom_file)
+                os.chown(custom_file, uid, gid) # set user:group 
 
-            elif battery_mode == '2':
-                print('Normal power mode selected')
-                os.system("sudo cp " + HOMEDIR + "/.config/slimbookbattery/custom/equilibrado /etc/tlp.conf")
-
-            elif battery_mode == '3':
-                print('Full power mode selected')
-                os.system("sudo cp " + HOMEDIR + "/.config/slimbookbattery/custom/maximorendimiento /etc/tlp.conf")
+            # Slimbook Battery Configuration
+            print("Resetting Slimbook Battery's conf")
+            custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/slimbookbattery.conf")
+            default_file = os.path.join(currpath, "slimbookbattery.conf")
+            print(default_file)
+            
+            os.remove(custom_file)
+            shutil.copy(default_file, custom_file)
+            os.chown(custom_file, uid, gid) # set user:group 
 
         if args[1] == "autostart":  # Sets brightness and enables tdp
             battery_mode = config.get('CONFIGURATION', 'modo_actual')
@@ -226,6 +218,13 @@ def notify(msg):
 def set_tdp(mode):
     # This function enables tdpcontroller autostart an changes it's mode if battery application,
     # battery autostart and sync tdp switch of the selected mode is on.
+    tdpcontroller = config['TDP']['tdpcontroller']
+    tdp_config_file = HOMEDIR + '/.config/' + tdpcontroller + '/' + tdpcontroller + '.conf'
+
+    config_tdp = ConfigParser()
+    config_tdp.read(tdp_config_file)
+
+
     print(colors.GREEN + '\n[TDP SETTINGS]' + colors.ENDC)
     print('Battery Mode: ' + mode)
 

@@ -66,6 +66,7 @@ if not os.path.isfile(config_file):
 config = configparser.ConfigParser()
 config.read(config_file)
 
+
 class colors:  # You may need to change color settings
     RED = '\033[31m'
     ENDC = '\033[m'
@@ -75,10 +76,10 @@ class colors:  # You may need to change color settings
     BLUE = '\033[34m'
     BOLD = "\033[;1m"
 
+
 class Preferences(Gtk.ApplicationWindow):
 
     min_resolution = False
-
     state_actual = ''
     autostart_inicial = ''
     modo_actual = ''
@@ -97,7 +98,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.set_decorated(False)
         self.set_resizable(False)
-
 
         # Movement
         self.is_in_drag = False
@@ -118,7 +118,7 @@ class Preferences(Gtk.ApplicationWindow):
             print(e)
             self.child_process.terminate()
 
-        #print(str(self.get_size()))
+        # print(str(self.get_size()))
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -204,10 +204,10 @@ class Preferences(Gtk.ApplicationWindow):
         hbox.pack_start(self.RestoreValues, True, True, 0)
         hbox.pack_start(self.btnAccept, True, True, 0)
         hbox.set_halign(Gtk.Align.END)
-        
+
         if self.min_resolution == True:
             hbox.set_name('smaller_label')
-            
+
         label77 = Gtk.Label(label='')
         label77.set_halign(Gtk.Align.START)
         label77.set_name('version')
@@ -237,16 +237,16 @@ class Preferences(Gtk.ApplicationWindow):
 
         if self.min_resolution == True:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename = os.path.join(imagespath, 'slimbookbattery-header-2.png'),
-                width = 775,
-                height = 175,
-                preserve_aspect_ratio = True)
+                filename=os.path.join(imagespath, 'slimbookbattery-header-2.png'),
+                width=775,
+                height=175,
+                preserve_aspect_ratio=True)
         else:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename = os.path.join(imagespath, 'slimbookbattery-header-2.png'),
-                width = 825,
-                height = 225,
-                preserve_aspect_ratio = True)
+                filename=os.path.join(imagespath, 'slimbookbattery-header-2.png'),
+                width=825,
+                height=225,
+                preserve_aspect_ratio=True)
 
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
@@ -273,7 +273,7 @@ class Preferences(Gtk.ApplicationWindow):
 
     # GENERAL PAGE  **********************************************************
 
-        print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))      
+        print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
 
         general_page_grid = Gtk.Grid(column_homogeneous=True,
                                      column_spacing=0,
@@ -290,7 +290,7 @@ class Preferences(Gtk.ApplicationWindow):
         notebook.append_page(general_page_grid, Gtk.Label.new(_('General')))
 
     # ********* GENERAL PAGE COMPONENENTS ************************************
-        # IMG 
+        # IMG
         col_1 = 1
         col_2 = 3
         col_3 = 1
@@ -311,8 +311,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchOnOff.set_halign(alignment_2)
         general_grid.attach(self.switchOnOff, col_2, row, 1, 1)
 
-
-        row = row+1
+        row = row + 1
         # LABEL AUTOSTART (1, 0)
         label11 = Gtk.Label(label=_('Autostart application:'))
         label11.set_halign(alignment_1)
@@ -323,7 +322,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchAutostart.set_halign(alignment_2)
         general_grid.attach(self.switchAutostart, col_2, row, 1, 1)
 
-        row = row +1
+        row = row + 1
         # LABEL INDICATOR (4, 0)
         hbox_indicator = Gtk.HBox(spacing=5)
 
@@ -347,7 +346,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchIcon.set_halign(alignment_2)
         general_grid.attach(self.switchIcon, col_2, row, 1, 1)
 
-        row = row+1
+        row = row + 1
         # LABEL DEVICE WORKING (3, 0)
         label11 = Gtk.Label(label=_('Working mode in case of battery failure'))
         label11.set_halign(alignment_1)
@@ -371,10 +370,9 @@ class Preferences(Gtk.ApplicationWindow):
 
         general_grid.attach(self.comboBoxWorkMode, col_2, row, 1, 1)
 
-        
         # LABEL PLUGGED (4, 0)
         # row = 0
-        row = row +1
+        row = row + 1
         hbox_charger = Gtk.HBox(spacing=5)
 
         label11 = Gtk.Label(label=_('Remember to disconnect charger:'))
@@ -384,7 +382,7 @@ class Preferences(Gtk.ApplicationWindow):
         icon.set_from_file(icon_path)
         icon.set_tooltip_text(
             _('Note: It is very important not to use your laptop always connected to AC, '
-            'this option will notify you to disconnect charger if you stay 15 days connected.)'))
+              'this option will notify you to disconnect charger if you stay 15 days connected. You should complete a charge cycle.'))
 
         hbox_charger.pack_start(label11, True, True, 0)
         hbox_charger.pack_start(icon, True, True, 0)
@@ -398,24 +396,32 @@ class Preferences(Gtk.ApplicationWindow):
         general_grid.attach(self.switchPlugged, col_4, row, 1, 1)
 
     # 8 ------------- TDP ADJUST
-        
+
         tdpcontroller = config['TDP']['tdpcontroller']
 
-        if config['TDP']['tdpcontroller'] == '':
-            row = row +1
-            proc = subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1")
-            if  proc[0] == 0 :
-                if proc[1].find('intel'):
-                    tdpcontroller = 'slimbookintelcontroller'
-                elif proc[1].find('amd'):
-                    tdpcontroller = 'slimbookamdcontroller'
-                else:
-                    print('Could not find TDP contoller for your processor')
+        # Checks which tdp controller is needed
+        proc = subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1")
+        if proc[0] == 0:
+            if proc[1].find('intel'):
+                tdpcontroller = 'slimbookintelcontroller'
+            elif proc[1].find('amd'):
+                tdpcontroller = 'slimbookamdcontroller'
+            else:
+                print('Could not find TDP contoller for your processor')
 
+            config_changed = True
+
+            if config['TDP']['tdpcontroller'] == '':
+                # Sets tdpcontroller if it's not set
                 config.set('TDP', 'tdpcontroller', tdpcontroller)
-                
-                print('TDP Controller found: '+tdpcontroller)
 
+            elif config['TDP']['tdpcontroller'] != tdpcontroller:
+                # Checks if tdp controller is correct
+                config.set('TDP', 'tdpcontroller', tdpcontroller)
+            else:
+                config_changed = False
+
+            if config_changed == True:
                 # This step is done at the end of function
                 configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
                 config.write(configfile)
@@ -423,7 +429,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         if tdpcontroller != '':
 
-            row = row+1
+            row = row + 1
 
             # LABEL 7
             label33 = Gtk.Label(label=_('Synchronice battery mode with CPU TDP mode:'))
@@ -463,7 +469,7 @@ class Preferences(Gtk.ApplicationWindow):
                 general_grid.attach(label33, col_3, row, label_width, 1)
 
     # ***************** BUTTONS **********************************************
-        row = 7
+        row = row + 1
         buttons_grid = Gtk.Grid(column_homogeneous=True,
                                 column_spacing=30,
                                 row_spacing=20)
@@ -541,13 +547,13 @@ class Preferences(Gtk.ApplicationWindow):
                             row_homogeneous=False,
                             column_spacing=25,
                             row_spacing=20)
-  
+
         low_page_grid.attach(low_grid, 0, 0, 2, 1)
 
         if self.min_resolution == True:
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-            
+
             scrolled_window1.set_min_content_height(400)
             scrolled_window1.set_min_content_width(1000)
 
@@ -755,13 +761,12 @@ class Preferences(Gtk.ApplicationWindow):
         self.check_autostart_switchWifiNIU(self.switchWifiNIU)
         low_grid.attach(self.switchWifiNIU, button_col, row, 1, 1)
 
-
         # ********* LOW MODE COMPONENTS COLUMN 2 *********************************
 
         if not self.min_resolution == True:
             row = 1
         else:
-            row = row+1
+            row = row + 1
 
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>' + (_('Persistent changes:')) + '</b></big>')
@@ -1047,7 +1052,7 @@ class Preferences(Gtk.ApplicationWindow):
         if self.min_resolution == True:
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-            
+
             scrolled_window1.set_min_content_height(400)
             scrolled_window1.set_min_content_width(1000)
 
@@ -1243,13 +1248,13 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchWifiNIU2.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU2)
         low_grid.attach(self.switchWifiNIU2, button_col, row, 1, 1)
-       
+
         # ********* MID MODE COMPONENTS COLUMN 2 *********************************
 
         if not self.min_resolution == True:
             row = 1
         else:
-            row = row+1
+            row = row + 1
 
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>' + (_('Persistent changes:')) + '</b></big>')
@@ -1511,7 +1516,6 @@ class Preferences(Gtk.ApplicationWindow):
                                         self.switchBlacklistBUSB2, self.switchBlacklistPrintUSB2,
                                         self.switchBlacklistWWANUSB2, self.switchShutdownSuspendUSB2)
 
-
         # HIGH MODE PAGE **********************************************************
         print('\nLOADING HIGH MODE COMPONENTS ...')
 
@@ -1529,7 +1533,7 @@ class Preferences(Gtk.ApplicationWindow):
         if self.min_resolution == True:
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-            
+
             scrolled_window1.set_min_content_height(400)
             scrolled_window1.set_min_content_width(1000)
 
@@ -1638,7 +1642,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.check_autostart_Graphics(self.switchGraphics3)
 
-        #self.switchGraphics3.set_sensitive(False)
+        # self.switchGraphics3.set_sensitive(False)
         low_grid.attach(self.switchGraphics3, button_col, row, 1, 1)
         # 4 ------------- SOUND SAVING *
         # LABEL 3
@@ -1725,12 +1729,12 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchWifiNIU3.set_valign(Gtk.Align.CENTER)
         self.check_autostart_switchWifiNIU(self.switchWifiNIU3)
         low_grid.attach(self.switchWifiNIU3, button_col, row, 1, 1)
-        
+
         # ********* HIGH MODE COMPONENTS COLUMN 2 *********************************
         if not self.min_resolution == True:
             row = 1
         else:
-            row = row+1
+            row = row + 1
 
         label33 = Gtk.Label(label='')
         label33.set_markup('<big><b>' + (_('Persistent changes:')) + '</b></big>')
@@ -2003,7 +2007,7 @@ class Preferences(Gtk.ApplicationWindow):
         if self.min_resolution == True:
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-            
+
             scrolled_window1.set_min_content_height(400)
             scrolled_window1.set_min_content_width(1000)
 
@@ -2101,7 +2105,7 @@ class Preferences(Gtk.ApplicationWindow):
         if self.min_resolution == True:
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-            
+
             scrolled_window1.set_min_content_height(400)
             scrolled_window1.set_min_content_width(1000)
 
@@ -2307,8 +2311,6 @@ class Preferences(Gtk.ApplicationWindow):
         info_page_grid = Gtk.Grid(column_homogeneous=True,
                                   column_spacing=0,
                                   row_spacing=20)
-        
-
 
         info_grid = Gtk.Grid(column_homogeneous=True,
                              column_spacing=0,
@@ -2316,15 +2318,12 @@ class Preferences(Gtk.ApplicationWindow):
         if self.min_resolution == True:
             info_grid.set_name('smaller_label')
 
-
         info_page_grid.attach(info_grid, 0, 0, 2, 4)
-        
-
 
         if self.min_resolution == True:
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-            
+
             scrolled_window1.set_min_content_height(400)
             scrolled_window1.set_min_content_width(1000)
 
@@ -2515,16 +2514,14 @@ class Preferences(Gtk.ApplicationWindow):
         label77.set_markup("<span><b>" + (_("Send an e-mail to: ")) + "dev@slimbook.es</b></span>")
         label77.set_justify(Gtk.Justification.CENTER)
 
-        
         # (12, 0)
         self.buttonReportFile = Gtk.Button(label=(_('Generate report file')))
         self.buttonReportFile.connect("clicked", self.on_buttonReportFile_clicked)
         self.buttonReportFile.set_halign(Gtk.Align.CENTER)
- 
 
         hbox = Gtk.HBox()
         hbox.add(label77)
-        hbox.pack_start( self.buttonReportFile, True, True, 0)
+        hbox.pack_start(self.buttonReportFile, True, True, 0)
         info_grid.attach(hbox, 1, 15, 3, 1)
 
         # (13, 0)
@@ -2533,7 +2530,6 @@ class Preferences(Gtk.ApplicationWindow):
         label77.set_justify(Gtk.Justification.CENTER)
         info_grid.attach(label77, 0, 16, 5, 1)
 
-        
         # (14, 0)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename=os.path.join(imagespath, 'cc.png'),
@@ -2860,7 +2856,7 @@ class Preferences(Gtk.ApplicationWindow):
             if cmd[0] == 0:
                 timeTo = cmd[1]
                 timeTo = timeTo.split()
-                #print(timeTo)
+                # print(timeTo)
                 if timeTo[4] == 'hours':
                     timeTo = timeTo[3] + (_(' hours'))
                 else:
@@ -2959,6 +2955,7 @@ class Preferences(Gtk.ApplicationWindow):
     def on_buttonRestGeneral_clicked(self, buttonRestGeneral):
         print('Reset values called')
         os.system('pkexec slimbookbattery-pkexec restore')
+        config.read(config_file)
         self.hide()
 
         win = Preferences()
@@ -3075,7 +3072,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         if variable == '1':
             self.switchPlugged.set_active(True)
-        else: 
+        else:
             self.switchPlugged.set_active(False)
 
         print()
@@ -3138,7 +3135,7 @@ class Preferences(Gtk.ApplicationWindow):
                 config.set('SETTINGS', 'limit_cpu_ahorro', '2')
 
             elif name == (_('none')):
-     
+
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
@@ -3704,7 +3701,6 @@ class Preferences(Gtk.ApplicationWindow):
         else:
             config.set('SETTINGS', 'graphics_maxrendimiento', str(0))
 
-
         statSound = self.switchSound3.get_active()  # Tlp custom file *
         if statSound:
             exec = subprocess.getstatusoutput(
@@ -4009,18 +4005,18 @@ class Preferences(Gtk.ApplicationWindow):
 
         # Checking autostart
 
-        if autostart == '1' and self.autostart_inicial == '0' :
+        if autostart == '1' and self.autostart_inicial == '0':
             print('Enabling autostart ...')
 
             if not os.path.isdir(user_home + '/.config/autostart'):
-                os.mkdir(user_home+'/.config/autostart')
-            
-            shutil.copy(current_path + "/slimbookbattery-autostart.desktop", user_home+"/.config/autostart/")
-            config.set('CONFIGURATION','autostart', '1')
+                os.mkdir(user_home + '/.config/autostart')
+
+            shutil.copy(current_path + "/slimbookbattery-autostart.desktop", user_home + "/.config/autostart/")
+            config.set('CONFIGURATION', 'autostart', '1')
 
         elif autostart == '0' and self.autostart_inicial == '1':
             print('Disabling autostart ...')
-            config.set('CONFIGURATION','autostart', '0')
+            config.set('CONFIGURATION', 'autostart', '0')
             os.remove(user_home + "/.config/autostart/slimbookbattery-autostart.desktop")
 
         # State
@@ -4084,10 +4080,9 @@ class Preferences(Gtk.ApplicationWindow):
 
         tdpcontroller = config['TDP']['tdpcontroller']
 
-
         if config['TDP']['saving_tdpsync'] == '1':
             reboot_process(tdpcontroller + 'indicator.py',
-                            '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + 'indicator.py', True)
+                           '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + 'indicator.py', True)
         else:
             print('Mode not setting TDP')
 

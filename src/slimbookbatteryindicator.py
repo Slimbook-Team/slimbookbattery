@@ -35,14 +35,16 @@ gi.require_version('Notify', '0.7')
 
 from gi.repository import Gtk, GdkPixbuf, AppIndicator3, Notify as notify
 
-
-entorno_usu = locale.getlocale()[0]
-if entorno_usu.find("en") >= 0 or entorno_usu.find("es") >= 0 or entorno_usu.find("it") >= 0 or entorno_usu.find(
-        "pt") >= 0 or entorno_usu.find("gl") >= 0:
-    idiomas = [entorno_usu]
-else:
+try:
+    entorno_usu = locale.getlocale()[0]
+    if entorno_usu.find("en") >= 0 or entorno_usu.find("es") >= 0 or entorno_usu.find("it") >= 0 or entorno_usu.find(
+            "pt") >= 0 or entorno_usu.find("gl") >= 0:
+        idiomas = [entorno_usu]
+    else:
+        idiomas = ['en']
+except:
     idiomas = ['en']
-
+    
 print('Slimbook Battery Indicator, executed as: ' + str(subprocess.getoutput('whoami')))
 print('Language: ', entorno_usu)
 
