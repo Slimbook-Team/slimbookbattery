@@ -196,6 +196,10 @@ msgstr "Excluded USB IDs from USB autosuspend:"
 msgid "Note: You need to write in the Text Box the USB IDs (separate with spaces) to exclude from autosuspend"
 msgstr "Note: You need to write in the Text Box the USB IDs (separate with spaces) to exclude from autosuspend"
 
+#: slimbookbatterypreferences.py:386
+msgid "Note: It is very important not to use your laptop always connected to AC, this option will notify you to disconnect charger if you stay 15 days connected. You should complete a charge cycle.)"
+msgstr ""
+
 #: preferences.py:671 preferences.py:1126 preferences.py:1581
 msgid "Exclude bluetooth devices from USB autosuspend:"
 msgstr "Exclude bluetooth devices from USB autosuspend:"

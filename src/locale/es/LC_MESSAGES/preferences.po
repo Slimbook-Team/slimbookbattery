@@ -323,6 +323,10 @@ msgstr "Si la aplicación te ha sido de utilidad, considera decirlo en nuestras 
 msgid "IMPORTANT NOTE:"
 msgstr "NOTA IMPORTANTE:"
 
+#: preferences.py:386
+msgid "Note: It is very important not to use your laptop always connected to AC, this option will notify you to disconnect charger if you stay 15 days connected. You should complete a charge cycle."
+msgstr "Nota: Es muy importante no mantener tu portátil siempre conectado al cargador, ésta opción te notificará para desconectar el cargador si llevas más de 15 días conectado. Deberías completar un ciclo de carga."
+
 #: preferences.py:2002
 msgid " If you have any software, widget or application that changes the CPU profile, battery"
 msgstr " Si ya tienes instalado algún software que cambie el perfil de la CPU, optimización de la"
