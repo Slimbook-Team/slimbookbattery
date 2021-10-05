@@ -401,14 +401,22 @@ class Preferences(Gtk.ApplicationWindow):
 
         # Checks which tdp controller is needed
         proc = subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1")
+
         if proc[0] == 0:
-            if proc[1].find('intel'):
+            print(proc[1])
+
+            if proc[1].lower().find('intel') != -1:
+                print('Intel')
                 tdpcontroller = 'slimbookintelcontroller'
-            elif proc[1].find('amd'):
+
+            elif proc[1].lower().find('amd') != -1:
+                print('AMD')
                 tdpcontroller = 'slimbookamdcontroller'
+
             else:
                 print('Could not find TDP contoller for your processor')
 
+            print('TDP Controller: '+tdpcontroller)
             config_changed = True
 
             if config['TDP']['tdpcontroller'] == '':
@@ -426,7 +434,8 @@ class Preferences(Gtk.ApplicationWindow):
                 configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
                 config.write(configfile)
                 configfile.close()
-
+        else:
+            print('F')
         if tdpcontroller != '':
 
             row = row + 1

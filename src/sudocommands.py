@@ -231,7 +231,6 @@ def set_tdp(mode):
     # Mode settings
     if config['CONFIGURATION']['application_on'] == '1':
 
-        tdp_switch = ''
         tdp_mode = ''
         tdp_switch = 'saving_tdpsync'
 
@@ -252,14 +251,20 @@ def set_tdp(mode):
                 print('  TDP changed to ' + config_tdp['CONFIGURATION']['mode'])
 
                 # Autostart settings
-                print('\nUpdating TDP autostart ...')
+                print('\nUpdating TDP autostart ...')                                                                             
                 if config['CONFIGURATION']['autostart'] == '1':
                     config_tdp.set('CONFIGURATION', 'autostart', 'on')
-                    print('  TDP Autostart enabled')
+
+                    tdp_autostart = '/usr/share/'+tdpcontroller+'/src/'+tdpcontroller+'-autostart.desktop'
+
+                    shutil.copy(tdp_autostart, HOMEDIR+'/.config/autostart/')
+
+                    print('TDP Autostart enabled')
+
                     if config_tdp['CONFIGURATION']['show-icon'] == 'on':
-                        print('  TDP Icon will be shown')
+                        print('TDP Icon will be shown')
                     else:
-                        config_tdp.set('CONFIGURATION', 'show-icon', 'off')
+                        print("TDP Icon won't be shown")
 
                 configfile = open(tdp_config_file, 'w')
                 config_tdp.write(configfile)
