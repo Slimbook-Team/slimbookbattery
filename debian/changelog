@@ -1,3 +1,21 @@
+slimbookbattery (4.0.2) focal; urgency=low
+  * Fixed reboot bug
+
+ -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
+
+slimbookbattery (4.0.1) focal; urgency=low
+  * New interface
+  * Draggable window
+  * Skipping password asking
+  * Added config values
+  * Added brightness switch
+  * Added TDP sync option
+  * Added user config check
+  * Added splash window
+  * Fixed bugs
+
+ -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
+
 slimbookbattery (4.0.0) focal; urgency=low
   * New interface
   * Draggable window

@@ -26,6 +26,7 @@ from datetime import date, datetime
 import signal
 import subprocess
 from os.path import expanduser
+import getpass
 
 import gi
 
@@ -52,7 +53,15 @@ current_path = os.path.dirname(os.path.realpath(__file__))
 imagespath = os.path.normpath(os.path.join(current_path, '..', 'images'))
 
 # Ruta del usuario actual
+try:
+    user = getpass.getuser()
+except:
+    user = os.getlogin()
+
+subprocess.getstatusoutput('echo $(date) @' + user + '>> /tmp/slimbookbattery.user')
+
 user_home = expanduser("~")
+
 
 config_file = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
 config = configparser.ConfigParser()

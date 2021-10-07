@@ -26,6 +26,7 @@ import re
 import subprocess
 import shutil
 import pwd
+from time import sleep
 import sys
 from configparser import ConfigParser
 
@@ -35,14 +36,12 @@ print('*************************************************************************
 
 print('\x1b[6;30;42m' + 'SlimbookBattery-Commandline, executed as: ' + str(subprocess.getoutput('whoami')) + '\x1b[0m')
 
-USERNAME = subprocess.getstatusoutput("logname")
-
-if USERNAME[0] == 0 and USERNAME[1] != 'root' and subprocess.getstatusoutput('getent passwd ' + USERNAME[1]) == 0:
-    USER_NAME = USERNAME[1]
+USER_NAME = subprocess.getstatusoutput('cat /tmp/slimbookbattery.user | tail -n 1 | cut -f 2 -d "@"')
+if USER_NAME[0] == 0:
+    USER_NAME =USER_NAME[1]
 else:
-    USER_NAME = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
-
-#subprocess.getstatusoutput('echo $(date) ' + USER_NAME + '>> /var/slimbookbattery.log')
+    subprocess.getstatusoutput('echo $(date) Failed to get user:' + USER_NAME[1] + '>> /var/slimbookbattery.log')
+    exit(5)
 
 HOMEDIR = subprocess.getoutput("echo ~" + USER_NAME)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -53,7 +52,6 @@ print("Username: " + str(USER_NAME) + " - Homedir: " + HOMEDIR + "")
 config_file = HOMEDIR + '/.config/slimbookbattery/slimbookbattery.conf'
 config = ConfigParser()
 config.read(config_file)
-
 
 
 idiomas = ['en']
@@ -94,7 +92,15 @@ def main(args):  # Args will be like --> command_name value
     print("Arguments: " + arguments + "\n")
 
     if (len(args)) > 1:
-        uid, gid =  pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
+
+        try:
+            uid, gid =  pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
+
+        except Exception as e:
+
+            subprocess.getstatusoutput('echo $(date) Failed to get user id/gid: ' + USER_NAME + '>> /var/slimbookbattery.log')
+            exit(5)
+
         battery_mode = config.get('CONFIGURATION', 'modo_actual')
 
         if args[1] == "apply":  # Applies selected mode conf and turns on/off tlp
@@ -530,9 +536,10 @@ def brightness_settings(mode):
         if set_brightness != '':
 
             if os.path.isdir("/sys/class/backlight"):
+                print('/sys/class/backlight exists.')
                 for name in os.listdir("/sys/class/backlight"):
-                    if os.path.isfile("/sys/class/backlight/" + name + "/max_brightness") and os.path.isfile(
-                            "/sys/class/backlight/" + name + "/brightness"):
+
+                    if os.path.isfile("/sys/class/backlight/" + name + "/max_brightness") and os.path.isfile("/sys/class/backlight/" + name + "/brightness"):
                         brilloMax = int(subprocess.getoutput("cat /sys/class/backlight/" + name + "/max_brightness"))
                         brightness = int((brilloMax / 100) * int(set_brightness))
                         print('Setting Brightness (mode' + mode + ')  to ' + str(
@@ -557,6 +564,11 @@ def brightness_settings(mode):
                                 "sed -i '$a @reboot /usr/bin/slimbookbattery-pkexec autostart' "
                                 "/var/spool/cron/crontabs/root")
                             print('Crontab settings added')
+                    else:
+                        print('Brightness file not found')
+
+            else:
+                print('Brightness directory not found')
         else:
             # CRONTAB EDIT
             print('Brightness setting is off')

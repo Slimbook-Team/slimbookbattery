@@ -42,7 +42,7 @@ if [ -e /sys/class/power_supply/BAT0 ]; then
 				for (( i=1; i<=$TIMES; i++ ))
 				do  
 				echo 'Notification sent'
-				su $user -c 'notify-send --icon=/usr/share/slimbookbattery/images/normal.png "Battery is quite full charged!" "Actual value $(cat /sys/class/power_supply/BAT0/capacity) %"'
+				su $user -c 'notify-send --icon=/usr/share/slimbookbattery/images/normal.png "Battery has charged enough!" "Actual value $(cat /sys/class/power_supply/BAT0/capacity) %"'
 				sleep $TIME_BETWEEN
 				done
 

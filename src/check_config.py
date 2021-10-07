@@ -22,6 +22,16 @@ CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
 uid, gid =  pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
 
 def main():    
+
+    if not (os.path.isdir(CONFIG_FOLDER) == True):
+        print('Creating config folder ...')
+        os.umask(0)
+        os.makedirs(CONFIG_FOLDER, mode=0o766) # creates with perms
+        os.chown(CONFIG_FOLDER, uid, gid) # set user:group 
+        print(subprocess.getoutput('ls -la '+CONFIG_FOLDER))
+    else:
+        print('Configuration folder ('+CONFIG_FOLDER+') found!')
+
     print(uid, os.stat(HOMEDIR+'/.config/slimbookbattery').st_uid)
     f_uid = os.stat(HOMEDIR+'/.config/slimbookbattery').st_uid
     f_gid = os.stat(HOMEDIR+'/.config/slimbookbattery').st_gid
@@ -34,15 +44,6 @@ def main():
             for filename in filenames:
                 print(os.path.join(dirpath, filename))
                 os.chown(os.path.join(dirpath, filename), uid, gid)
-
-    if not (os.path.isdir(CONFIG_FOLDER) == True):
-        print('Creating config folder ...')
-        os.umask(0)
-        os.makedirs(CONFIG_FOLDER, mode=0o766) # creates with perms
-        os.chown(CONFIG_FOLDER, uid, gid) # set user:group 
-        print(subprocess.getoutput('ls -la '+CONFIG_FOLDER))
-    else:
-        print('Configuration folder ('+CONFIG_FOLDER+') found!')
 
     check_config_file()
     check_tlp_files()
