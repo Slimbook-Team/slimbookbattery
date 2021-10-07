@@ -15,21 +15,6 @@ VERSION_REGEX = re.compile(r'\(.*\)')
 
 
 def main():
-    changelog = None
-    for candidate_path in ['../changelog', '../debian/changelog']:
-        candidate_path = os.path.join(CURRENT_PATH, candidate_path)
-        if os.path.exists(candidate_path):
-            changelog = candidate_path
-            break
-
-    version = 'Unknown'
-    if os.path.exists(changelog):
-        with open(changelog, 'r') as f:
-            content = f.read()
-        version_list = VERSION_REGEX.findall(content)
-        if version_list:
-            version = version_list[0]
-
     parser = argparse.ArgumentParser(
         description='Slimbook Battery Commandline Interface:\n'
                     'For support go to: https://github.com/slimbook/slimbookbattery'
@@ -38,6 +23,21 @@ def main():
 
     args = parser.parse_args()
     if args.version:
+        changelog = None
+        for candidate_path in ['../changelog', '../debian/changelog']:
+            candidate_path = os.path.join(CURRENT_PATH, candidate_path)
+            if os.path.exists(candidate_path):
+                changelog = candidate_path
+                break
+
+        version = 'Unknown'
+        if os.path.exists(changelog):
+            with open(changelog, 'r') as f:
+                content = f.read()
+            version_list = VERSION_REGEX.findall(content)
+            if version_list:
+                version = version_list[0]
+
         sys.stdout.write('Slimbook Battery {}\n'.format(version))
         exit(0)
 
