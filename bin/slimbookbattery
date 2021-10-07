@@ -1,40 +1,58 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-
+import argparse
 import os
+import re
 import sys
 import subprocess
 
-args = sys.argv
-tlp = "/usr/bin/tlp"
-tlp2 = "/usr/sbin/tlp"
 
-current_path = os.path.dirname(os.path.realpath(__file__))
-
-if len(args)>1:
-    if args[1]=='-h':
-        print('Slimbook Battery Commandline Interface:')
-        print('For support go to: https://github.com/slimbook/slimbookbattery')
-        print('\n\t-h: This help.')
-        print('\t-v: Application version.')
-    elif args[1]=='-v':
-        version_line = subprocess.getstatusoutput("cat /usr/share/slimbookbattery/src/changelog |head -n1| egrep -o '\(.*\)'")
-        if version_line[0] == 0:
-            print('Slimbook Battery '+version_line[1])
-        else:
-            print('Version not found.')
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+TLP = "/usr/bin/tlp"
+TLP2 = "/usr/sbin/tlp"
+VERSION_REGEX = re.compile(r'\(.*\)')
 
 
-else:
-    if os.path.exists(tlp) or os.path.exists(tlp2):
-        if __name__ == "__main__":
-            pgrep = subprocess.getoutput("pgrep slimbookbatterypreferences")
-            numProcRunning = pgrep.split('\n')
-            if len(numProcRunning) > 1:
-                print("Slimbook Battery is in execution")
-            else:
-                preference_py = '/usr/share/slimbookbattery/src/slimbookbatterypreferences.py'
-                os.system('python3 {}'.format(preference_py))
+def main():
+    changelog = None
+    for candidate_path in ['../changelog', '../debian/changelog']:
+        candidate_path = os.path.join(CURRENT_PATH, candidate_path)
+        if os.path.exists(candidate_path):
+            changelog = candidate_path
+            break
 
-exit(0)
+    version = 'Unknown'
+    if os.path.exists(changelog):
+        with open(changelog, 'r') as f:
+            content = f.read()
+        version_list = VERSION_REGEX.findall(content)
+        if version_list:
+            version = version_list[0]
+
+    parser = argparse.ArgumentParser(
+        description='Slimbook Battery Commandline Interface:\n'
+                    'For support go to: https://github.com/slimbook/slimbookbattery'
+    )
+    parser.add_argument('-v', '--version', action='store_true', help='application version')
+
+    args = parser.parse_args()
+    if args.version:
+        sys.stdout.write('Slimbook Battery {}\n'.format(version))
+        exit(0)
+
+    if not (os.path.exists(TLP) or os.path.exists(TLP2)):
+        sys.stderr.write("Slimbook Battery requires TLP\n")
+        exit(1)
+
+    pgrep = subprocess.getoutput("pgrep slimbookbatterypreferences")
+    num_proc_running = pgrep.split('\n')
+    if len(num_proc_running) > 1:
+        sys.stdout.write("Slimbook Battery is in execution\n")
+    else:
+        preference_py = os.path.join(CURRENT_PATH, '../src/slimbookbatterypreferences.py')
+        os.system('python3 {}'.format(preference_py))
+
+
+if __name__ == "__main__":
+    main()
