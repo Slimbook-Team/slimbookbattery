@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 #
 import configparser
-import getpass
 import logging
 import os
 import pwd
@@ -99,7 +98,7 @@ def check_config_file():
 
 
 # Checks if the user's default config files exist an if they are like the app version's default files.
-# If files or directories don't exist they are created. 
+# If files or directories don't exist they are created.
 def check_tlp_files():
     logger.info("Checking Slimbook Battery's TLP Configuration")
 

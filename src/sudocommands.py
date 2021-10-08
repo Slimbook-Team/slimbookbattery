@@ -20,8 +20,6 @@
 
 
 # This file will be executed as sudo by pkexec
-import getpass
-import gettext
 import logging
 import os
 import pwd
@@ -36,7 +34,6 @@ CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 if CURRENT_PATH not in sys.path:
     sys.path = [CURRENT_PATH] + sys.path
 import utils
-
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -183,7 +180,8 @@ def main(args):  # Args will be like --> command_name value
 
         if args[1] == "report":
             os.system(
-                "sudo python3 " + CURRENT_PATH + "/slimbookbattery-report.py " + args[2] + ' ' + args[3] + ' ' + args[4])
+                "sudo python3 " + CURRENT_PATH + "/slimbookbattery-report.py " + args[2] + ' ' + args[3] + ' ' + args[
+                    4])
 
         if args[1] == "restart_tlp":
             logger.info('Restarting TLP...')
@@ -230,7 +228,7 @@ def set_tdp(mode):
     config_tdp = ConfigParser()
     config_tdp.read(tdp_config_file)
 
-    logger.info('\n{}[TDP SETTINGS]{}' .format(Colors.GREEN, Colors.ENDC))
+    logger.info('\n{}[TDP SETTINGS]{}'.format(Colors.GREEN, Colors.ENDC))
     logger.info('Battery Mode: {}'.format(mode))
 
     # Mode settings
@@ -353,7 +351,7 @@ def mode_settings(mode):
                     os.system('prime-select nvidia')
 
         graphics_after = subprocess.getoutput('prime-select query')
-        logger.debug('Graphics before --> {} // Graphics after --> {}'.format(graphics_before,  graphics_after))
+        logger.debug('Graphics before --> {} // Graphics after --> {}'.format(graphics_before, graphics_after))
         if not graphics_before == graphics_after:
             logger.info('Required reboot changes to 1')
             required_reboot = 1
@@ -535,7 +533,8 @@ def brightness_settings(mode):
                 logger.debug('/sys/class/backlight exists.')
                 for name in os.listdir("/sys/class/backlight"):
 
-                    if os.path.isfile("/sys/class/backlight/" + name + "/max_brightness") and os.path.isfile("/sys/class/backlight/" + name + "/brightness"):
+                    if os.path.isfile("/sys/class/backlight/" + name + "/max_brightness") and os.path.isfile(
+                            "/sys/class/backlight/" + name + "/brightness"):
                         brilloMax = int(subprocess.getoutput("cat /sys/class/backlight/" + name + "/max_brightness"))
                         brightness = int((brilloMax / 100) * int(set_brightness))
 

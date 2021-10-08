@@ -2561,6 +2561,7 @@ class Preferences(Gtk.ApplicationWindow):
             stat = config['SETTINGS'][mode_brightness]
         except (ValueError, IndexError, KeyError):
             import check_config
+            check_config.main()
 
         stat = config['SETTINGS'][mode_brightness]
         if stat == '1':
