@@ -19,17 +19,19 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import configparser
-import getpass
-import gettext
 import os
 import signal
 import subprocess
+import sys
 from datetime import date
-from os.path import expanduser
 
 import gi
 
-import locale
+# We want load first current location
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+if CURRENT_PATH not in sys.path:
+    sys.path = [CURRENT_PATH] + sys.path
+import utils
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
@@ -37,31 +39,14 @@ gi.require_version('Notify', '0.7')
 
 from gi.repository import Gtk, GdkPixbuf, AppIndicator3, Notify as notify
 
-languages = ['en']
-try:
-    entorno_usu = locale.getlocale()[0]
-    for lang in ["en", "es", "it", "pt", "gl"]:
-        if entorno_usu.find(lang) >= 0:
-            languages = [entorno_usu]
-            break
-except Exception:
-    pass
+user = utils.get_user()
+_ = utils.load_translation('slimbookbattery')
 
-print('Slimbook Battery Indicator, executed as: ' + str(subprocess.getoutput('whoami')))
-print('Language: ', languages)
-
-CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
-IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
-
-# Ruta del usuario actual
-try:
-    user = getpass.getuser()
-except Exception:
-    user = os.getlogin()
+IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '../images'))
 
 subprocess.getstatusoutput('echo $(date) @' + user + '>> /tmp/slimbookbattery.user')
 
-user_home = expanduser("~")
+user_home = os.path.expanduser('~{}'.format(user))
 
 config_file = os.path.join(user_home, '.config/slimbookbattery/slimbookbattery.conf')
 config = configparser.ConfigParser()
@@ -82,13 +67,8 @@ indicator.set_icon_full(DISABLED, 'Icon disabled')
 proceso = None
 alert = None
 
-CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
 
-_ = gettext.translation('slimbookbattery',
-                        os.path.join(CURRENT_PATH, 'locale'),
-                        languages=languages,
-                        fallback=True, ).gettext
 
 if config['CONFIGURATION']['alerts'] == '1':
     if not os.path.isfile('/lib/systemd/system/slimbookbattery.service'):

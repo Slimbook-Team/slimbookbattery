@@ -10,9 +10,13 @@ import shutil
 import subprocess
 import sys
 
-USER_NAME = getpass.getuser()
-if USER_NAME == 'root':
-    USER_NAME = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
+# We want load first current location
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+if CURRENT_PATH not in sys.path:
+    sys.path = [CURRENT_PATH] + sys.path
+import utils
+
+USER_NAME = utils.get_user()
 
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 

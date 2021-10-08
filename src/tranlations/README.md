@@ -12,4 +12,4 @@ Tip: You can use the existent folders as a guide to translate *.po files in your
 1. Edit .po files in the language folder.
 2. Upload the new folder to this repository route.
 
-(We will compile them to .mo, although you can try to do it by executing 'bash compila_mo.sh' inside the locale folder)
+(We will compile them to .mo, although you can try to do it by executing 'bash compila_mo.sh' inside the tranlations folder)
