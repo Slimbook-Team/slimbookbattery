@@ -19,16 +19,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import configparser
+import getpass
 import gettext
-import locale
 import os
-from datetime import date, datetime
 import signal
 import subprocess
+from datetime import date
 from os.path import expanduser
-import getpass
 
 import gi
+
+import locale
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
@@ -36,42 +37,41 @@ gi.require_version('Notify', '0.7')
 
 from gi.repository import Gtk, GdkPixbuf, AppIndicator3, Notify as notify
 
+languages = ['en']
 try:
     entorno_usu = locale.getlocale()[0]
-    if entorno_usu.find("en") >= 0 or entorno_usu.find("es") >= 0 or entorno_usu.find("it") >= 0 or entorno_usu.find(
-            "pt") >= 0 or entorno_usu.find("gl") >= 0:
-        idiomas = [entorno_usu]
-    else:
-        idiomas = ['en']
-except:
-    idiomas = ['en']
-    
-print('Slimbook Battery Indicator, executed as: ' + str(subprocess.getoutput('whoami')))
-print('Language: ', entorno_usu)
+    for lang in ["en", "es", "it", "pt", "gl"]:
+        if entorno_usu.find(lang) >= 0:
+            languages = [entorno_usu]
+            break
+except Exception:
+    pass
 
-current_path = os.path.dirname(os.path.realpath(__file__))
-imagespath = os.path.normpath(os.path.join(current_path, '..', 'images'))
+print('Slimbook Battery Indicator, executed as: ' + str(subprocess.getoutput('whoami')))
+print('Language: ', languages)
+
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
 
 # Ruta del usuario actual
 try:
     user = getpass.getuser()
-except:
+except Exception:
     user = os.getlogin()
 
 subprocess.getstatusoutput('echo $(date) @' + user + '>> /tmp/slimbookbattery.user')
 
 user_home = expanduser("~")
 
-
-config_file = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
+config_file = os.path.join(user_home, '.config/slimbookbattery/slimbookbattery.conf')
 config = configparser.ConfigParser()
 config.read(config_file)
 
-ENERGY_SAVING = imagespath + '/indicator/normal.png'
-EQUILIBRADO = imagespath + '/indicator/balanced_normal.png'
-MAX_PERFORMANCE = imagespath + '/indicator/performance_normal.png'
+ENERGY_SAVING = os.path.join(IMAGES_PATH, 'indicator/normal.png')
+EQUILIBRADO = os.path.join(IMAGES_PATH, 'indicator/balanced_normal.png')
+MAX_PERFORMANCE = os.path.join(IMAGES_PATH, 'indicator/performance_normal.png')
 
-DISABLED = imagespath + '/indicator/disabled_normal.png'
+DISABLED = os.path.join(IMAGES_PATH, 'indicator/disabled_normal.png')
 
 APPINDICATOR_ID = 'Slimbook Battery Indicator'
 
@@ -82,15 +82,13 @@ indicator.set_icon_full(DISABLED, 'Icon disabled')
 proceso = None
 alert = None
 
-current_path = os.path.dirname(os.path.realpath(__file__))
-imagespath = os.path.normpath(os.path.join(current_path, '..', 'images'))
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
 
-t = gettext.translation('slimbookbattery',
-                        current_path + '/locale',
-                        languages=idiomas,
-                        fallback=True, )
-
-_ = t.gettext
+_ = gettext.translation('slimbookbattery',
+                        os.path.join(CURRENT_PATH, 'locale'),
+                        languages=languages,
+                        fallback=True, ).gettext
 
 if config['CONFIGURATION']['alerts'] == '1':
     if not os.path.isfile('/lib/systemd/system/slimbookbattery.service'):
@@ -149,14 +147,15 @@ class Indicator(Gtk.Application):
 
         print()
 
+
 def check_plug():
     last = config.get('CONFIGURATION', 'plugged')
     if not last == '':
-        last=last.split('-')
+        last = last.split('-')
         last_date = []
         for value in last:
             last_date.append(int(value))
-            
+
         last_date = date(last_date[0], last_date[1], last_date[2])
 
         today = date.today()
@@ -164,12 +163,13 @@ def check_plug():
 
         last_plug = abs(last_date - today).days
 
-        if last_plug >=15:
+        if last_plug >= 15:
             status = (subprocess.getstatusoutput("cat /sys/class/power_supply/BAT0/status"))
 
-            if status[0]==0 and status[1]!='Discharging':
-                os.system('notify-send --icon '+os.path.join(current_path, '../images/normal.png')+' "Slimbook Battery" "'+
-                _('It seems that you have been connected to AC for at least 15 days, we reccomend you to disconnect your charger, and discharge battery')+'"')
+            if status[0] == 0 and status[1] != 'Discharging':
+                os.system('notify-send --icon ' + os.path.join(CURRENT_PATH,
+                                                               '../images/normal.png') + ' "Slimbook Battery" "' +
+                          _('It seems that you have been connected to AC for at least 15 days, we reccomend you to disconnect your charger, and discharge battery') + '"')
             else:
                 print('Resetting last unplugged date')
                 config.set('CONFIGURATION', 'plugged', str(date.today()))
@@ -177,13 +177,13 @@ def check_plug():
                 config.write(configfile)
                 configfile.close()
 
-        print('Time since last time disconnection: '+str(last_plug)+' days')
+        print('Time since last time disconnection: ' + str(last_plug) + ' days')
     else:
         print('No date saved')
 
         config.set('CONFIGURATION', 'plugged', str(date.today()))
         # This step is done at the end of function
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
+        configfile = open(os.path.join(user_home, '.config/slimbookbattery/slimbookbattery.conf'), 'w')
         config.write(configfile)
         configfile.close()
 
@@ -198,28 +198,28 @@ def build_menu():
 
     # Imagenes a utilizar para los iconos del menú
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-        filename=imagespath + '/normal.png',
+        filename=os.path.join(IMAGES_PATH, 'normal.png'),
         width=25,
         height=25,
         preserve_aspect_ratio=True)
     icon_ahorro = Gtk.Image.new_from_pixbuf(pixbuf)
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-        filename=imagespath + '/balanced_normal.png',
+        filename=os.path.join(IMAGES_PATH, 'balanced_normal.png'),
         width=25,
         height=25,
         preserve_aspect_ratio=True)
     icon_equilibrado = Gtk.Image.new_from_pixbuf(pixbuf)
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-        filename=imagespath + '/performance_normal.png',
+        filename=os.path.join(IMAGES_PATH, 'performance_normal.png'),
         width=25,
         height=25,
         preserve_aspect_ratio=True)
     icon_max_rendimiento = Gtk.Image.new_from_pixbuf(pixbuf)
 
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-        filename=imagespath + '/disabled_normal.png',
+        filename=os.path.join(IMAGES_PATH, 'disabled_normal.png'),
         width=25,
         height=25,
         preserve_aspect_ratio=True)
@@ -283,7 +283,8 @@ def modo_ahorro(self):
     update_config('CONFIGURATION', 'modo_actual', self.modo_actual)
     subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
 
-    reboot_process(tdpcontroller, '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + 'indicator.py')
+    controller_path = os.path.join('/usr/share/', tdpcontroller, 'src', tdpcontroller, 'indicator.py')
+    reboot_process(tdpcontroller, controller_path)
     animations(self.modo_actual)
 
 
@@ -294,7 +295,8 @@ def modo_equilibrado(self):
     update_config('CONFIGURATION', 'application_on', '1')
     update_config('CONFIGURATION', 'modo_actual', self.modo_actual)
     subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
-    reboot_process(tdpcontroller, '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + 'indicator.py')
+    controller_path = os.path.join('/usr/share/', tdpcontroller, 'src', tdpcontroller, 'indicator.py')
+    reboot_process(tdpcontroller, controller_path)
     animations(self.modo_actual)
 
 
@@ -305,14 +307,15 @@ def modo_max_rendimiento(self):
     update_config('CONFIGURATION', 'application_on', '1')
     update_config('CONFIGURATION', 'modo_actual', self.modo_actual)
     subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
-    reboot_process(tdpcontroller,
-                   '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + 'indicator.py')  # Only if it's running
+
+    controller_path = os.path.join('/usr/share/', tdpcontroller, 'src', tdpcontroller, 'indicator.py')
+    reboot_process(tdpcontroller, controller_path)  # Only if it's running
     animations(self.modo_actual)
 
 
 def modo_avanzado(self):
     print('preferencias')
-    os.system(current_path + '/slimbookbatterypreferences.py')
+    os.system(os.path.join(CURRENT_PATH, 'slimbookbatterypreferences.py'))
 
 
 def modo_apagado(self):
@@ -406,7 +409,7 @@ def reboot_process(process_name, path):
 
 def rebootNvidia():
     pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-        filename='/usr/share/slimbookbattery/images/normal.png',
+        filename=os.path.join(IMAGES_PATH, 'normal.png'),
         width=90,
         height=90,
         preserve_aspect_ratio=True)
@@ -442,7 +445,8 @@ def update_config(section, variable, value):
     print("\n- Variable |" + variable + "| updated in .conf, actual value: " + value)
 
 
-Indicator()
+if __name__ == '__main__':
+    Indicator()
 
-signal.signal(signal.SIGINT, signal.SIG_DFL)
-Gtk.main()
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+    Gtk.main()
