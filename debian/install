@@ -8,7 +8,7 @@ images/slimbookbattery.png /usr/share/pixmaps/
 custom/* /usr/share/slimbookbattery/custom/
 default/* /usr/share/slimbookbattery/default/
 policykit/* /usr/share/polkit-1/actions/
-src/locale/* /usr/share/slimbookbattery/locale/
+src/tranlations/* /usr/share/slimbookbattery/tranlations/
 debian/changelog /usr/share/slimbookbattery/src/
 LICENSE /usr/share/slimbookbattery/
 udev-rules/* /etc/udev/rules.d

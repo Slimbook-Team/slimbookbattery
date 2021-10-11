@@ -19,46 +19,33 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import configparser
-import getpass
-import gettext
-import locale
 import math
-import shutil
 import os
+import shutil
 import subprocess
+import sys
 import time
 
 import gi
 
+# We want load first current location
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+if CURRENT_PATH not in sys.path:
+    sys.path = [CURRENT_PATH] + sys.path
+import utils
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf
-from os.path import expanduser
-
-idiomas = ['en']
-try:
-    entorno_usu = locale.getlocale()[0]
-    for lang in ["en", "es", "it", "pt", "gl"]:
-        if entorno_usu.find(lang) >= 0:
-            idiomas = [entorno_usu]
-            break
-    print('Language: ', entorno_usu)
-except Exception:
-    print('Locale exception')
 
 err_trace = []
 
-user = getpass.getuser()
-user_home = expanduser("~")
-current_path = os.path.dirname(os.path.realpath(__file__))
-imagespath = os.path.normpath(os.path.join(current_path, '..', 'images'))
+user = utils.get_user()
+user_home = os.path.expanduser("~{}".format(user))
+
+imagespath = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
 config_file = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
 
-t = gettext.translation('preferences',
-                        current_path + '/locale',
-                        languages=idiomas,
-                        fallback=True)
-
-_ = t.gettext
+_ = utils.load_translation('preferences')
 
 if not os.path.isfile(config_file):
     pass
@@ -78,7 +65,6 @@ class colors:  # You may need to change color settings
 
 
 class Preferences(Gtk.ApplicationWindow):
-
     min_resolution = False
     state_actual = ''
     autostart_inicial = ''
@@ -110,7 +96,7 @@ class Preferences(Gtk.ApplicationWindow):
         # Center
         # self.connect('realize', self.on_realize)
 
-        self.child_process = subprocess.Popen(current_path + '/splash.py', stdout=subprocess.PIPE)
+        self.child_process = subprocess.Popen(CURRENT_PATH + '/splash.py', stdout=subprocess.PIPE)
 
         try:
             self.set_ui()
@@ -211,7 +197,7 @@ class Preferences(Gtk.ApplicationWindow):
         label77 = Gtk.Label(label='')
         label77.set_halign(Gtk.Align.START)
         label77.set_name('version')
-        version_line = subprocess.getstatusoutput("cat " + current_path + "/changelog |head -n1| egrep -o '\(.*\)'")
+        version_line = subprocess.getstatusoutput("cat " + CURRENT_PATH + "/changelog |head -n1| egrep -o '\(.*\)'")
         if version_line[0] == 0:
             version = version_line[1]
             label77.set_markup('<span font="10">Version ' + version[1:len(version) - 1] + '</span>')
@@ -271,7 +257,7 @@ class Preferences(Gtk.ApplicationWindow):
         win_grid.attach(evnt_close, 0, 0, 1, 4)
         win_grid.attach(notebook, 0, 3, 1, 1)
 
-    # GENERAL PAGE  **********************************************************
+        # GENERAL PAGE  **********************************************************
 
         print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
 
@@ -289,7 +275,7 @@ class Preferences(Gtk.ApplicationWindow):
         # General page won't have scroll
         notebook.append_page(general_page_grid, Gtk.Label.new(_('General')))
 
-    # ********* GENERAL PAGE COMPONENENTS ************************************
+        # ********* GENERAL PAGE COMPONENENTS ************************************
         # IMG
         col_1 = 1
         col_2 = 3
@@ -395,7 +381,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchPlugged.set_halign(alignment_2)
         general_grid.attach(self.switchPlugged, col_4, row, 1, 1)
 
-    # 8 ------------- TDP ADJUST
+        # 8 ------------- TDP ADJUST
 
         tdpcontroller = config['TDP']['tdpcontroller']
 
@@ -416,7 +402,7 @@ class Preferences(Gtk.ApplicationWindow):
             else:
                 print('Could not find TDP contoller for your processor')
 
-            print('TDP Controller: '+tdpcontroller)
+            print('TDP Controller: ' + tdpcontroller)
             config_changed = True
 
             if config['TDP']['tdpcontroller'] == '':
@@ -477,7 +463,7 @@ class Preferences(Gtk.ApplicationWindow):
                 label33.set_halign(alignment_1)
                 general_grid.attach(label33, col_3, row, label_width, 1)
 
-    # ***************** BUTTONS **********************************************
+        # ***************** BUTTONS **********************************************
         row = row + 1
         buttons_grid = Gtk.Grid(column_homogeneous=True,
                                 column_spacing=30,
@@ -2575,6 +2561,7 @@ class Preferences(Gtk.ApplicationWindow):
             stat = config['SETTINGS'][mode_brightness]
         except (ValueError, IndexError, KeyError):
             import check_config
+            check_config.main()
 
         stat = config['SETTINGS'][mode_brightness]
         if stat == '1':
@@ -2609,8 +2596,8 @@ class Preferences(Gtk.ApplicationWindow):
 
         if subprocess.getstatusoutput(
                 "cat " + file_mode + " | grep 'DEVICES_TO_DISABLE_ON_LAN_CONNECT' | grep 'wifi'")[0] == 0 \
-            and subprocess.getstatusoutput(
-                "cat " + file_mode + " | grep 'DEVICES_TO_ENABLE_ON_LAN_DISCONNECT' | grep 'wifi'")[0] == 0:
+                and subprocess.getstatusoutput(
+            "cat " + file_mode + " | grep 'DEVICES_TO_ENABLE_ON_LAN_DISCONNECT' | grep 'wifi'")[0] == 0:
             switchWifiDisableLAN.set_active(True)
         else:
             switchWifiDisableLAN.set_active(False)
@@ -3346,7 +3333,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         print('\n')
 
-        #print('Config: ' + config['SETTINGS']['limit_cpu_ahorro'])
+        # print('Config: ' + config['SETTINGS']['limit_cpu_ahorro'])
 
         # This step is done at the end of function
         configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
@@ -4020,7 +4007,7 @@ class Preferences(Gtk.ApplicationWindow):
             if not os.path.isdir(user_home + '/.config/autostart'):
                 os.mkdir(user_home + '/.config/autostart')
 
-            shutil.copy(current_path + "/slimbookbattery-autostart.desktop", user_home + "/.config/autostart/")
+            shutil.copy(CURRENT_PATH + "/slimbookbattery-autostart.desktop", user_home + "/.config/autostart/")
             config.set('CONFIGURATION', 'autostart', '1')
 
         elif autostart == '0' and self.autostart_inicial == '1':
@@ -4082,7 +4069,7 @@ class Preferences(Gtk.ApplicationWindow):
         command = 'pkexec slimbookbattery-pkexec apply'
         subprocess.Popen(command.split(' '))
 
-        reboot_process('slimbookbatteryindicator.py', current_path + '/slimbookbatteryindicator.py', True)
+        reboot_process('slimbookbatteryindicator.py', CURRENT_PATH + '/slimbookbatteryindicator.py', True)
 
         # This process wil only reboot if is running if not, and option is on, it will be launched
         actual_mode = config['CONFIGURATION']['modo_actual']
@@ -4191,7 +4178,7 @@ def reboot_process(process_name, path, start):
 
 
 style_provider = Gtk.CssProvider()
-style_provider.load_from_path(current_path + '/css/style.css')
+style_provider.load_from_path(CURRENT_PATH + '/css/style.css')
 
 Gtk.StyleContext.add_provider_for_screen(
     Gdk.Screen.get_default(), style_provider,
