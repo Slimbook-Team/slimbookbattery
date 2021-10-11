@@ -42,6 +42,7 @@ try:
             idiomas = [entorno_usu]
             break
     print('Language: ', entorno_usu)
+    
 except Exception:
     print('Locale exception')
 
@@ -97,7 +98,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.set_size_request(1100, 400)
 
         self.set_decorated(False)
-        self.set_resizable(False)
+        self.set_resizable(True)
 
         # Movement
         self.is_in_drag = False
@@ -236,16 +237,16 @@ class Preferences(Gtk.ApplicationWindow):
         notebook.set_tab_pos(Gtk.PositionType.TOP)
 
         if self.min_resolution == True:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename=os.path.join(imagespath, 'slimbookbattery-header-2.png'),
-                width=775,
-                height=175,
-                preserve_aspect_ratio=True)
+            height = 175
+            width=775
         else:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            height=225
+            width=825
+            
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                 filename=os.path.join(imagespath, 'slimbookbattery-header-2.png'),
-                width=825,
-                height=225,
+                width=width,
+                height=height,
                 preserve_aspect_ratio=True)
 
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
@@ -285,6 +286,9 @@ class Preferences(Gtk.ApplicationWindow):
 
         general_page_grid.attach(general_grid, 0, 0, 1, 1)
         general_page_grid.set_halign(Gtk.Align.CENTER)
+
+        if self.min_resolution == True:
+            general_grid.set_name('smaller_label')
 
         # General page won't have scroll
         notebook.append_page(general_page_grid, Gtk.Label.new(_('General')))
@@ -477,6 +481,7 @@ class Preferences(Gtk.ApplicationWindow):
                 label33.set_halign(alignment_1)
                 general_grid.attach(label33, col_3, row, label_width, 1)
 
+
     # ***************** BUTTONS **********************************************
         row = row + 1
         buttons_grid = Gtk.Grid(column_homogeneous=True,
@@ -505,11 +510,18 @@ class Preferences(Gtk.ApplicationWindow):
         rbutton3.set_halign(Gtk.Align.CENTER)
         rbutton3.connect('toggled', self.on_button_toggled, '3')
 
+        if self.min_resolution == True:
+            height = 50
+            width = 50
+        else:
+            height = 100
+            width = 100
+
         # IMG LOW
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename=os.path.join(imagespath, 'normal.png'),
-            width=100,
-            height=100,
+            width=width,
+            height=height,
             preserve_aspect_ratio=True)
         mid_img = Gtk.Image.new_from_pixbuf(pixbuf)
         mid_img.set_halign(Gtk.Align.CENTER)
@@ -521,8 +533,8 @@ class Preferences(Gtk.ApplicationWindow):
         # IMG MEDIUM
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename=os.path.join(imagespath, 'balanced_normal.png'),
-            width=100,
-            height=100,
+            width=width,
+            height=height,
             preserve_aspect_ratio=True)
         mid_img = Gtk.Image.new_from_pixbuf(pixbuf)
         mid_img.set_halign(Gtk.Align.CENTER)
@@ -534,8 +546,8 @@ class Preferences(Gtk.ApplicationWindow):
         # IMG HIGH
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename=os.path.join(imagespath, 'performance_normal.png'),
-            width=100,
-            height=100,
+            width=width,
+            height=height,
             preserve_aspect_ratio=True)
 
         high_img = Gtk.Image.new_from_pixbuf(pixbuf)
@@ -560,6 +572,7 @@ class Preferences(Gtk.ApplicationWindow):
         low_page_grid.attach(low_grid, 0, 0, 2, 1)
 
         if self.min_resolution == True:
+
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
 
@@ -781,6 +794,7 @@ class Preferences(Gtk.ApplicationWindow):
         label33.set_markup('<big><b>' + (_('Persistent changes:')) + '</b></big>')
         if self.min_resolution == True:
             label33.set_name('title')
+
         label33.set_halign(Gtk.Align.START)
         low_grid.attach(label33, label_col2, row, 5, 1)
         # 1 ------------- BRIGHTNESS *
@@ -3166,15 +3180,16 @@ class Preferences(Gtk.ApplicationWindow):
                     ''')
                 print('Setting limit to ' + name + ' --> Exit: ' + str(exec[0]))
                 config.set('SETTINGS', 'limit_cpu_ahorro', '3')
-
-        statGovernor = self.comboBoxGovernor.get_active_iter()  # .conf file && Tlp custom file*
-        # Test pending
-        if statGovernor is not None:
-            model = self.comboBoxGovernor.get_model()
-            row_id, name = model[statGovernor][:2]
-            subprocess.getstatusoutput(
-                'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ '
-                'cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
+                
+        if governorIsCompatible()[0] == 0:
+            statGovernor = self.comboBoxGovernor.get_active_iter()  # .conf file && Tlp custom file*
+            # Test pending
+            if statGovernor is not None:
+                model = self.comboBoxGovernor.get_model()
+                row_id, name = model[statGovernor][:2]
+                subprocess.getstatusoutput(
+                    'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ '
+                    'cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
 
         statGraphics = self.switchGraphics.get_active()  # .conf file *
         if statGraphics:
@@ -3432,14 +3447,15 @@ class Preferences(Gtk.ApplicationWindow):
                 print('Setting limit to ' + name + ' --> Exit: ' + str(exec[0]))
                 config.set('SETTINGS', 'limit_cpu_equilibrado', '3')
 
-        statGovernor = self.comboBoxGovernor2.get_active_iter()  # .conf file && Tlp custom file*
-        # Test pending
-        if statGovernor is not None:
-            model = self.comboBoxGovernor2.get_model()
-            row_id, name = model[statGovernor][:2]
-            subprocess.getstatusoutput(
-                'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ '
-                'cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
+        if governorIsCompatible()[0] == True:
+            statGovernor = self.comboBoxGovernor2.get_active_iter()  # .conf file && Tlp custom file*
+            # Test pending
+            if statGovernor is not None:
+                model = self.comboBoxGovernor2.get_model()
+                row_id, name = model[statGovernor][:2]
+                subprocess.getstatusoutput(
+                    'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ '
+                    'cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
 
         statGraphics = self.switchGraphics2.get_active()  # .conf file *
         if statGraphics:
@@ -3695,14 +3711,15 @@ class Preferences(Gtk.ApplicationWindow):
                 print('Setting limit to ' + name + ' --> Exit: ' + str(exec[0]))
                 config.set('SETTINGS', 'limit_cpu_maximorendimiento', '3')
 
-        statGovernor = self.comboBoxGovernor3.get_active_iter()  # .conf file && Tlp custom file*
-        # Test pending
-        if statGovernor is not None:
-            model = self.comboBoxGovernor3.get_model()
-            row_id, name = model[statGovernor][:2]
-            subprocess.getstatusoutput(
-                'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ '
-                'cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
+        if governorIsCompatible()[0] == True:
+            statGovernor = self.comboBoxGovernor3.get_active_iter()  # .conf file && Tlp custom file*
+            # Test pending
+            if statGovernor is not None:
+                model = self.comboBoxGovernor3.get_model()
+                row_id, name = model[statGovernor][:2]
+                subprocess.getstatusoutput(
+                    'sed -i "/CPU_SCALING_GOVERNOR_ON_BAT=/ '
+                    'cCPU_SCALING_GOVERNOR_ON_BAT=' + name + '" ~/.config/slimbookbattery/custom/' + mode)
 
         statGraphics = self.switchGraphics3.get_active()  # .conf file *
         if statGraphics:
