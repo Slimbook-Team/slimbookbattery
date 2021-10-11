@@ -13,9 +13,9 @@ not_changed=""
 # 1. Busca los ids y msg del inglés
 cd ./src/
 
-echo $(pwd)"/locale/en/LC_MESSAGES/$file.po"
+echo $(pwd)"/tranlations/en/LC_MESSAGES/$file.po"
 
-egrep 'msgid|msgstr' ./locale/en/LC_MESSAGES/$file.po | while read -r line ; do
+egrep 'msgid|msgstr' ./tranlations/en/LC_MESSAGES/$file.po | while read -r line ; do
   
   
   if [ $((i%2)) -eq 0 ]; then # Si la linea es par (msgid)...

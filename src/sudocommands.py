@@ -20,8 +20,6 @@
 
 
 # This file will be executed as sudo by pkexec
-import getpass
-import gettext
 import logging
 import os
 import pwd
@@ -31,8 +29,11 @@ import subprocess
 import sys
 from configparser import ConfigParser
 
-import locale
-
+# We want load first current location
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+if CURRENT_PATH not in sys.path:
+    sys.path = [CURRENT_PATH] + sys.path
+import utils
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -55,18 +56,8 @@ if file_handler:
     logger.addHandler(std_handler)
 
 logger.debug('******************************************************************************')
-USER_NAME = getpass.getuser()
+USER_NAME = utils.get_user(from_file='/tmp/slimbookbattery.user')
 logger.info('\x1b[6;30;42mSlimbookBattery-Commandline, executed as: {}\x1b[0m'.format(USER_NAME))
-
-if os.path.exists('/tmp/slimbookbattery.user'):
-    exit_code, USER_NAME = subprocess.getstatusoutput('cat /tmp/slimbookbattery.user | tail -n 1 | cut -f 2 -d "@"')
-    if exit_code != 0:
-        logger.error('Failed to get user: {}'.format(USER_NAME[1]))
-        exit(5)
-    logger.info('User changed to {}'.format(USER_NAME))
-elif 'SUDO_USER' in os.environ:
-    USER_NAME = os.environ['SUDO_USER']
-    logger.info('User changed to {}'.format(USER_NAME))
 
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -78,21 +69,7 @@ config_file = os.path.join(HOMEDIR, '.config/slimbookbattery/slimbookbattery.con
 config = ConfigParser()
 config.read(config_file)
 
-languages = ['en']
-try:
-    user_env = locale.getlocale()[0]
-    for lang in ["en", "es", "it", "pt", "gl"]:
-        if user_env.find(lang) >= 0:
-            languages = [user_env]
-            break
-    logger.info('Language: {}'.format(user_env))
-except Exception:
-    logger.exception('Locale exception')
-
-_ = gettext.translation('sudocommands',
-                        os.path.join(CURRENT_PATH, 'locale'),
-                        languages=languages,
-                        fallback=True).gettext
+_ = utils.load_translation('sudocommands')
 
 msg_graphics = _('Graphics settings have been modified, changes will be applied on restart.')
 
@@ -203,7 +180,8 @@ def main(args):  # Args will be like --> command_name value
 
         if args[1] == "report":
             os.system(
-                "sudo python3 " + CURRENT_PATH + "/slimbookbattery-report.py " + args[2] + ' ' + args[3] + ' ' + args[4])
+                "sudo python3 " + CURRENT_PATH + "/slimbookbattery-report.py " + args[2] + ' ' + args[3] + ' ' + args[
+                    4])
 
         if args[1] == "restart_tlp":
             logger.info('Restarting TLP...')
@@ -250,7 +228,7 @@ def set_tdp(mode):
     config_tdp = ConfigParser()
     config_tdp.read(tdp_config_file)
 
-    logger.info('\n{}[TDP SETTINGS]{}' .format(Colors.GREEN, Colors.ENDC))
+    logger.info('\n{}[TDP SETTINGS]{}'.format(Colors.GREEN, Colors.ENDC))
     logger.info('Battery Mode: {}'.format(mode))
 
     # Mode settings
@@ -373,7 +351,7 @@ def mode_settings(mode):
                     os.system('prime-select nvidia')
 
         graphics_after = subprocess.getoutput('prime-select query')
-        logger.debug('Graphics before --> {} // Graphics after --> {}'.format(graphics_before,  graphics_after))
+        logger.debug('Graphics before --> {} // Graphics after --> {}'.format(graphics_before, graphics_after))
         if not graphics_before == graphics_after:
             logger.info('Required reboot changes to 1')
             required_reboot = 1
@@ -555,7 +533,8 @@ def brightness_settings(mode):
                 logger.debug('/sys/class/backlight exists.')
                 for name in os.listdir("/sys/class/backlight"):
 
-                    if os.path.isfile("/sys/class/backlight/" + name + "/max_brightness") and os.path.isfile("/sys/class/backlight/" + name + "/brightness"):
+                    if os.path.isfile("/sys/class/backlight/" + name + "/max_brightness") and os.path.isfile(
+                            "/sys/class/backlight/" + name + "/brightness"):
                         brilloMax = int(subprocess.getoutput("cat /sys/class/backlight/" + name + "/max_brightness"))
                         brightness = int((brilloMax / 100) * int(set_brightness))
 
