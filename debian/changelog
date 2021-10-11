@@ -1,3 +1,8 @@
+slimbookbattery (4.0.3) focal; urgency=low
+  * 
+
+ -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
+
 slimbookbattery (4.0.2) focal; urgency=low
   * Fixed reboot bug
 
