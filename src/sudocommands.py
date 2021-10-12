@@ -117,12 +117,12 @@ def main(args):  # Args will be like --> command_name value
             set_tdp(battery_mode)
 
             logger.info("\n{}[COPY TDP CUSTOM SETTINGS]{}".format(Colors.GREEN, Colors.ENDC))
-            exec = subprocess.getstatusoutput(
-                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/custom/" + mode_name + " /etc/tlp.conf")
-            if exec[0] == 0:
+            custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/custom/", mode_name)
+            exit_code, msg = subprocess.getstatusoutput("sudo cp {} /etc/tlp.conf".format(custom_file))
+            if exit_code == 0:
                 logger.info('File copied succesfully!')
             else:
-                logger.error('Execution failed {}'.format(exec[1]))
+                logger.error('Execution failed {}'.format(msg))
 
             # Sets mode changes and enables/disables TLP according to conf
             if config.getboolean('CONFIGURATION', 'application_on'):
@@ -258,9 +258,10 @@ def set_tdp(mode):
                 if config.getboolean('CONFIGURATION', 'autostart'):
                     config_tdp.set('CONFIGURATION', 'autostart', 'on')
 
-                    tdp_autostart = '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + '-autostart.desktop'
+                    tdp_autostart = os.path.join('/usr/share/', tdpcontroller, 'src',
+                                                 '{}-autostart.desktop'.format(tdpcontroller))
 
-                    shutil.copy(tdp_autostart, HOMEDIR + '/.config/autostart/')
+                    shutil.copy(tdp_autostart, os.path.join(HOMEDIR, '.config/autostart'))
 
                     logger.info('TDP Autostart enabled')
 
@@ -288,9 +289,9 @@ def set_tdp(mode):
 def change_config(args):  # For general page options
     logger.info('\n{}[CHANGE CONFIGURATION]{}'.format(Colors.GREEN, Colors.ENDC))
     files = ['/etc/tlp.conf',
-             HOMEDIR + '/.config/slimbookbattery/custom/ahorrodeenergia',
-             HOMEDIR + '/.config/slimbookbattery/custom/equilibrado',
-             HOMEDIR + '/.config/slimbookbattery/custom/maximorendimiento']
+             os.path.join(HOMEDIR, '.config/slimbookbattery/custom/ahorrodeenergia'),
+             os.path.join(HOMEDIR, '.config/slimbookbattery/custom/equilibrado'),
+             os.path.join(HOMEDIR, '.config/slimbookbattery/custom/maximorendimiento')]
 
     for file in files:
         update_config(file, args[2], args[3])
@@ -300,9 +301,9 @@ def mode_settings(mode):
     required_reboot = 0
     logger.info('\n{}[MODE SETTINGS]{}'.format(Colors.GREEN, Colors.ENDC))
 
-    file_ahorro = HOMEDIR + '/.config/slimbookbattery/custom/ahorrodeenergia'
-    file_equilibrado = HOMEDIR + '/.config/slimbookbattery/custom/equilibrado'
-    file_max = HOMEDIR + '/.config/slimbookbattery/custom/maximorendimiento'
+    file_ahorro = os.path.join(HOMEDIR, '.config/slimbookbattery/custom/ahorrodeenergia')
+    file_equilibrado = os.path.join(HOMEDIR, '.config/slimbookbattery/custom/equilibrado')
+    file_max = os.path.join(HOMEDIR, '.config/slimbookbattery/custom/maximorendimiento')
 
     graficaNvidia = False
     graphics_before = ''
