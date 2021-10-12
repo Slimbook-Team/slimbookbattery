@@ -222,8 +222,8 @@ def notify(msg):
 def set_tdp(mode):
     # This function enables tdpcontroller autostart an changes it's mode if battery application,
     # battery autostart and sync tdp switch of the selected mode is on.
-    tdpcontroller = config['TDP']['tdpcontroller']
-    tdp_config_file = HOMEDIR + '/.config/' + tdpcontroller + '/' + tdpcontroller + '.conf'
+    tdpcontroller = config.get('TDP', 'tdpcontroller')
+    tdp_config_file = os.path.join(HOMEDIR, '.config', tdpcontroller, '{}.conf'.format(tdpcontroller))
 
     config_tdp = ConfigParser()
     config_tdp.read(tdp_config_file)
@@ -250,7 +250,7 @@ def set_tdp(mode):
             if config.getboolean('TDP', tdp_switch):
                 logger.info('Updating TDP mode ...')
                 config_tdp.set('CONFIGURATION', 'mode', tdp_mode)
-                logger.info('  TDP changed to {}'.format(config_tdp['CONFIGURATION']['mode']))
+                logger.info('  TDP changed to {}'.format(config_tdp.get('CONFIGURATION', 'mode')))
 
                 # Autostart settings
                 logger.info('\nUpdating TDP autostart ...')
@@ -272,7 +272,7 @@ def set_tdp(mode):
                 config_tdp.write(configfile)
                 configfile.close()
 
-                logger.info('Actual TDP Mode: {}'.format(config_tdp['CONFIGURATION']['mode']))
+                logger.info('Actual TDP Mode: {}'.format(config_tdp.get('CONFIGURATION', 'mode')))
 
             else:
                 logger.error('TDP Sync not active')
