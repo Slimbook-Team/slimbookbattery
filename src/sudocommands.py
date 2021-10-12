@@ -94,13 +94,6 @@ def main(args):  # Args will be like --> command_name value
 
     if (len(args)) > 1:
 
-        try:
-            uid, gid = pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
-
-        except Exception as e:
-            logger.exception('Failed to get user id/gid: {}'.format(USER_NAME))
-            exit(5)
-
         battery_mode = config.get('CONFIGURATION', 'modo_actual')
 
         if args[1] == "apply":  # Applies selected mode conf and turns on/off tlp
@@ -155,6 +148,14 @@ def main(args):  # Args will be like --> command_name value
 
             logger.info("Resetting modes conf")
             modes = ('ahorrodeenergia', 'equilibrado', 'maximorendimiento')
+
+            uid, gid = None, None
+            try:
+                pwnam = pwd.getpwnam(USER_NAME)
+                uid, gid = pwnam.pw_uid, pwnam.pw_gid
+            except Exception:
+                logger.error('Failed to get user id/gid: {}'.format(USER_NAME))
+                exit(5)
 
             for mode in modes:
                 custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/custom/", mode)
