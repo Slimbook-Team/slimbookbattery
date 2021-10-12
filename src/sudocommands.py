@@ -232,7 +232,7 @@ def set_tdp(mode):
     logger.info('Battery Mode: {}'.format(mode))
 
     # Mode settings
-    if config['CONFIGURATION']['application_on'] == '1':
+    if config.getboolean('CONFIGURATION', 'application_on'):
 
         tdp_mode = ''
         tdp_switch = 'saving_tdpsync'
@@ -247,14 +247,14 @@ def set_tdp(mode):
             tdp_mode = 'high'
 
         try:
-            if config['TDP'][tdp_switch] == '1':
+            if config.getboolean('TDP', tdp_switch):
                 logger.info('Updating TDP mode ...')
                 config_tdp.set('CONFIGURATION', 'mode', tdp_mode)
                 logger.info('  TDP changed to {}'.format(config_tdp['CONFIGURATION']['mode']))
 
                 # Autostart settings
                 logger.info('\nUpdating TDP autostart ...')
-                if config['CONFIGURATION']['autostart'] == '1':
+                if config.getboolean('CONFIGURATION', 'autostart'):
                     config_tdp.set('CONFIGURATION', 'autostart', 'on')
 
                     tdp_autostart = '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + '-autostart.desktop'
@@ -263,7 +263,7 @@ def set_tdp(mode):
 
                     logger.info('TDP Autostart enabled')
 
-                    if config_tdp['CONFIGURATION']['show-icon'] == 'on':
+                    if config_tdp.getboolean('CONFIGURATION', 'show-icon'):
                         logger.debug('TDP Icon will be shown')
                     else:
                         logger.debug("TDP Icon won't be shown")
@@ -319,11 +319,11 @@ def mode_settings(mode):
         logger.info('Setting new profile ...')
         if mode == '1':
 
-            if config['SETTINGS']['graphics_ahorro'] == '1' and graphics_before != 'intel':
+            if config.getboolean('SETTINGS', 'graphics_ahorro') and graphics_before != 'intel':
                 if not graphics_before == 'intel':
                     os.system('prime-select intel')
 
-            elif config['SETTINGS']['graphics_ahorro'] == '0' and graphics_before != 'on-demand':
+            elif not config.getboolean('SETTINGS', 'graphics_ahorro') and graphics_before != 'on-demand':
                 if not graphics_before == 'on-demand':
                     os.system('prime-select intel')
                     # avocado
@@ -331,22 +331,22 @@ def mode_settings(mode):
 
         elif mode == '2':
 
-            if config['SETTINGS']['graphics_equilibrado'] == '1' and graphics_before != 'on-demand':
+            if config.getboolean('SETTINGS', 'graphics_equilibrado') and graphics_before != 'on-demand':
                 if not graphics_before == 'on-demand':
                     os.system('prime-select intel')
                     os.system('prime-select on-demand')
 
-            elif config['SETTINGS']['graphics_equilibrado'] == '0' and graphics_before != 'nvidia':
+            elif not config.getboolean('SETTINGS', 'graphics_equilibrado') and graphics_before != 'nvidia':
                 if not graphics_before == 'nvidia':
                     os.system('prime-select nvidia')
 
         elif mode == '3':  # need to check
-            if config['SETTINGS']['graphics_maxrendimiento'] == '1' and graphics_before != 'on-demand':
+            if config.getboolean('SETTINGS', 'graphics_maxrendimiento') and graphics_before != 'on-demand':
                 if not graphics_before == 'on-demand':
                     os.system('prime-select intel')
                     os.system('prime-select on-demand')
 
-            elif config['SETTINGS']['graphics_maxrendimiento'] == '0' and graphics_before != 'nvidia':
+            elif not config.getboolean('SETTINGS', 'graphics_maxrendimiento') and graphics_before != 'nvidia':
                 if not graphics_before == 'nvidia':
                     os.system('prime-select nvidia')
 
@@ -390,7 +390,7 @@ def mode_settings(mode):
         # RADEON
         if subprocess.getstatusoutput('lscpu | grep -i model | grep  -i Radeon')[0] == 0:
             logger.info('Radeon graphics power profile: {}'.format(profile))
-            if config['SETTINGS'][variable] == '1':
+            if config.getboolean('SETTINGS', variable):
                 RADEON_POWER_PROFILE_ON_BAT = profile
 
             os.system(
@@ -442,7 +442,7 @@ def mode_settings(mode):
                 freqCorrecta = False
 
             logger.info('Intel graphics power profile: {}'.format(profile))
-            if config['SETTINGS'][variable] == '1':
+            if config.getboolean('SETTINGS', variable):
                 # MIN_BAT/MIN_AC
                 for i in range(len(freq_available)):
                     if (int(freq_available[i]) > limit[0] and int(freq_available[i]) < limit[1]):
@@ -514,18 +514,18 @@ def brightness_settings(mode):
     set_brightness = ''
 
     if mode == '1':
-        if config.get('SETTINGS', 'saving_brightness_switch') == '1':
+        if config.getboolean('SETTINGS', 'saving_brightness_switch'):
             set_brightness = config.get('SETTINGS', 'ahorro_brightness')
 
     elif mode == '2':
-        if config.get('SETTINGS', 'balanced_brightness_switch') == '1':
+        if config.getboolean('SETTINGS', 'balanced_brightness_switch'):
             set_brightness = config.get('SETTINGS', 'equilibrado_brightness')
 
     elif mode == '3':
-        if config.get('SETTINGS', 'power_brightness_switch') == '1':
+        if config.getboolean('SETTINGS', 'power_brightness_switch'):
             set_brightness = config.get('SETTINGS', 'maxrendimiento_brightness')
 
-    if config.get('CONFIGURATION', 'application_on') == '1':
+    if config.getboolean('CONFIGURATION', 'application_on'):
 
         if set_brightness != '':
 
