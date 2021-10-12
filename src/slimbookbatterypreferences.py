@@ -424,9 +424,8 @@ class Preferences(Gtk.ApplicationWindow):
 
             if config_changed:
                 # This step is done at the end of function
-                configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-                config.write(configfile)
-                configfile.close()
+                with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+                    config.write(configfile)
         else:
             print('F')
         if tdpcontroller != '':
@@ -3329,9 +3328,8 @@ class Preferences(Gtk.ApplicationWindow):
         # print('Config: ' + config['SETTINGS']['limit_cpu_ahorro'])
 
         # This step is done at the end of function
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        config.write(configfile)
-        configfile.close()
+        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+            config.write(configfile)
 
     def write_modes2_conf(self):
 
@@ -3592,9 +3590,8 @@ class Preferences(Gtk.ApplicationWindow):
         print('\n')
 
         # This step is done at the end of function
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        config.write(configfile)
-        configfile.close()
+        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+            config.write(configfile)
 
     def write_modes3_conf(self):
         mode = 'maximorendimiento'
@@ -3860,9 +3857,8 @@ class Preferences(Gtk.ApplicationWindow):
         print('\n')
 
         # This step is done at the end of function
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        config.write(configfile)
-        configfile.close()
+        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+            config.write(configfile)
 
     def animations(self, mode):
 
@@ -4024,9 +4020,8 @@ class Preferences(Gtk.ApplicationWindow):
 
         config.set('CONFIGURATION', 'modo_actual', self.modo_actual)
 
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        config.write(configfile)
-        configfile.close()
+        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+            config.write(configfile)
 
         # print('pkexec slimbookbattry-pkexec change_config TLP_DEFAULT_MODE ' + workMode)
 
@@ -4050,9 +4045,8 @@ class Preferences(Gtk.ApplicationWindow):
         config.set('CONFIGURATION', 'max_battery_times', str(int(self.scaleNumTimes.get_value())))
         config.set('CONFIGURATION', 'time_between_warnings', str(int(self.scaleTimeWarnings.get_value())))
 
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        config.write(configfile)
-        configfile.close()
+        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+            config.write(configfile)
 
         self.write_modes_conf()
         self.write_modes2_conf()
