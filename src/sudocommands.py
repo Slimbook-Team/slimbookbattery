@@ -312,17 +312,13 @@ def change_config(args):  # For general page options
              os.path.join(HOMEDIR, '.config/slimbookbattery/custom/equilibrado'),
              os.path.join(HOMEDIR, '.config/slimbookbattery/custom/maximorendimiento')]
 
-    for file in files:
-        update_config(file, args[2], args[3])
+    for filepath in files:
+        update_config(filepath, args[2], args[3])
 
 
 def mode_settings(mode):
     required_reboot = 0
     logger.info('\n{}[MODE SETTINGS]{}'.format(Colors.GREEN, Colors.ENDC))
-
-    file_ahorro = os.path.join(HOMEDIR, '.config/slimbookbattery/custom/ahorrodeenergia')
-    file_equilibrado = os.path.join(HOMEDIR, '.config/slimbookbattery/custom/equilibrado')
-    file_max = os.path.join(HOMEDIR, '.config/slimbookbattery/custom/maximorendimiento')
 
     graficaNvidia = False
     graphics_before = ''
@@ -386,7 +382,7 @@ def mode_settings(mode):
             profile = MAPPING_MODES[mode]['graphics_profile']
             limit = MAPPING_MODES[mode]['limit']
             mode_name = MAPPING_MODES[mode]['mode_name']
-            file = os.path.join(HOMEDIR, '.config/slimbookbattery/custom', mode_name)
+            filepath = os.path.join(HOMEDIR, '.config/slimbookbattery/custom', mode_name)
         else:
             logger.error('Mode must be {}, found: {}'.format(MAPPING_MODES.keys(), mode))
             return -1
@@ -404,20 +400,20 @@ def mode_settings(mode):
 
             os.system(
                 'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
-                    RADEON_POWER_PROFILE_ON_BAT, file
+                    RADEON_POWER_PROFILE_ON_BAT, filepath
                 )
             )
             os.system(
                 'sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT={}" {}'.format(
-                    RADEON_DPM_STATE_ON_BAT, file
+                    RADEON_DPM_STATE_ON_BAT, filepath
                 )
             )
             os.system(
                 'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT={}" {}'.format(
-                    RADEON_DPM_PERF_LEVEL_ON_BAT, file
+                    RADEON_DPM_PERF_LEVEL_ON_BAT, filepath
                 )
             )
-        # INTEL 
+        # INTEL
         elif subprocess.getstatusoutput('lspci | grep VGA | grep -i Intel')[0] == 0:
             # GRAPHICS INTEL SETTINGS
             freq_table = ''
@@ -497,22 +493,22 @@ def mode_settings(mode):
                     logger.info('Setting GPU frequencies on bat --> {} {} {}'.format(
                         str(min_bat), str(max_bat), str(boost_bat))
                     )
-                    update_config(file, 'INTEL_GPU_MIN_FREQ_ON_BAT', str(min_bat))
-                    update_config(file, 'INTEL_GPU_MIN_FREQ_ON_AC', str(min_ac))
-                    update_config(file, 'INTEL_GPU_MAX_FREQ_ON_BAT', str(max_bat))
-                    update_config(file, 'INTEL_GPU_MAX_FREQ_ON_AC', str(max_ac))
-                    update_config(file, 'INTEL_GPU_BOOST_FREQ_ON_BAT', str(boost_bat))
-                    update_config(file, 'INTEL_GPU_BOOST_FREQ_ON_AC', str(boost_ac))
+                    update_config(filepath, 'INTEL_GPU_MIN_FREQ_ON_BAT', str(min_bat))
+                    update_config(filepath, 'INTEL_GPU_MIN_FREQ_ON_AC', str(min_ac))
+                    update_config(filepath, 'INTEL_GPU_MAX_FREQ_ON_BAT', str(max_bat))
+                    update_config(filepath, 'INTEL_GPU_MAX_FREQ_ON_AC', str(max_ac))
+                    update_config(filepath, 'INTEL_GPU_BOOST_FREQ_ON_BAT', str(boost_bat))
+                    update_config(filepath, 'INTEL_GPU_BOOST_FREQ_ON_AC', str(boost_ac))
                 else:
                     logger.info('Frequency not changed')
             else:
                 logger.info('Intel graphics power profile: #{}'.format(profile))
-                os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_BAT=/ c#INTEL_GPU_MIN_FREQ_ON_BAT=0" ' + file)
-                os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_AC=/ c#INTEL_GPU_MIN_FREQ_ON_AC=0" ' + file)
-                os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_BAT=/ c#INTEL_GPU_MAX_FREQ_ON_BAT=0" ' + file)
-                os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_AC=/ c#INTEL_GPU_MAX_FREQ_ON_AC=0" ' + file)
-                os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_BAT=/ c#INTEL_GPU_BOOST_FREQ_ON_BAT=0" ' + file)
-                os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_AC=/ c#INTEL_GPU_BOOST_FREQ_ON_AC=0" ' + file)
+                os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_BAT=/ c#INTEL_GPU_MIN_FREQ_ON_BAT=0" ' + filepath)
+                os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_AC=/ c#INTEL_GPU_MIN_FREQ_ON_AC=0" ' + filepath)
+                os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_BAT=/ c#INTEL_GPU_MAX_FREQ_ON_BAT=0" ' + filepath)
+                os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_AC=/ c#INTEL_GPU_MAX_FREQ_ON_AC=0" ' + filepath)
+                os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_BAT=/ c#INTEL_GPU_BOOST_FREQ_ON_BAT=0" ' + filepath)
+                os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_AC=/ c#INTEL_GPU_BOOST_FREQ_ON_AC=0" ' + filepath)
         else:
             logger.error('Graphics 404')
     return required_reboot
@@ -596,24 +592,23 @@ def brightness_settings(mode):
             logger.debug('Crontab settings commented')
 
 
-def update_config(file, variable, value):
+def update_config(filepath, variable, value):
     try:
-        call = subprocess.getoutput('cat ' + file)
+        call = subprocess.getoutput('cat ' + filepath)
         patron = re.compile(variable + '\=(.*)')
         last_value = patron.search(call)[1]
     except Exception:
         last_value = ''
 
     if last_value != value:
-        command = "sudo sed -i '/" + variable + "/ c" + variable + "=" + value + "' " + file
+        command = "sudo sed -i '/" + variable + "/ c" + variable + "=" + value + "' " + filepath
         if os.system(command) == 0:
-            logger.info("Info: {} updated in {}, value: {}".format(variable, file, value))
+            logger.info("Info: {} updated in {}, value: {}".format(variable, filepath, value))
         else:
             logger.error('Sed command failed')
             return 1
     else:
-        logger.info('Already set in {}'.format(file))
-        logger.info('Already set in {}'.format(file))
+        logger.info('Already set in {}'.format(filepath))
 
     return 0
 
