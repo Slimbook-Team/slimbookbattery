@@ -84,6 +84,40 @@ class Colors:  # You may need to change color settings
     BOLD = "\033[;1m"
 
 
+MAPPING_MODES = {
+    '1': {
+        'full_text': 'Power saving mode',
+        'mode_name': 'ahorrodeenergia',
+        'tdp_mode': 'low',
+        'graphics_check': 'graphics_ahorro',
+        'graphics_profile': 'low',
+        'graphics_limit': (0, 600, 600, 800),
+        'brightness_setting_check': 'saving_brightness_switch',
+        'brightness_setting_value': 'ahorro_brightness',
+    },
+    '2': {
+        'full_text': 'Normal power mode',
+        'mode_name': 'equilibrado',
+        'tdp_mode': 'medium',
+        'graphics_check': 'graphics_equilibrado',
+        'graphics_profile': 'mid',
+        'graphics_limit': (0, 600, 900, 1000),
+        'brightness_setting_check': 'balanced_brightness_switch',
+        'brightness_setting_value': 'equilibrado_brightness',
+    },
+    '3': {
+        'full_text': 'Full power mode',
+        'mode_name': 'maximorendimiento',
+        'tdp_mode': 'high',
+        'graphics_check': 'graphics_maxrendimiento',
+        'graphics_profile': 'high',
+        'graphics_limit': (0, 600, 900, 1000),
+        'brightness_setting_check': 'power_brightness_switch',
+        'brightness_setting_value': 'maxrendimiento_brightness',
+    },
+}
+
+
 def main(args):  # Args will be like --> command_name value
 
     arguments = ''
@@ -94,42 +128,26 @@ def main(args):  # Args will be like --> command_name value
 
     if (len(args)) > 1:
 
-        try:
-            uid, gid = pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
-
-        except Exception as e:
-            logger.exception('Failed to get user id/gid: {}'.format(USER_NAME))
-            exit(5)
-
         battery_mode = config.get('CONFIGURATION', 'modo_actual')
 
         if args[1] == "apply":  # Applies selected mode conf and turns on/off tlp
             mode_name = ''
             # Copies selected custom mode conf to /etc/tlp.conf
             # print('Passing Custom Configuration '+battery_mode+' to tlp.conf')
-
-            if battery_mode == '1':
-                logger.info('Power saving mode')
-                mode_name = 'ahorrodeenergia'
-
-            elif battery_mode == '2':
-                logger.info('Normal power mode')
-                mode_name = 'equilibrado'
-
-            elif battery_mode == '3':
-                logger.info('Full power mode')
-                mode_name = 'maximorendimiento'
+            if battery_mode in MAPPING_MODES:
+                logger.info(MAPPING_MODES[battery_mode]['full_text'])
+                mode_name = MAPPING_MODES[battery_mode]['mode_name']
 
             brightness_settings(battery_mode)  # Executed by indicator
             set_tdp(battery_mode)
 
             logger.info("\n{}[COPY TDP CUSTOM SETTINGS]{}".format(Colors.GREEN, Colors.ENDC))
-            exec = subprocess.getstatusoutput(
-                "sudo cp " + HOMEDIR + "/.config/slimbookbattery/custom/" + mode_name + " /etc/tlp.conf")
-            if exec[0] == 0:
+            custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/custom/", mode_name)
+            exit_code, msg = subprocess.getstatusoutput("sudo cp {} /etc/tlp.conf".format(custom_file))
+            if exit_code == 0:
                 logger.info('File copied succesfully!')
             else:
-                logger.error('Execution failed {}'.format(exec[1]))
+                logger.error('Execution failed {}'.format(msg))
 
             # Sets mode changes and enables/disables TLP according to conf
             if config.getboolean('CONFIGURATION', 'application_on'):
@@ -155,6 +173,14 @@ def main(args):  # Args will be like --> command_name value
 
             logger.info("Resetting modes conf")
             modes = ('ahorrodeenergia', 'equilibrado', 'maximorendimiento')
+
+            uid, gid = None, None
+            try:
+                pwnam = pwd.getpwnam(USER_NAME)
+                uid, gid = pwnam.pw_uid, pwnam.pw_gid
+            except Exception:
+                logger.error('Failed to get user id/gid: {}'.format(USER_NAME))
+                exit(5)
 
             for mode in modes:
                 custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/custom/", mode)
@@ -222,8 +248,8 @@ def notify(msg):
 def set_tdp(mode):
     # This function enables tdpcontroller autostart an changes it's mode if battery application,
     # battery autostart and sync tdp switch of the selected mode is on.
-    tdpcontroller = config['TDP']['tdpcontroller']
-    tdp_config_file = HOMEDIR + '/.config/' + tdpcontroller + '/' + tdpcontroller + '.conf'
+    tdpcontroller = config.get('TDP', 'tdpcontroller')
+    tdp_config_file = os.path.join(HOMEDIR, '.config', tdpcontroller, '{}.conf'.format(tdpcontroller))
 
     config_tdp = ConfigParser()
     config_tdp.read(tdp_config_file)
@@ -232,38 +258,33 @@ def set_tdp(mode):
     logger.info('Battery Mode: {}'.format(mode))
 
     # Mode settings
-    if config['CONFIGURATION']['application_on'] == '1':
+    if config.getboolean('CONFIGURATION', 'application_on'):
 
         tdp_mode = ''
         tdp_switch = 'saving_tdpsync'
 
-        if mode == '1':
-            tdp_mode = 'low'
-
-        elif mode == '2':
-            tdp_mode = 'medium'
-
-        elif mode == '3':
-            tdp_mode = 'high'
+        if mode in MAPPING_MODES:
+            tdp_mode = MAPPING_MODES[mode]['tdp_mode']
 
         try:
-            if config['TDP'][tdp_switch] == '1':
+            if config.getboolean('TDP', tdp_switch):
                 logger.info('Updating TDP mode ...')
                 config_tdp.set('CONFIGURATION', 'mode', tdp_mode)
-                logger.info('  TDP changed to {}'.format(config_tdp['CONFIGURATION']['mode']))
+                logger.info('  TDP changed to {}'.format(config_tdp.get('CONFIGURATION', 'mode')))
 
                 # Autostart settings
                 logger.info('\nUpdating TDP autostart ...')
-                if config['CONFIGURATION']['autostart'] == '1':
+                if config.getboolean('CONFIGURATION', 'autostart'):
                     config_tdp.set('CONFIGURATION', 'autostart', 'on')
 
-                    tdp_autostart = '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + '-autostart.desktop'
+                    tdp_autostart = os.path.join('/usr/share/', tdpcontroller, 'src',
+                                                 '{}-autostart.desktop'.format(tdpcontroller))
 
-                    shutil.copy(tdp_autostart, HOMEDIR + '/.config/autostart/')
+                    shutil.copy(tdp_autostart, os.path.join(HOMEDIR, '.config/autostart'))
 
                     logger.info('TDP Autostart enabled')
 
-                    if config_tdp['CONFIGURATION']['show-icon'] == 'on':
+                    if config_tdp.getboolean('CONFIGURATION', 'show-icon'):
                         logger.debug('TDP Icon will be shown')
                     else:
                         logger.debug("TDP Icon won't be shown")
@@ -272,7 +293,7 @@ def set_tdp(mode):
                 config_tdp.write(configfile)
                 configfile.close()
 
-                logger.info('Actual TDP Mode: {}'.format(config_tdp['CONFIGURATION']['mode']))
+                logger.info('Actual TDP Mode: {}'.format(config_tdp.get('CONFIGURATION', 'mode')))
 
             else:
                 logger.error('TDP Sync not active')
@@ -287,21 +308,17 @@ def set_tdp(mode):
 def change_config(args):  # For general page options
     logger.info('\n{}[CHANGE CONFIGURATION]{}'.format(Colors.GREEN, Colors.ENDC))
     files = ['/etc/tlp.conf',
-             HOMEDIR + '/.config/slimbookbattery/custom/ahorrodeenergia',
-             HOMEDIR + '/.config/slimbookbattery/custom/equilibrado',
-             HOMEDIR + '/.config/slimbookbattery/custom/maximorendimiento']
+             os.path.join(HOMEDIR, '.config/slimbookbattery/custom/ahorrodeenergia'),
+             os.path.join(HOMEDIR, '.config/slimbookbattery/custom/equilibrado'),
+             os.path.join(HOMEDIR, '.config/slimbookbattery/custom/maximorendimiento')]
 
-    for file in files:
-        update_config(file, args[2], args[3])
+    for filepath in files:
+        update_config(filepath, args[2], args[3])
 
 
 def mode_settings(mode):
     required_reboot = 0
     logger.info('\n{}[MODE SETTINGS]{}'.format(Colors.GREEN, Colors.ENDC))
-
-    file_ahorro = HOMEDIR + '/.config/slimbookbattery/custom/ahorrodeenergia'
-    file_equilibrado = HOMEDIR + '/.config/slimbookbattery/custom/equilibrado'
-    file_max = HOMEDIR + '/.config/slimbookbattery/custom/maximorendimiento'
 
     graficaNvidia = False
     graphics_before = ''
@@ -319,11 +336,11 @@ def mode_settings(mode):
         logger.info('Setting new profile ...')
         if mode == '1':
 
-            if config['SETTINGS']['graphics_ahorro'] == '1' and graphics_before != 'intel':
+            if config.getboolean('SETTINGS', 'graphics_ahorro') and graphics_before != 'intel':
                 if not graphics_before == 'intel':
                     os.system('prime-select intel')
 
-            elif config['SETTINGS']['graphics_ahorro'] == '0' and graphics_before != 'on-demand':
+            elif not config.getboolean('SETTINGS', 'graphics_ahorro') and graphics_before != 'on-demand':
                 if not graphics_before == 'on-demand':
                     os.system('prime-select intel')
                     # avocado
@@ -331,22 +348,22 @@ def mode_settings(mode):
 
         elif mode == '2':
 
-            if config['SETTINGS']['graphics_equilibrado'] == '1' and graphics_before != 'on-demand':
+            if config.getboolean('SETTINGS', 'graphics_equilibrado') and graphics_before != 'on-demand':
                 if not graphics_before == 'on-demand':
                     os.system('prime-select intel')
                     os.system('prime-select on-demand')
 
-            elif config['SETTINGS']['graphics_equilibrado'] == '0' and graphics_before != 'nvidia':
+            elif not config.getboolean('SETTINGS', 'graphics_equilibrado') and graphics_before != 'nvidia':
                 if not graphics_before == 'nvidia':
                     os.system('prime-select nvidia')
 
         elif mode == '3':  # need to check
-            if config['SETTINGS']['graphics_maxrendimiento'] == '1' and graphics_before != 'on-demand':
+            if config.getboolean('SETTINGS', 'graphics_maxrendimiento') and graphics_before != 'on-demand':
                 if not graphics_before == 'on-demand':
                     os.system('prime-select intel')
                     os.system('prime-select on-demand')
 
-            elif config['SETTINGS']['graphics_maxrendimiento'] == '0' and graphics_before != 'nvidia':
+            elif not config.getboolean('SETTINGS', 'graphics_maxrendimiento') and graphics_before != 'nvidia':
                 if not graphics_before == 'nvidia':
                     os.system('prime-select nvidia')
 
@@ -360,26 +377,14 @@ def mode_settings(mode):
     elif not graficaNvidia:
         logger.info('Setting graphics frequency ...')
 
-        if mode == '1':
-            variable = 'graphics_ahorro'
-            profile = 'low'
-            limit = (0, 600, 600, 800)
-            file = file_ahorro
-
-        elif mode == '2':
-            variable = 'graphics_equilibrado'
-            profile = 'mid'
-            limit = (0, 600, 900, 1000)
-            file = file_equilibrado
-
-        elif mode == '3':
-            variable = 'graphics_maxrendimiento'
-            profile = 'high'
-            limit = (0, 600, 900, 1000)
-            file = file_max
-
+        if mode in MAPPING_MODES:
+            variable = MAPPING_MODES[mode]['graphics_check']
+            profile = MAPPING_MODES[mode]['graphics_profile']
+            limit = MAPPING_MODES[mode]['graphics_limit']
+            mode_name = MAPPING_MODES[mode]['mode_name']
+            filepath = os.path.join(HOMEDIR, '.config/slimbookbattery/custom', mode_name)
         else:
-            logger.error('Mode must be 1,2 or 3, found: {}'.format(mode))
+            logger.error('Mode must be {}, found: {}'.format(MAPPING_MODES.keys(), mode))
             return -1
 
         # GRAPHICS AMD SETTINGS de
@@ -390,25 +395,25 @@ def mode_settings(mode):
         # RADEON
         if subprocess.getstatusoutput('lscpu | grep -i model | grep  -i Radeon')[0] == 0:
             logger.info('Radeon graphics power profile: {}'.format(profile))
-            if config['SETTINGS'][variable] == '1':
+            if config.getboolean('SETTINGS', variable):
                 RADEON_POWER_PROFILE_ON_BAT = profile
 
             os.system(
                 'sed -i "/RADEON_POWER_PROFILE_ON_BAT=/ cRADEON_POWER_PROFILE_ON_BAT={}" {}'.format(
-                    RADEON_POWER_PROFILE_ON_BAT, file
+                    RADEON_POWER_PROFILE_ON_BAT, filepath
                 )
             )
             os.system(
                 'sed -i "/RADEON_DPM_STATE_ON_BAT=/ cRADEON_DPM_STATE_ON_BAT={}" {}'.format(
-                    RADEON_DPM_STATE_ON_BAT, file
+                    RADEON_DPM_STATE_ON_BAT, filepath
                 )
             )
             os.system(
                 'sed -i "/RADEON_DPM_PERF_LEVEL_ON_BAT=/ cRADEON_DPM_PERF_LEVEL_ON_BAT={}" {}'.format(
-                    RADEON_DPM_PERF_LEVEL_ON_BAT, file
+                    RADEON_DPM_PERF_LEVEL_ON_BAT, filepath
                 )
             )
-        # INTEL 
+        # INTEL
         elif subprocess.getstatusoutput('lspci | grep VGA | grep -i Intel')[0] == 0:
             # GRAPHICS INTEL SETTINGS
             freq_table = ''
@@ -442,7 +447,7 @@ def mode_settings(mode):
                 freqCorrecta = False
 
             logger.info('Intel graphics power profile: {}'.format(profile))
-            if config['SETTINGS'][variable] == '1':
+            if config.getboolean('SETTINGS', variable):
                 # MIN_BAT/MIN_AC
                 for i in range(len(freq_available)):
                     if (int(freq_available[i]) > limit[0] and int(freq_available[i]) < limit[1]):
@@ -488,22 +493,22 @@ def mode_settings(mode):
                     logger.info('Setting GPU frequencies on bat --> {} {} {}'.format(
                         str(min_bat), str(max_bat), str(boost_bat))
                     )
-                    update_config(file, 'INTEL_GPU_MIN_FREQ_ON_BAT', str(min_bat))
-                    update_config(file, 'INTEL_GPU_MIN_FREQ_ON_AC', str(min_ac))
-                    update_config(file, 'INTEL_GPU_MAX_FREQ_ON_BAT', str(max_bat))
-                    update_config(file, 'INTEL_GPU_MAX_FREQ_ON_AC', str(max_ac))
-                    update_config(file, 'INTEL_GPU_BOOST_FREQ_ON_BAT', str(boost_bat))
-                    update_config(file, 'INTEL_GPU_BOOST_FREQ_ON_AC', str(boost_ac))
+                    update_config(filepath, 'INTEL_GPU_MIN_FREQ_ON_BAT', str(min_bat))
+                    update_config(filepath, 'INTEL_GPU_MIN_FREQ_ON_AC', str(min_ac))
+                    update_config(filepath, 'INTEL_GPU_MAX_FREQ_ON_BAT', str(max_bat))
+                    update_config(filepath, 'INTEL_GPU_MAX_FREQ_ON_AC', str(max_ac))
+                    update_config(filepath, 'INTEL_GPU_BOOST_FREQ_ON_BAT', str(boost_bat))
+                    update_config(filepath, 'INTEL_GPU_BOOST_FREQ_ON_AC', str(boost_ac))
                 else:
                     logger.info('Frequency not changed')
             else:
                 logger.info('Intel graphics power profile: #{}'.format(profile))
-                os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_BAT=/ c#INTEL_GPU_MIN_FREQ_ON_BAT=0" ' + file)
-                os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_AC=/ c#INTEL_GPU_MIN_FREQ_ON_AC=0" ' + file)
-                os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_BAT=/ c#INTEL_GPU_MAX_FREQ_ON_BAT=0" ' + file)
-                os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_AC=/ c#INTEL_GPU_MAX_FREQ_ON_AC=0" ' + file)
-                os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_BAT=/ c#INTEL_GPU_BOOST_FREQ_ON_BAT=0" ' + file)
-                os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_AC=/ c#INTEL_GPU_BOOST_FREQ_ON_AC=0" ' + file)
+                os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_BAT=/ c#INTEL_GPU_MIN_FREQ_ON_BAT=0" ' + filepath)
+                os.system('sed -i "/INTEL_GPU_MIN_FREQ_ON_AC=/ c#INTEL_GPU_MIN_FREQ_ON_AC=0" ' + filepath)
+                os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_BAT=/ c#INTEL_GPU_MAX_FREQ_ON_BAT=0" ' + filepath)
+                os.system('sed -i "/INTEL_GPU_MAX_FREQ_ON_AC=/ c#INTEL_GPU_MAX_FREQ_ON_AC=0" ' + filepath)
+                os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_BAT=/ c#INTEL_GPU_BOOST_FREQ_ON_BAT=0" ' + filepath)
+                os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_AC=/ c#INTEL_GPU_BOOST_FREQ_ON_AC=0" ' + filepath)
         else:
             logger.error('Graphics 404')
     return required_reboot
@@ -513,19 +518,13 @@ def brightness_settings(mode):
     logger.info('\n{}[BRIGTNESS SETTINGS]{}'.format(Colors.GREEN, Colors.ENDC))
     set_brightness = ''
 
-    if mode == '1':
-        if config.get('SETTINGS', 'saving_brightness_switch') == '1':
-            set_brightness = config.get('SETTINGS', 'ahorro_brightness')
+    if mode in MAPPING_MODES:
+        brightness_setting_check = MAPPING_MODES[mode]['brightness_setting_check']
+        brightness_setting_value = MAPPING_MODES[mode]['brightness_setting_value']
+        if config.getboolean('SETTINGS', brightness_setting_check):
+            set_brightness = config.get('SETTINGS', brightness_setting_value)
 
-    elif mode == '2':
-        if config.get('SETTINGS', 'balanced_brightness_switch') == '1':
-            set_brightness = config.get('SETTINGS', 'equilibrado_brightness')
-
-    elif mode == '3':
-        if config.get('SETTINGS', 'power_brightness_switch') == '1':
-            set_brightness = config.get('SETTINGS', 'maxrendimiento_brightness')
-
-    if config.get('CONFIGURATION', 'application_on') == '1':
+    if config.getboolean('CONFIGURATION', 'application_on'):
 
         if set_brightness != '':
 
@@ -593,24 +592,23 @@ def brightness_settings(mode):
             logger.debug('Crontab settings commented')
 
 
-def update_config(file, variable, value):
+def update_config(filepath, variable, value):
     try:
-        call = subprocess.getoutput('cat ' + file)
+        call = subprocess.getoutput('cat ' + filepath)
         patron = re.compile(variable + '\=(.*)')
         last_value = patron.search(call)[1]
     except Exception:
         last_value = ''
 
     if last_value != value:
-        command = "sudo sed -i '/" + variable + "/ c" + variable + "=" + value + "' " + file
+        command = "sudo sed -i '/" + variable + "/ c" + variable + "=" + value + "' " + filepath
         if os.system(command) == 0:
-            logger.info("Info: {} updated in {}, value: {}".format(variable, file, value))
+            logger.info("Info: {} updated in {}, value: {}".format(variable, filepath, value))
         else:
             logger.error('Sed command failed')
             return 1
     else:
-        logger.info('Already set in {}'.format(file))
-        logger.info('Already set in {}'.format(file))
+        logger.info('Already set in {}'.format(filepath))
 
     return 0
 
