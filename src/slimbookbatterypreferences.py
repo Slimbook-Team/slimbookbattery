@@ -390,7 +390,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # 8 ------------- TDP ADJUST
 
-        tdpcontroller = config['TDP']['tdpcontroller']
+        tdpcontroller = config.get('TDP', 'tdpcontroller')
 
         # Checks which tdp controller is needed
         proc = subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1")
@@ -412,21 +412,20 @@ class Preferences(Gtk.ApplicationWindow):
             print('TDP Controller: ' + tdpcontroller)
             config_changed = True
 
-            if config['TDP']['tdpcontroller'] == '':
+            if config.get('TDP', 'tdpcontroller') == '':
                 # Sets tdpcontroller if it's not set
                 config.set('TDP', 'tdpcontroller', tdpcontroller)
 
-            elif config['TDP']['tdpcontroller'] != tdpcontroller:
+            elif config.get('TDP', 'tdpcontroller') != tdpcontroller:
                 # Checks if tdp controller is correct
                 config.set('TDP', 'tdpcontroller', tdpcontroller)
             else:
                 config_changed = False
 
-            if config_changed == True:
+            if config_changed:
                 # This step is done at the end of function
-                configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-                config.write(configfile)
-                configfile.close()
+                with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+                    config.write(configfile)
         else:
             print('F')
         if tdpcontroller != '':
@@ -635,7 +634,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         config.read(user_home + '/.config/slimbookbattery/slimbookbattery.conf')
 
-        value = config['SETTINGS']['limit_cpu_ahorro']
+        value = config.get('SETTINGS', 'limit_cpu_ahorro')
 
         if value == '1':  # Max
             self.comboBoxLimitCPU.set_active(0)
@@ -813,8 +812,8 @@ class Preferences(Gtk.ApplicationWindow):
         # BUTTON 1
 
         self.scaleBrightness = Gtk.Scale()
-        ahorroBrightness = config['SETTINGS']['ahorro_brightness']
-        self.scaleBrightness.set_adjustment(Gtk.Adjustment.new(int(ahorroBrightness), 00, 100, 5, 5, 0))
+        ahorroBrightness = config.getint('SETTINGS', 'ahorro_brightness')
+        self.scaleBrightness.set_adjustment(Gtk.Adjustment.new(ahorroBrightness, 00, 100, 5, 5, 0))
         self.scaleBrightness.set_digits(0)
         self.scaleBrightness.set_hexpand(True)
 
@@ -1118,7 +1117,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.comboBoxLimitCPU2.set_halign(Gtk.Align.END)
         self.comboBoxLimitCPU2.set_entry_text_column(1)
 
-        value = config['SETTINGS']['limit_cpu_equilibrado']
+        value = config.get('SETTINGS', 'limit_cpu_equilibrado')
 
         if value == '1':
             self.comboBoxLimitCPU2.set_active(0)
@@ -1300,8 +1299,8 @@ class Preferences(Gtk.ApplicationWindow):
 
         # BUTTON 1
         self.scaleBrightness2 = Gtk.Scale()
-        equilibradoBrightness = config['SETTINGS']['equilibrado_brightness']
-        self.scaleBrightness2.set_adjustment(Gtk.Adjustment.new(int(equilibradoBrightness), 0, 100, 5, 5, 0))
+        equilibradoBrightness = config.getint('SETTINGS', 'equilibrado_brightness')
+        self.scaleBrightness2.set_adjustment(Gtk.Adjustment.new(equilibradoBrightness, 0, 100, 5, 5, 0))
         self.scaleBrightness2.set_digits(0)
         self.scaleBrightness2.set_hexpand(True)
 
@@ -1599,7 +1598,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.comboBoxLimitCPU3.set_entry_text_column(1)
         # self.comboBoxLimitCPU.set_active(self.check_autostart_comboBoxLimitCPU(self.comboBoxLimitCPU))
 
-        value = config['SETTINGS']['limit_cpu_maximorendimiento']
+        value = config.get('SETTINGS', 'limit_cpu_maximorendimiento')
 
         if value == '1':
             self.comboBoxLimitCPU3.set_active(0)
@@ -1781,8 +1780,8 @@ class Preferences(Gtk.ApplicationWindow):
         # BUTTON 1
 
         self.scaleBrightness3 = Gtk.Scale()
-        maxrendimientoBrightness = config['SETTINGS']['maxrendimiento_brightness']
-        self.scaleBrightness3.set_adjustment(Gtk.Adjustment.new(int(maxrendimientoBrightness), 0, 100, 5, 5, 0))
+        maxrendimientoBrightness = config.getint('SETTINGS', 'maxrendimiento_brightness')
+        self.scaleBrightness3.set_adjustment(Gtk.Adjustment.new(maxrendimientoBrightness, 0, 100, 5, 5, 0))
         self.scaleBrightness3.set_digits(0)
         self.scaleBrightness3.set_hexpand(True)
 
@@ -2038,7 +2037,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchAlerts = Gtk.Switch()
         self.switchAlerts.set_halign(Gtk.Align.START)
 
-        if config['CONFIGURATION']['alerts'] == '1':
+        if config.getboolean('CONFIGURATION', 'alerts'):
             self.switchAlerts.set_active(True)
 
         # self.switchAlerts.set_active(self.check_autostart_switchAlerts(self.switchAlerts))
@@ -2052,8 +2051,8 @@ class Preferences(Gtk.ApplicationWindow):
         # (1, 1)
         self.scaleMaxBatVal = Gtk.Scale()
         self.scaleMaxBatVal.set_size_request(200, 10)
-        max_value = config['CONFIGURATION']['max_battery_value']
-        self.scaleMaxBatVal.set_adjustment(Gtk.Adjustment.new(int(max_value), 0, 100, 5, 5, 0))
+        max_value = config.getint('CONFIGURATION', 'max_battery_value')
+        self.scaleMaxBatVal.set_adjustment(Gtk.Adjustment.new(max_value, 0, 100, 5, 5, 0))
         self.scaleMaxBatVal.set_digits(0)
         self.scaleMaxBatVal.set_hexpand(True)
         cycles_grid.attach(self.scaleMaxBatVal, 1, 1, 1, 1)
@@ -2066,8 +2065,8 @@ class Preferences(Gtk.ApplicationWindow):
         # (2, 1)
         self.scaleMinBatVal = Gtk.Scale()
         self.scaleMinBatVal.set_size_request(200, 10)
-        min_value = config['CONFIGURATION']['min_battery_value']
-        self.scaleMinBatVal.set_adjustment(Gtk.Adjustment.new(int(min_value), 0, 100, 5, 5, 0))
+        min_value = config.getint('CONFIGURATION', 'min_battery_value')
+        self.scaleMinBatVal.set_adjustment(Gtk.Adjustment.new(min_value, 0, 100, 5, 5, 0))
         self.scaleMinBatVal.set_digits(0)
         self.scaleMinBatVal.set_hexpand(True)
         cycles_grid.attach(self.scaleMinBatVal, 1, 2, 1, 1)
@@ -2080,9 +2079,9 @@ class Preferences(Gtk.ApplicationWindow):
         # (3, 1)
         self.scaleNumTimes = Gtk.Scale()
         self.scaleNumTimes.set_size_request(200, 10)
-        max_value = 15
-        max_value = config['CONFIGURATION']['max_battery_times']
-        self.scaleNumTimes.set_adjustment(Gtk.Adjustment.new(int(max_value), 0, 10, 5, 5, 0))
+
+        max_value = config.getint('CONFIGURATION', 'max_battery_times')
+        self.scaleNumTimes.set_adjustment(Gtk.Adjustment.new(max_value, 0, 10, 5, 5, 0))
         self.scaleNumTimes.set_digits(0)
         self.scaleNumTimes.set_hexpand(True)
         cycles_grid.attach(self.scaleNumTimes, 1, 3, 1, 1)
@@ -2095,8 +2094,8 @@ class Preferences(Gtk.ApplicationWindow):
         # (4, 1)
         self.scaleTimeWarnings = Gtk.Scale()
         self.scaleTimeWarnings.set_size_request(200, 10)
-        min_value = config['CONFIGURATION']['time_between_warnings']
-        self.scaleTimeWarnings.set_adjustment(Gtk.Adjustment.new(int(min_value), 0, 300, 5, 5, 0))
+        min_value = config.getint('CONFIGURATION', 'time_between_warnings')
+        self.scaleTimeWarnings.set_adjustment(Gtk.Adjustment.new(min_value, 0, 300, 5, 5, 0))
         self.scaleTimeWarnings.set_digits(0)
         self.scaleTimeWarnings.set_hexpand(True)
         cycles_grid.attach(self.scaleTimeWarnings, 1, 4, 1, 1)
@@ -2565,36 +2564,22 @@ class Preferences(Gtk.ApplicationWindow):
     def check_autostart_switchTDP(self, switchTDP):
         # print('TDP')
         tdp_adjustment = switchTDP.get_name()
-        stat = config['TDP'][tdp_adjustment]
-        if stat == '1':
-            switchTDP.set_active(True)
-
-        elif stat == '0':
-            switchTDP.set_active(False)
+        switchTDP.set_active(config.getboolean('TDP', tdp_adjustment))
 
     def check_autostart_switchBrightness(self, switchBrightness, scale):
         mode_brightness = switchBrightness.get_name()
-        try:
-            stat = config['SETTINGS'][mode_brightness]
-        except (ValueError, IndexError, KeyError):
-            import check_config
+        if not config.has_option('SETTINGS', mode_brightness):
+            import check_config  # Fix config and reload
             check_config.main()
+            config.read(config_file)
 
-        stat = config['SETTINGS'][mode_brightness]
-        if stat == '1':
-            switchBrightness.set_active(True)
-            scale.set_sensitive(True)
-        elif stat == '0':
-            switchBrightness.set_active(False)
-            scale.set_sensitive(False)
+        stat = config.getboolean('SETTINGS', mode_brightness)
+        switchBrightness.set_active(stat)
+        scale.set_sensitive(stat)
 
     def check_autostart_switchAnimations(self, switchAnimations):
         mode_anims = switchAnimations.get_name()
-        stat = config['SETTINGS'][mode_anims]
-        if stat == '1':
-            switchAnimations.set_active(True)
-        elif stat == '0':
-            switchAnimations.set_active(False)
+        switchAnimations.set_active(config.getboolean('SETTINGS', mode_anims))
 
     def check_autostart_USBSuspend(self, switchUSBSuspend):
         mode = switchUSBSuspend.get_name()
@@ -2698,19 +2683,15 @@ class Preferences(Gtk.ApplicationWindow):
 
     def check_autostart_Graphics(self, switchGraphics):  # Only in saving and balanced mode
         mode = switchGraphics.get_name()
+        graphics = None
         if mode == 'ahorrodeenergia':
-            graphics = config['SETTINGS']['graphics_ahorro']
+            graphics = config.getboolean('SETTINGS', 'graphics_ahorro')
         elif mode == 'equilibrado':
-            graphics = config['SETTINGS']['graphics_equilibrado']
+            graphics = config.getboolean('SETTINGS', 'graphics_equilibrado')
         elif mode == 'maximorendimiento':
-            graphics = config['SETTINGS']['graphics_maxrendimiento']
-
-        if graphics == '0':
-            # print('Graphics saving:  Off')
-            switchGraphics.set_active(False)
-        elif graphics == '1':
-            # print('Graphics saving:  On')
-            switchGraphics.set_active(True)
+            graphics = config.getboolean('SETTINGS', 'graphics_maxrendimiento')
+        if graphics is not None:
+            switchGraphics.set_active(graphics)
 
     def check_autostart_Governor(self, comboBoxGovernor, governor_name):  # All modes
         mode = comboBoxGovernor.get_name()
@@ -2997,34 +2978,27 @@ class Preferences(Gtk.ApplicationWindow):
         dialog.destroy()
 
     def load_cycles_components(self):
-
         # SWITCH ALERTS
-        stat = str(int(config['CONFIGURATION']['alerts']))
-        # active = None
-
-        if stat == '1':
-            self.switchAlerts.set_active(True)
-        elif stat == '0':
-            self.switchAlerts.set_active(False)
+        self.switchAlerts.set_active(config.getboolean('CONFIGURATION', 'alerts'))
         print()
 
     def load_components(self, radiobutton1, radiobutton2, radiobutton3):
 
         print('\nLoading variables ...\n')
 
-        variable = config['CONFIGURATION']['application_on']
-        if variable == '1':
+        variable = config.getboolean('CONFIGURATION', 'application_on')
+        if variable:
             self.switchOnOff.set_active(True)
             print('\tState: on')
 
-        elif variable == '0':
+        else:
             self.switchOnOff.set_active(False)
             print('\tState: off')
 
         # Autostart (system)
-        variable = config['CONFIGURATION']['autostart']
+        # variable = config['CONFIGURATION']['autostart']
 
-        if (os.path.isfile(user_home + "/.config/autostart/slimbookbattery-autostart.desktop")):
+        if os.path.isfile(user_home + "/.config/autostart/slimbookbattery-autostart.desktop"):
             self.switchAutostart.set_active(True)
             self.autostart_inicial = '1'
             print('\tAutostart: on')
@@ -3035,7 +3009,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # Actual Mode ()
         config.read(user_home + '/.config/slimbookbattery/slimbookbattery.conf')
-        variable = config['CONFIGURATION']['modo_actual']
+        variable = config.get('CONFIGURATION', 'modo_actual')
 
         if variable == '1':
             radiobutton1.set_active(True)
@@ -3071,9 +3045,9 @@ class Preferences(Gtk.ApplicationWindow):
 
         # Icon (.conf)
 
-        variable = config['CONFIGURATION']['icono']
+        variable = config.getboolean('CONFIGURATION', 'icono')
 
-        if variable == '1':
+        if variable:
             print('\tIcon: on')
             self.switchIcon.set_active(True)
 
@@ -3081,9 +3055,9 @@ class Preferences(Gtk.ApplicationWindow):
             print('\tIcon: off')
             self.switchIcon.set_active(False)
 
-        variable = config['CONFIGURATION']['plug_warn']
+        variable = config.getboolean('CONFIGURATION', 'plug_warn')
 
-        if variable == '1':
+        if variable:
             self.switchPlugged.set_active(True)
         else:
             self.switchPlugged.set_active(False)
@@ -3354,9 +3328,8 @@ class Preferences(Gtk.ApplicationWindow):
         # print('Config: ' + config['SETTINGS']['limit_cpu_ahorro'])
 
         # This step is done at the end of function
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        config.write(configfile)
-        configfile.close()
+        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+            config.write(configfile)
 
     def write_modes2_conf(self):
 
@@ -3617,9 +3590,8 @@ class Preferences(Gtk.ApplicationWindow):
         print('\n')
 
         # This step is done at the end of function
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        config.write(configfile)
-        configfile.close()
+        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+            config.write(configfile)
 
     def write_modes3_conf(self):
         mode = 'maximorendimiento'
@@ -3885,9 +3857,8 @@ class Preferences(Gtk.ApplicationWindow):
         print('\n')
 
         # This step is done at the end of function
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        config.write(configfile)
-        configfile.close()
+        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+            config.write(configfile)
 
     def animations(self, mode):
 
@@ -3901,7 +3872,7 @@ class Preferences(Gtk.ApplicationWindow):
                 os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
                 os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
             elif mode == '1':
-                if config['SETTINGS']['ahorro_animations'] == "1":
+                if config.getboolean('SETTINGS', 'ahorro_animations'):
                     print('Animations Inactive')
                     os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
@@ -3913,7 +3884,7 @@ class Preferences(Gtk.ApplicationWindow):
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
 
             elif mode == '2':
-                if config['SETTINGS']['equilibrado_animations'] == '1':
+                if config.getboolean('SETTINGS', 'equilibrado_animations'):
                     print('Animations Inactive')
                     os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
@@ -3926,7 +3897,7 @@ class Preferences(Gtk.ApplicationWindow):
 
             elif mode == '3':
                 print('xd')
-                if config['SETTINGS']['maxrendimiento_animations'] == '1':
+                if config.getboolean('SETTINGS', 'maxrendimiento_animations'):
                     print('Animations Inactive')
                     os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
@@ -4049,9 +4020,8 @@ class Preferences(Gtk.ApplicationWindow):
 
         config.set('CONFIGURATION', 'modo_actual', self.modo_actual)
 
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        config.write(configfile)
-        configfile.close()
+        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+            config.write(configfile)
 
         # print('pkexec slimbookbattry-pkexec change_config TLP_DEFAULT_MODE ' + workMode)
 
@@ -4075,15 +4045,14 @@ class Preferences(Gtk.ApplicationWindow):
         config.set('CONFIGURATION', 'max_battery_times', str(int(self.scaleNumTimes.get_value())))
         config.set('CONFIGURATION', 'time_between_warnings', str(int(self.scaleTimeWarnings.get_value())))
 
-        configfile = open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w')
-        config.write(configfile)
-        configfile.close()
+        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+            config.write(configfile)
 
         self.write_modes_conf()
         self.write_modes2_conf()
         self.write_modes3_conf()
 
-        self.animations(config['CONFIGURATION']['modo_actual'])
+        self.animations(config.get('CONFIGURATION', 'modo_actual'))
 
         # Settings application
         command = 'pkexec slimbookbattery-pkexec apply'
@@ -4092,11 +4061,11 @@ class Preferences(Gtk.ApplicationWindow):
         reboot_process('slimbookbatteryindicator.py', CURRENT_PATH + '/slimbookbatteryindicator.py', True)
 
         # This process wil only reboot if is running if not, and option is on, it will be launched
-        actual_mode = config['CONFIGURATION']['modo_actual']
+        # actual_mode = config['CONFIGURATION']['modo_actual']
 
-        tdpcontroller = config['TDP']['tdpcontroller']
+        tdpcontroller = config.get('TDP', 'tdpcontroller')
 
-        if config['TDP']['saving_tdpsync'] == '1':
+        if config.getboolean('TDP', 'saving_tdpsync'):
             reboot_process(tdpcontroller + 'indicator.py',
                            '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + 'indicator.py', True)
         else:
