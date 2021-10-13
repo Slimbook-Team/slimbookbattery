@@ -3,7 +3,6 @@
 
 import argparse
 import os
-import re
 import sys
 import subprocess
 import configparser
@@ -23,9 +22,7 @@ def main():
     parser.add_argument('-v', '--version', action='store_true', help='application version')
 
     args = parser.parse_args()
-    if args.version:
-        changelog = None
-        
+    if args.version:      
         version = 'Unknown'
         if os.path.isfile(DESKTOP):
             version = config['Desktop Entry']['Version']
