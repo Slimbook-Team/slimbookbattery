@@ -380,7 +380,7 @@ def mode_settings(mode):
         if mode in MAPPING_MODES:
             variable = MAPPING_MODES[mode]['graphics_check']
             profile = MAPPING_MODES[mode]['graphics_profile']
-            limit = MAPPING_MODES[mode]['limit']
+            limit = MAPPING_MODES[mode]['graphics_limit']
             mode_name = MAPPING_MODES[mode]['mode_name']
             filepath = os.path.join(HOMEDIR, '.config/slimbookbattery/custom', mode_name)
         else:
