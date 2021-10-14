@@ -7,12 +7,13 @@ import sys
 import subprocess
 import configparser
 
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 DESKTOP = '/usr/share/applications/slimbookbattery.desktop'
+if not os.path.exists(DESKTOP):
+    DESKTOP = os.path.join(CURRENT_PATH, '../slimbookbattery.desktop')
 TLP = "/usr/bin/tlp"
 TLP2 = "/usr/sbin/tlp"
 
-config = configparser.ConfigParser()
-config.read(DESKTOP)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -20,12 +21,16 @@ def main():
                     'For support go to: https://github.com/slimbook/slimbookbattery'
     )
     parser.add_argument('-v', '--version', action='store_true', help='application version')
+    parser.add_argument('--minimize', action='store_true', help='start minimized')
 
     args = parser.parse_args()
-    if args.version:      
+    if args.version:
         version = 'Unknown'
         if os.path.isfile(DESKTOP):
-            version = config['Desktop Entry']['Version']
+            config = configparser.ConfigParser()
+            config.read(DESKTOP)
+            if config.has_option('Desktop Entry', 'Version'):
+                version = config.get('Desktop Entry', 'Version')
 
         sys.stdout.write('Slimbook Battery {}\n'.format(version))
         exit(0)
@@ -38,9 +43,11 @@ def main():
     num_proc_running = pgrep.split('\n')
     if len(num_proc_running) > 1:
         sys.stdout.write("Slimbook Battery is in execution\n")
+    elif args.minimize:
+        indicator_py = os.path.join(CURRENT_PATH, '../src/slimbookbatteryindicator.py')
+        os.system('python3 {}'.format(indicator_py))
     else:
-        print(os.curdir)
-        preference_py = os.path.join('/usr/share/slimbookbattery/src/slimbookbatterypreferences.py')
+        preference_py = os.path.join(CURRENT_PATH, '../src/slimbookbatterypreferences.py')
         os.system('python3 {}'.format(preference_py))
 
 
