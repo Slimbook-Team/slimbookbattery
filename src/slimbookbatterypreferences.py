@@ -2706,7 +2706,9 @@ class Preferences(Gtk.ApplicationWindow):
             else:
                 print('Setting default mode powersave')
                 comboBoxGovernor.set_active(0)
-        elif governor_name == 'acpi-cpufreq':
+
+        # See https://linrunner.de/tlp/settings/processor.html
+        elif governor_name == 'acpi-cpufreq' or governor_name == 'intel_cpufreq':
             if subprocess.getstatusoutput(
                     "cat " + file_mode + " | grep 'CPU_SCALING_GOVERNOR_ON_BAT=ondemand'")[0] == 0:
                 comboBoxGovernor.set_active(0)
@@ -4124,7 +4126,7 @@ def governorIsCompatible():
     for governor_driver in governor:
         governor_name = governor_driver
 
-        if governor_driver != 'intel_pstate' and governor_driver != 'acpi-cpufreq':
+        if governor_driver != 'intel_pstate' and governor_driver != 'acpi-cpufreq' and governor_driver != 'intel_cpufreq':
             governorCompatible = False
             break
 
