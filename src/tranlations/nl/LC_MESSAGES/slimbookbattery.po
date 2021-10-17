@@ -68,10 +68,6 @@ msgstr "Cycli-meldingen zijn uitgeschakeld en de toepassing is actief"
 msgid "strappstatus3"
 msgstr "Cycli-meldingen zijn ingeschakeld en de toepassing is niet actief"
 
-#: slimbookbattery.py:220
-msgid "strappstatus4"
-msgstr "Cycli-meldingen zijn uitgeschakeld en de toepassing is niet actief"
-
 #: slimbookbattery.py:255
 msgid "Energy Saving"
 msgstr "Energiebesparing"

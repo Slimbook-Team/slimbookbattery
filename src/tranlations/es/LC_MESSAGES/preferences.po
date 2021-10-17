@@ -499,7 +499,7 @@ msgid "Disable animations:"
 msgstr "Desactivar animaciones:"
 
 #: slimbookbatteryindicator.py:161
-msgid "It seems that you have been connected to AC for at least 15 days, we reccomend you to disconnect your charger, and discharge battery"
+msgid "It seems that you have been connected to AC for at least 15 days, we recommend you to disconnect your charger, and discharge battery"
 msgstr "Parece que llevas conectado al cargador, al menos 15 dias, te recomendamos desconectar el cargador y hacer un ciclo de descarga de la batería."
 
 #: slimbookbatterypreferences.py:380

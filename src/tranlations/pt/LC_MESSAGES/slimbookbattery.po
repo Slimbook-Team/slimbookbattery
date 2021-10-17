@@ -66,10 +66,6 @@ msgstr "Alertas de ciclos desativados e aplicativo rodando"
 msgid "strappstatus3"
 msgstr "Alertas de ciclo estão ativados e aplicativo está encerrado"
 
-#: slimbookbattery.py:220
-msgid "strappstatus4"
-msgstr "Alertas de ciclo estão desativados e aplicativo está encerrado"
-
 #: slimbookbattery.py:255
 msgid "Energy Saving"
 msgstr "Economia de energia"

@@ -66,10 +66,6 @@ msgstr "Las alertas de los ciclos estan deshabilitadas y la aplicación está en
 msgid "strappstatus3"
 msgstr "Las alertas de los ciclos estan habilitadas y la aplicación está apagada"
 
-#: slimbookbattery.py:220
-msgid "strappstatus4"
-msgstr "Las alertas de los ciclos estan deshabilitadas y la aplicación está apagada"
-
 #: slimbookbattery.py:255
 msgid "Energy Saving"
 msgstr "Ahorro de energía"
@@ -170,5 +166,5 @@ msgid "System will not restart"
 msgstr "El sistema no se reiniciará"
 
 #: slimbookbatteryindicator.py:161
-msgid "It seems that you have been connected to AC for at least 15 days, we reccomend you to disconnect your charger, and discharge battery"
+msgid "It seems that you have been connected to AC for at least 15 days, we recommend you to disconnect your charger, and discharge battery"
 msgstr "Parece que llevas conectado al cargador, al menos 15 dias, te recomendamos desconectar el cargador y hacer un ciclo de descarga de la batería."
