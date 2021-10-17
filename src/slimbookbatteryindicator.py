@@ -72,7 +72,7 @@ class Indicator(Gtk.Application):
     def __init__(self):
 
         if config.getboolean('CONFIGURATION', 'plug_warn'):
-            check_plug()
+            self.check_plug()
 
         if config.getboolean('CONFIGURATION', 'icono'):
             indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
@@ -97,6 +97,46 @@ class Indicator(Gtk.Application):
 
         else:
             indicator.set_icon_full(DISABLED, 'Icon energy saving')
+
+    @staticmethod
+    def check_plug():
+        last = config.get('CONFIGURATION', 'plugged')
+        if not last == '':
+            last = last.split('-')
+            last_date = []
+            for value in last:
+                last_date.append(int(value))
+
+            last_date = date(last_date[0], last_date[1], last_date[2])
+
+            today = date.today()
+
+            last_plug = abs(last_date - today).days
+
+            if last_plug >= 15:
+                code, stdout = subprocess.getstatusoutput("cat /sys/class/power_supply/BAT0/status")
+
+                if code == 0 and stdout != 'Discharging':
+                    cmd = 'notify-send --icon {} "Slimbook Battery" "{}"'.format(
+                        os.path.join(CURRENT_PATH, '../images/normal.png'),
+                        _('It seems that you have been connected to AC for at least 15 days, '
+                          'we recommend you to disconnect your charger, and discharge battery')
+                    )
+                    os.system(cmd)
+                else:
+                    logger.debug('Resetting last unplugged date')
+                    config.set('CONFIGURATION', 'plugged', str(date.today()))
+                    with open(config_file, 'w') as configfile:
+                        config.write(configfile)
+
+            logger.info('Time since last time disconnection: {} days'.format(last_plug))
+        else:
+            logger.debug('No date saved')
+
+            config.set('CONFIGURATION', 'plugged', str(date.today()))
+            # This step is done at the end of function
+            with open(os.path.join(HOMEDIR, '.config/slimbookbattery/slimbookbattery.conf'), 'w') as configfile:
+                config.write(configfile)
 
     def build_menu(self):
         menu = Gtk.Menu()
@@ -227,46 +267,6 @@ class Indicator(Gtk.Application):
     def salir(self, item):
         os.system('pkexec slimbookbattery-pkexec service stop')
         Gtk.main_quit()
-
-
-def check_plug():
-    last = config.get('CONFIGURATION', 'plugged')
-    if not last == '':
-        last = last.split('-')
-        last_date = []
-        for value in last:
-            last_date.append(int(value))
-
-        last_date = date(last_date[0], last_date[1], last_date[2])
-
-        today = date.today()
-
-        last_plug = abs(last_date - today).days
-
-        if last_plug >= 15:
-            code, stdout = subprocess.getstatusoutput("cat /sys/class/power_supply/BAT0/status")
-
-            if code == 0 and stdout != 'Discharging':
-                cmd = 'notify-send --icon {} "Slimbook Battery" "{}"'.format(
-                    os.path.join(CURRENT_PATH, '../images/normal.png'),
-                    _('It seems that you have been connected to AC for at least 15 days, '
-                      'we recommend you to disconnect your charger, and discharge battery')
-                )
-                os.system(cmd)
-            else:
-                logger.debug('Resetting last unplugged date')
-                config.set('CONFIGURATION', 'plugged', str(date.today()))
-                with open(config_file, 'w') as configfile:
-                    config.write(configfile)
-
-        logger.info('Time since last time disconnection: {} days'.format(last_plug))
-    else:
-        logger.debug('No date saved')
-
-        config.set('CONFIGURATION', 'plugged', str(date.today()))
-        # This step is done at the end of function
-        with open(os.path.join(HOMEDIR, '.config/slimbookbattery/slimbookbattery.conf'), 'w') as configfile:
-            config.write(configfile)
 
 
 def animations(mode):
