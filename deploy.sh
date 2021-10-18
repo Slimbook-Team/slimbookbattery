@@ -59,11 +59,11 @@ done < debian/install
 echo
 echo "Creating binary simlinks..."
 sudo rm /usr/bin/slimbookbattery /usr/bin/slimbookbattery-pkexec
-sudo cp -s /usr/share/slimbookbattery/bin/* /usr/bin/
+sudo cp -sv /usr/share/slimbookbattery/bin/* /usr/bin/
 
 echo
-echo "Checking installation (post installation script)"
-if ./src/check_config.py; then
+echo "Checking installation (post installation script and applying translations)"
+if ./src/check_config.py && ./replace.sh; then
 	echo "Done!"
 else
 	echo "ERROR: See below otput, could not check your installation porperly"
