@@ -19,6 +19,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import configparser
+import logging
 import math
 import os
 import shutil
@@ -37,7 +38,7 @@ import utils
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf
 
-err_trace = []
+logger = logging.getLogger()
 
 user = utils.get_user()
 user_home = os.path.expanduser("~{}".format(user))
@@ -64,6 +65,253 @@ class colors:  # You may need to change color settings
     YELLOW = '\033[33m'
     BLUE = '\033[34m'
     BOLD = "\033[;1m"
+
+
+class InfoPageGrid(Gtk.Grid):
+    SOCIAL = [
+        {
+            'icon': 'twitter.png',
+            'url': 'https://twitter.com/SlimbookEs',
+            'text': '@SlimbookEs',
+            'name': 'twitter',
+        },
+        {
+            'icon': 'facebook.png',
+            'url': 'https://www.facebook.com/slimbook.es',
+            'text': 'Slimbook',
+            'name': 'facebook',
+        },
+        {
+            'icon': 'insta.png',
+            'url': 'https://www.instagram.com/slimbookes/?hl=en',
+            'text': 'Slimbook',
+            'name': 'instagram',
+        }
+    ]
+
+    def __init__(self, parent, *args, **kwargs):
+        kwargs.setdefault('column_homogeneous', True)
+        kwargs.setdefault('column_spacing', 0)
+        kwargs.setdefault('row_spacing', 20)
+        super(InfoPageGrid, self).__init__(*args, **kwargs)
+
+        self.parent = parent
+        self.info_grid = Gtk.Grid(column_homogeneous=True,
+                                  column_spacing=0,
+                                  row_spacing=15)
+        self.setup()
+
+    def setup(self):
+        self.setup_title()
+        self.setup_description()
+        self.setup_social()
+        self.setup_disclaimer()
+        self.setup_links()
+        self.setup_contact()
+        self.setup_licence()
+
+        self.attach(self.info_grid, 0, 0, 2, 4)
+
+    def setup_title(self):
+        box = Gtk.HBox(spacing=15)
+        box.set_halign(Gtk.Align.CENTER)
+
+        # Title
+        title = Gtk.Label(label='')
+        title.set_markup('<span font="20"><b>Slimbook Battery 4</b></span>')
+        title.set_justify(Gtk.Justification.CENTER)
+        box.add(title)
+
+        # Icon
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=os.path.join(imagespath, 'normal.png'),
+            width=60,
+            height=60,
+            preserve_aspect_ratio=True)
+        box.add(Gtk.Image.new_from_pixbuf(pixbuf))
+        self.info_grid.attach(box, 0, 1, 5, 1)
+
+    def setup_description(self):
+        line = Gtk.Label(label='')
+        msg = "<span>{}\n{}</span>".format(
+            _("Slimbook Battery is a battery optimization application for "
+              "portable devices and can increase the battery"),
+            _("life up to 50%. For this purpose, the third-party software is "
+              "used to manage and configure the system resources.")
+        )
+        line.set_markup(msg)
+        line.set_justify(Gtk.Justification.CENTER)
+        self.info_grid.attach(line, 0, 2, 5, 1)
+
+        thanks = Gtk.Label(label='')
+        thanks.set_markup("<span>" + (
+            _("Special thanks to TLP (© 2019, linrunner), Nvidia, AMD and Intel "
+              "for offering us the necessary tools to make it possible!")) + "</span>")
+        thanks.set_justify(Gtk.Justification.CENTER)
+        self.info_grid.attach(thanks, 0, 3, 5, 1)
+
+    def setup_social(self):
+        line = Gtk.Label(label='')
+        line.set_markup("<span>" + (
+            _("If this application has been useful to you, "
+              "consider saying it in our social networks or even buy a SLIMBOOK ;)")) + "</span>")
+        line.set_justify(Gtk.Justification.CENTER)
+        self.info_grid.attach(line, 0, 4, 5, 1)
+        box = Gtk.HBox(spacing=5)
+        for social in self.SOCIAL:
+            icon = Gtk.Image.new_from_pixbuf(
+                GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                    filename=os.path.join(imagespath, social.get('icon')),
+                    width=25,
+                    height=25,
+                    preserve_aspect_ratio=True
+                )
+            )
+            icon.set_name('{name}_icon'.format(**social))
+            box.pack_start(icon, False, False, 0)
+            label = Gtk.Label(label=' ')
+            markup = '<span><b><a href="{url}">{text}</a></b></span>'.format(**social)
+            label.set_name(social.get('name'))
+            label.set_markup(markup)
+            label.set_justify(Gtk.Justification.CENTER)
+            box.pack_start(label, False, False, 0)
+        box.set_halign(Gtk.Align.CENTER)
+        self.info_grid.attach(box, 0, 6, 5, 1)
+
+    def setup_disclaimer(self):
+        disclaimer = Gtk.Label(label='')
+        msg = "<span><b>{}</b>{}\n{}</span>".format(
+            _("IMPORTANT NOTE:"),
+            _(" If you have any software, widget or application that changes the CPU profile, battery"),
+            _("optimization or similar, it may affect the operation of this application. "
+              "Use it under your responsibility.")
+        )
+        disclaimer.set_markup(msg)
+        disclaimer.set_justify(Gtk.Justification.CENTER)
+        self.info_grid.attach(disclaimer, 0, 7, 5, 1)
+
+    def setup_links(self):
+        box = Gtk.HBox()
+        box.set_halign(Gtk.Align.CENTER)
+
+        link = Gtk.LinkButton(uri='https://slimbook.es/', label=(_('Visit SLIMBOOK website')))
+        link.set_name('link')
+        link.set_halign(Gtk.Align.CENTER)
+        box.add(link)
+
+        link = Gtk.LinkButton(uri=(_('strurlwebsite')), label=(_('Tutorial to learn to use Slimbook Battery')))
+        link.set_name('link')
+        link.set_halign(Gtk.Align.CENTER)
+        box.add(link)
+
+        link = Gtk.LinkButton(uri="https://github.com/slimbook/slimbookbattery/tree/main/src/locale",
+                              label=(_('Help us with translations!')))
+        link.set_name('link')
+        link.set_halign(Gtk.Align.CENTER)
+        box.add(link)
+        self.info_grid.attach(box, 0, 10, 5, 1)
+
+        box = Gtk.HBox()
+        box.set_halign(Gtk.Align.CENTER)
+
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=os.path.join(imagespath, 'GitHub_Logo_White.png'),
+            width=150,
+            height=30,
+            preserve_aspect_ratio=True)
+        icon = Gtk.Image()
+        icon.set_from_pixbuf(pixbuf)
+        github = Gtk.LinkButton(uri="https://github.com/slimbook/slimbookbattery")
+        github.set_name('link')
+        github.set_halign(Gtk.Align.CENTER)
+        github.set_image(icon)
+        box.add(github)
+        self.info_grid.attach(box, 0, 11, 5, 1)
+
+        patreon = Gtk.Label()
+        msg = "<span>{}<a href='https://www.patreon.com/slimbook'>Patreon</a>{}</span>".format(
+            _("If you want you can support the developement of this app "
+              "and several more to come by joining us on "),
+            _(" or buying a brand new Slimbook ;)")
+        )
+        patreon.set_markup(msg)
+        patreon.set_justify(Gtk.Justification.CENTER)
+        self.info_grid.attach(patreon, 0, 12, 5, 1)
+
+    def setup_contact(self):
+        info = Gtk.Label(label='')
+        msg = "<span><b>{}</b> {} {}</span>".format(
+            _("Info:"),
+            _("Contact with us if you find something wrong. "
+              "We would appreciate that you attach the file that is generated"),
+            _("by clicking the button below")
+        )
+        info.set_markup(msg)
+        info.set_justify(Gtk.Justification.CENTER)
+        self.info_grid.attach(info, 0, 13, 5, 1)
+
+        info = Gtk.Label(label=' ')
+        info.set_markup("<span><b>" + (_("Send an e-mail to: ")) + "dev@slimbook.es</b></span>")
+        info.set_justify(Gtk.Justification.CENTER)
+
+        box = Gtk.HBox()
+        report = Gtk.Button(label=(_('Generate report file')))
+        report.connect("clicked", self.on_click)
+        report.set_halign(Gtk.Align.CENTER)
+        box.add(report)
+        self.info_grid.attach(box, 1, 15, 3, 1)
+
+    def setup_licence(self):
+        licence = Gtk.Label(label='')
+        licence.set_markup(_('The software is provided  as is , without warranty of any kind.'))
+        licence.set_justify(Gtk.Justification.CENTER)
+        self.info_grid.attach(licence, 0, 16, 5, 1)
+
+        box = Gtk.HBox()
+        box.set_halign(Gtk.Align.CENTER)
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=os.path.join(imagespath, 'cc.png'),
+            width=150,
+            height=30,
+            preserve_aspect_ratio=True)
+        icon = Gtk.Image()
+        icon.set_from_pixbuf(pixbuf)
+        link = Gtk.LinkButton(uri="https://creativecommons.org/licenses/by-nc-nd/4.0/")
+        link.set_name('link')
+        link.set_halign(Gtk.Align.CENTER)
+        link.set_image(icon)
+        box.add(link)
+        self.info_grid.attach(box, 0, 17, 5, 1)
+
+    def on_click(self, button):
+        save_dialog = Gtk.FileChooserDialog(title="Please select a folder to save the file",
+                                            parent=self.parent,
+                                            action=Gtk.FileChooserAction.SELECT_FOLDER)
+
+        save_dialog.add_button(Gtk.STOCK_CANCEL, 0)
+        save_dialog.add_button(Gtk.STOCK_SAVE, 1)
+        save_dialog.set_name('save_dialog')
+
+        response = save_dialog.run()
+        if response == 1:
+            path = os.path.join(
+                save_dialog.get_filename(),
+                '/report_{}.txt'.format(time.strftime("%d-%m-%y_%H:%M"))
+            )
+            desktop = subprocess.getoutput("echo $XDG_CURRENT_DESKTOP")
+
+            cmd = "pkexec slimbookbattery-pkexec report {path} {desktop} {user_home}".format(
+                path=path, desktop=desktop, user_home=user_home
+            )
+            code, output = subprocess.getstatusoutput(cmd)
+            if code == 0:
+                logger.info(_('Report file generated'))
+            else:
+                logger.info(_('Report fail'))
+                logger.error(output)
+        elif response == Gtk.ResponseType.CANCEL:
+            logger.info(_('Report file canceled'))
+        save_dialog.destroy()
 
 
 class Preferences(Gtk.ApplicationWindow):
@@ -195,7 +443,7 @@ class Preferences(Gtk.ApplicationWindow):
         hbox.pack_start(self.btnAccept, True, True, 0)
         hbox.set_halign(Gtk.Align.END)
 
-        if self.min_resolution == True:
+        if self.min_resolution:
             hbox.set_name('smaller_label')
 
         label77 = Gtk.Label(label='')
@@ -2318,20 +2566,11 @@ class Preferences(Gtk.ApplicationWindow):
         battery_grid.attach(label66, col2, 15, 2, 1)
 
         # INFO PAGE **************************************************************
+        info_page_grid = InfoPageGrid(self)
 
-        info_page_grid = Gtk.Grid(column_homogeneous=True,
-                                  column_spacing=0,
-                                  row_spacing=20)
+        if self.min_resolution:
+            info_page_grid.info_grid.set_name('smaller_label')
 
-        info_grid = Gtk.Grid(column_homogeneous=True,
-                             column_spacing=0,
-                             row_spacing=15)
-        if self.min_resolution == True:
-            info_grid.set_name('smaller_label')
-
-        info_page_grid.attach(info_grid, 0, 0, 2, 4)
-
-        if self.min_resolution == True:
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
 
@@ -2342,212 +2581,6 @@ class Preferences(Gtk.ApplicationWindow):
             notebook.append_page(scrolled_window1, Gtk.Label.new(_('Information')))
         else:
             notebook.append_page(info_page_grid, Gtk.Label.new(_('Information')))
-
-        # ********* APPLICATION INFO COMPONENTS ***********************************
-
-        hbox = Gtk.HBox(spacing=15)
-        hbox.set_halign(Gtk.Align.CENTER)
-        # Icon
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'normal.png'),
-            width=60,
-            height=60,
-            preserve_aspect_ratio=True)
-        iconApp = Gtk.Image.new_from_pixbuf(pixbuf)
-
-        # Title
-        label77 = Gtk.Label(label='')
-        label77.set_markup('<span font="20"><b>Slimbook Battery 4</b></span>')
-        label77.set_justify(Gtk.Justification.CENTER)
-
-        hbox.add(label77)
-        hbox.add(iconApp)
-
-        info_grid.attach(hbox, 0, 1, 5, 1)
-
-        # Text 1
-        label77 = Gtk.Label(label='')
-        msg = "<span>{}\n{}</span>".format(
-            _("Slimbook Battery is a battery optimization application for "
-              "portable devices and can increase the battery"),
-            _("life up to 50%. For this purpose, the third-party software is "
-              "used to manage and configure the system resources.")
-        )
-        label77.set_markup(msg)
-        label77.set_justify(Gtk.Justification.CENTER)
-        info_grid.attach(label77, 0, 2, 5, 1)
-
-        # (3, 0)
-        label77 = Gtk.Label(label='')
-        label77.set_markup("<span>" + (
-            _("Special thanks to TLP (© 2019, linrunner), Nvidia, AMD and Intel "
-              "for offering us the necessary tools to make it possible!")) + "</span>")
-        label77.set_justify(Gtk.Justification.CENTER)
-        info_grid.attach(label77, 0, 3, 5, 1)
-
-        # (4, 0)
-        label77 = Gtk.Label(label='')
-        label77.set_markup("<span>" + (
-            _("If this application has been useful to you, "
-              "consider saying it in our social networks or even buy a SLIMBOOK ;)")) + "</span>")
-        label77.set_justify(Gtk.Justification.CENTER)
-        info_grid.attach(label77, 0, 4, 5, 1)
-
-        # (5, 0)
-        hbox = Gtk.HBox(spacing=5)
-
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'twitter.png'),
-            width=25,
-            height=25,
-            preserve_aspect_ratio=True)
-
-        twitter = Gtk.Image.new_from_pixbuf(pixbuf)
-
-        hbox.pack_start(twitter, False, False, 0)
-
-        label77 = Gtk.Label(label=' ')
-        label77.set_markup("<span><b><a href='https://twitter.com/SlimbookEs'>@SlimbookEs</a></b>    </span>")
-        label77.set_justify(Gtk.Justification.CENTER)
-        hbox.pack_start(label77, False, False, 0)
-
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'facebook.png'),
-            width=25,
-            height=25,
-            preserve_aspect_ratio=True)
-
-        facebook = Gtk.Image.new_from_pixbuf(pixbuf)
-        hbox.pack_start(facebook, False, False, 0)
-
-        label77 = Gtk.Label(label=' ')
-        label77.set_markup("<span><b><a href='https://www.facebook.com/slimbook.es'>Slimbook</a></b>    </span>")
-        label77.set_justify(Gtk.Justification.CENTER)
-        hbox.pack_start(label77, False, False, 0)
-
-        try:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename=os.path.join(imagespath, 'insta.png'),
-                width=25,
-                height=25,
-                preserve_aspect_ratio=True)
-        except Exception:
-            print()
-
-        instagram = Gtk.Image.new_from_pixbuf(pixbuf)
-        hbox.pack_start(instagram, False, False, 0)
-        label77 = Gtk.Label(label=' ')
-        label77.set_markup("<span><b><a href='https://www.instagram.com/slimbookes/?hl=en'>@slimbookes</a></b></span>")
-        label77.set_justify(Gtk.Justification.CENTER)
-        hbox.pack_start(label77, False, False, 0)
-        hbox.set_halign(Gtk.Align.CENTER)
-        info_grid.attach(hbox, 0, 6, 5, 1)
-
-        # (6, 0)
-        label77 = Gtk.Label(label='')
-        msg = "<span><b>{}</b>{}\n{}</span>".format(
-            _("IMPORTANT NOTE:"),
-            _(" If you have any software, widget or application that changes the CPU profile, battery"),
-            _("optimization or similar, it may affect the operation of this application. "
-              "Use it under your responsibility.")
-        )
-        label77.set_markup(msg)
-        label77.set_justify(Gtk.Justification.CENTER)
-        info_grid.attach(label77, 0, 7, 5, 1)
-
-        hbox = Gtk.HBox()
-        hbox.set_halign(Gtk.Align.CENTER)
-        # (8, 0)
-        label77 = Gtk.LinkButton(uri='https://slimbook.es/', label=(_('Visit SLIMBOOK website')))
-        label77.set_name('link')
-        label77.set_halign(Gtk.Align.CENTER)
-        hbox.add(label77)
-        # info_grid.attach(label77, 0, 9, 5, 1)
-
-        # (9, 0)
-        label77 = Gtk.LinkButton(uri=(_('strurlwebsite')), label=(_('Tutorial to learn to use Slimbook Battery')))
-        label77.set_name('link')
-        label77.set_halign(Gtk.Align.CENTER)
-        hbox.add(label77)
-
-        label77 = Gtk.LinkButton(uri="https://github.com/slimbook/slimbookbattery/tree/main/src/locale",
-                                 label=(_('Help us with translations!')))
-        label77.set_name('link')
-        label77.set_halign(Gtk.Align.CENTER)
-        hbox.add(label77)
-
-        info_grid.attach(hbox, 0, 10, 5, 1)
-
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'GitHub_Logo_White.png'),
-            width=150,
-            height=30,
-            preserve_aspect_ratio=True)
-
-        img = Gtk.Image()
-        img.set_from_pixbuf(pixbuf)
-
-        github = Gtk.LinkButton(uri="https://github.com/slimbook/slimbookbattery")
-        github.set_name('link')
-        github.set_halign(Gtk.Align.CENTER)
-        github.set_image(img)
-
-        hbox = Gtk.HBox()
-        hbox.set_halign(Gtk.Align.CENTER)
-
-        hbox.add(github)
-
-        info_grid.attach(hbox, 0, 11, 5, 1)
-
-        label77 = Gtk.Label()
-        msg = "<span>{}<a href='https://www.patreon.com/slimbook'>Patreon</a>{}</span>".format(
-            _("If you want you can support the developement of this app "
-              "and several more to come by joining us on "),
-            _(" or buying a brand new Slimbook ;)")
-        )
-        label77.set_markup(msg)
-        label77.set_justify(Gtk.Justification.CENTER)
-        info_grid.attach(label77, 0, 12, 5, 1)
-
-        # (10, 0)
-        label77 = Gtk.Label(label='')
-        msg = "<span><b>{}</b> {} {}</span>".format(
-            _("Info:"),
-            _("Contact with us if you find something wrong. "
-              "We would appreciate that you attach the file that is generated"),
-            _("by clicking the button below")
-        )
-        label77.set_markup(msg)
-        label77.set_justify(Gtk.Justification.CENTER)
-        info_grid.attach(label77, 0, 13, 5, 1)
-
-        label77 = Gtk.Label(label=' ')
-        label77.set_markup("<span><b>" + (_("Send an e-mail to: ")) + "dev@slimbook.es</b></span>")
-        label77.set_justify(Gtk.Justification.CENTER)
-
-        # (12, 0)
-        self.buttonReportFile = Gtk.Button(label=(_('Generate report file')))
-        self.buttonReportFile.connect("clicked", self.on_buttonReportFile_clicked)
-        self.buttonReportFile.set_halign(Gtk.Align.CENTER)
-
-        hbox = Gtk.HBox()
-        hbox.add(label77)
-        hbox.pack_start(self.buttonReportFile, True, True, 0)
-        info_grid.attach(hbox, 1, 15, 3, 1)
-
-        # (13, 0)
-        label77 = Gtk.Label(label='')
-        label77.set_markup(_('The software is provided  as is , without warranty of any kind.'))
-        label77.set_justify(Gtk.Justification.CENTER)
-        info_grid.attach(label77, 0, 16, 5, 1)
-
-        # (14, 0)
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'cc.png'),
-            width=100,
-            height=200,
-            preserve_aspect_ratio=True)
-        Gtk.Image.new_from_pixbuf(pixbuf)
 
         # END
         self.child_process.terminate()
@@ -4073,31 +4106,6 @@ class Preferences(Gtk.ApplicationWindow):
         else:
             print('Mode not setting TDP')
 
-    def on_buttonReportFile_clicked(self, buttonReportFile):
-        # Se abrirá un dialogo para el usuario para que
-        # elija donde desea guardar el archivo del reporte que se va a generar
-        saveDialog = Gtk.FileChooserDialog(title="Please select a folder to save the file",
-                                           parent=self,
-                                           action=Gtk.FileChooserAction.SELECT_FOLDER)
-
-        saveDialog.add_button(Gtk.STOCK_CANCEL, 0)
-        saveDialog.add_button(Gtk.STOCK_SAVE, 1)
-
-        response = saveDialog.run()
-        saveDialog.set_name('save_dialog')
-        print(str(response))
-        if response == 1:
-            ruta = saveDialog.get_filename() + '/report_' + time.strftime("%d-%m-%y_%H:%M") + '.txt'
-            escritorio = subprocess.getoutput("echo $XDG_CURRENT_DESKTOP")
-            if subprocess.getstatusoutput(
-                    "pkexec slimbookbattery-pkexec report " + ruta + ' ' + escritorio + ' ' + user_home)[0] == 0:
-                print(_('Report file generated'))
-            else:
-                print(_('Report file canceled'))
-        elif response == Gtk.ResponseType.CANCEL:
-            print(_('Report file canceled'))
-        saveDialog.destroy()
-
     def close(self, button, state):
         print('Button Close Clicked')
         Gtk.main_quit()
@@ -4168,15 +4176,22 @@ def reboot_process(process_name, path, start):
     print()
 
 
-style_provider = Gtk.CssProvider()
-style_provider.load_from_path(CURRENT_PATH + '/css/style.css')
-
-Gtk.StyleContext.add_provider_for_screen(
-    Gdk.Screen.get_default(), style_provider,
-    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-)
-
 if __name__ == "__main__":
+    logger.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    style_provider = Gtk.CssProvider()
+    style_provider.load_from_path(CURRENT_PATH + '/css/style.css')
+
+    Gtk.StyleContext.add_provider_for_screen(
+        Gdk.Screen.get_default(), style_provider,
+        Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    )
+
     win = Preferences()
     win.connect("destroy", Gtk.main_quit)
     win.show_all()
