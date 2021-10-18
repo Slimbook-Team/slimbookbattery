@@ -10,12 +10,22 @@ file='preferences'
 i=0
 
 not_changed=""
+
+# By default it will work on system deployed files
+destination=/usr/share/slimbookbattery/
+
+# Check if it is given an argument to translate repository instead of deployed files
+if [ $# -ge 1 ] && [ $@[0] == "dev" } ]; then
+	destination=$(pwd);
+fi
+echo "Replace will run in folder: $destination"
+
 # 1. Busca los ids y msg del inglés
 cd ./src/
 
 echo $(pwd)"/tranlations/en/LC_MESSAGES/$file.po"
 
-egrep 'msgid|msgstr' ./tranlations/en/LC_MESSAGES/$file.po | while read -r line ; do
+egrep 'msgid|msgstr' $(pwd)/tranlations/en/LC_MESSAGES/$file.po | while read -r line ; do
   
   
   if [ $((i%2)) -eq 0 ]; then # Si la linea es par (msgid)...
@@ -29,7 +39,7 @@ egrep 'msgid|msgstr' ./tranlations/en/LC_MESSAGES/$file.po | while read -r line 
     
     #grep -rl "'$oldvalue'" . | xargs sed -i "'s/$oldvalue/$newvalue/g"
 
-    cmd1="grep -rl '$oldvalue' ."
+    cmd1="grep -rl '$oldvalue' $destination"
     #echo "$cmd1"
 
 
@@ -65,7 +75,7 @@ egrep 'msgid|msgstr' ./tranlations/en/LC_MESSAGES/$file.po | while read -r line 
             { # try
               #echo $file     
                 echo \($oldvalue\) will be replaced by \($newvalue\)
-                cmd2="sed -i 's/$oldvalue/$newvalue/g' $file"
+                cmd2="sudo sed -i 's/$oldvalue/$newvalue/g' $file"
                 { #try
                   if eval $cmd2; then
                     echo 'Done'
