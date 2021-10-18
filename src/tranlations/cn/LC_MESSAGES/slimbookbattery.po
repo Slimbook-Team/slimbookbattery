@@ -66,10 +66,6 @@ msgstr "电池充放周期警报已禁用，该应用程序已经打开"
 msgid "strappstatus3"
 msgstr "电池充放周期警报已启用，该应用程序已经关闭"
 
-#: slimbookbattery.py:220
-msgid "strappstatus4"
-msgstr "电池充放周期警报已禁用，该应用程序已经关闭"
-
 #: slimbookbattery.py:255
 msgid "Energy Saving"
 msgstr "节能模式"

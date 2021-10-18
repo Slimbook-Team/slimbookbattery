@@ -66,10 +66,6 @@ msgstr "Cycle alerts disabled and application it's on"
 msgid "strappstatus3"
 msgstr "Cycle alerts are enabled and the application it's off"
 
-#: slimbookbattery.py:220
-msgid "strappstatus4"
-msgstr "Cycle alerts are disabled and the application it's off"
-
 #: slimbookbattery.py:255
 msgid "Energy Saving"
 msgstr "Energy Saving"
