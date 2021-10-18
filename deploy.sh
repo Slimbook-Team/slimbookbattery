@@ -41,18 +41,27 @@ echo "Check system dependencies..."
 echo "TODO :')'"
 
 echo "Removing previously installed resources..."
-sudo rm -rf /usr/share/slimbookbattery/*
-sudo rm /usr/bin/slimbookbattery /usr/bin/slimbookbattery-pkexec
+sudo rm -rf /usr/share/slimbookbattery/
 
 echo
 echo "Deploying..."
+#TODO remove needed to create folder structure manually
 sudo mkdir /usr/share/slimbookbattery
-sudo cp -vRf . /usr/share/slimbookbattery/
+sudo mkdir /usr/share/slimbookbattery/images
+sudo mkdir /usr/share/slimbookbattery/changelog
+sudo mkdir /usr/share/slimbookbattery/src
+sudo mkdir /usr/share/slimbookbattery/bin
+
+while read line; do
+	sudo cp -vrf $line
+done < debian/install
 
 echo
 echo "Creating binary simlinks..."
+sudo rm /usr/bin/slimbookbattery /usr/bin/slimbookbattery-pkexec
 sudo cp -s /usr/share/slimbookbattery/bin/* /usr/bin/
 
+echo
 echo "Checking installation (post installation script)"
 if ./src/check_config.py; then
 	echo "Done!"
