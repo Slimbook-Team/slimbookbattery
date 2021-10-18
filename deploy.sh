@@ -13,9 +13,7 @@ python_packages=$(grep -Re "^import" * | awk '{print $2}' | sort -u)
 
 echo "Checking Python dependencies..."
 echo -ne "Dependencies are: $python $python_pck_installer"
-python_packages=$python_packages
 echo $python_packages
-
 if [ ! $python ] && [ ! $python_pck_installer ];
 then
 	echo "Please install $python and $python_pck_installer"
@@ -38,7 +36,15 @@ fi
 
 echo
 echo "Check system dependencies..."
-echo "TODO :')'"
+#system_dependencies="libindicator7 libappindicator1 gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 gir1.2-glib-2.0 libappindicator3-1 libgirepository-1.0-1 gir1.2-notify-0.7 gir1.2-appindicator3-0.1 tlp tlp-rdw libnotify-bin cron"
+echo "TODO..."
+for lib in $system_dependencies; do
+	if ! $(whereis $lib &> /dev/null);
+	then
+		echo "Missing package: $lib. Try to install using your distro package manager"
+		exit 1
+	fi
+done
 
 echo "Removing previously installed resources..."
 sudo rm -rf /usr/share/slimbookbattery/
@@ -63,8 +69,11 @@ sudo cp -sv /usr/share/slimbookbattery/bin/* /usr/bin/
 
 echo
 echo "Checking installation (post installation script and applying translations)"
-if ./src/check_config.py && ./replace.sh; then
+chmod +x debian/postinst
+if ./src/check_config.py && ./debian/postinst && ./replace.sh ; then
 	echo "Done!"
+	exit 0
 else
 	echo "ERROR: See below otput, could not check your installation porperly"
+	exit 1
 fi
