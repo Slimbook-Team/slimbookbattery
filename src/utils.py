@@ -43,7 +43,7 @@ def load_translation(filename):
     languages = get_languages()
     return gettext.translation(
         filename,
-        os.path.join(current_path, 'tranlations'),
+        os.path.join(current_path, 'translations'),
         languages=languages,
         fallback=True
     ).gettext
