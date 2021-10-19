@@ -22,7 +22,7 @@ Run command:
   `sudo apt install ./slimbookbattery_4.0.0_all.deb`
 
 # Install 
-
+## From debian based distros
 You can download Slimbook Battery from our application download center for Linux with our repositories in Launchpad. You can do it too if you introduce this in a Terminal (Ctrl+Alt+T):
 
     sudo add-apt-repository ppa:slimbook/slimbook
@@ -31,7 +31,12 @@ You can download Slimbook Battery from our application download center for Linux
 By doing this we will have added the Slimbook repositories. Now we will execute the next command to install the application:
 
     sudo apt install slimbookbattery
+## From non-debian distro   
+Donwload entire repo. Navigate to it in a terminal. And run deploy.sh script:
+  
+	./deploy.sh
 
+It will deploy SlimbookBattery in your system, check and install Python dependencies prepare all.  
 # Collaborate
 You can help us by taking a look at our [**To do list**](https://github.com/slimbook/slimbookbattery/projects/1)
 
