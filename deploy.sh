@@ -66,6 +66,7 @@ echo
 echo "Creating binary simlinks..."
 sudo rm /usr/bin/slimbookbattery /usr/bin/slimbookbattery-pkexec
 sudo cp -sv /usr/share/slimbookbattery/bin/* /usr/bin/
+sudo chmod +x /usr/share/slimbookbattery/bin/*
 
 echo
 echo "Checking installation (post installation script and applying translations)"
