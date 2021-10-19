@@ -47,6 +47,13 @@
     font-weight: bold;
 }
 
+#facebook_icon {
+    padding-left: 15px;
+}
+#facebook {
+    padding-right: 15px;
+}
+
 /* #restore {
     background-image: url('../../images/interface/btn3.png');
     background-image: linear-gradient(to right, rgb(136, 135, 135) 0%, transparent 100%);

@@ -16,7 +16,7 @@ The energy save applications like TLP are based on "If I i'm not using it and co
 
 # Install for testing
 Download the .deb file here:
-https://github.com/slimbook/slimbookbattery/releases/tag/v4.0beta
+https://github.com/slimbook/slimbookbattery/releases
 
 Run command:
   `sudo apt install ./slimbookbattery_4.0.0_all.deb`
