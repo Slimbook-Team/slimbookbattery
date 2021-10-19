@@ -314,6 +314,183 @@ class InfoPageGrid(Gtk.Grid):
         save_dialog.destroy()
 
 
+class BatteryGrid(Gtk.Grid):
+    HEADER = 1
+    CONTENT = 3
+
+    FIELDS = [
+        {
+            'label_name': 'native',
+            'header': _('Battery'),
+            'filter': 'native-path',
+        },
+        {
+            'label_name': 'vendor',
+            'header': _('Manufacturer:'),
+            'filter': 'vendor',
+        },
+        {
+            'label_name': 'model',
+            'header': _('Battery model:'),
+            'filter': 'model',
+        },
+        {
+            'label_name': 'technology',
+            'header': _('Technology:'),
+            'filter': 'technology',
+        },
+        {
+            'label_name': 'percentage',
+            'header': _('Remaining battery:'),
+            'filter': 'percentage',
+        },
+        {
+            'label_name': 'capacity',
+            'header': _('Maximum capacity:'),
+            'filter': 'capacity',
+        },
+        {
+            'label_name': 'state',
+            'header': _('Status:'),
+            'filter': 'state',
+        },
+        {
+            'label_name': 'time_to',
+            'mapping': {
+                'discharging': {
+                    'header': _('Time to empty:'),
+                    'filter': 'time to empty',
+                },
+                'charging': {
+                    'header': _('Time to full:'),
+                    'filter': 'time to full',
+                },
+                'fully-charged': {
+                    'header': _('Time to full:'),
+                    'text': _('Fully charged'),
+                },
+            },
+        },
+        {
+            'label_name': 'rechargeable',
+            'header': _('Rechargeable:'),
+            'filter': 'rechargeable',
+        },
+        {
+            'label_name': 'supply',
+            'header': _('Power supply:'),
+            'filter': 'power supply',
+        },
+        {
+            'label_name': 'full',
+            'header': _('Energy full:'),
+            'filter': 'energy-full',
+        },
+        {
+            'label_name': 'design',
+            'header': _('Energy full design:'),
+            'filter': 'energy-full-design',
+        },
+        {
+            'label_name': 'rate',
+            'header': _('Energy rate:'),
+            'filter': 'energy-rate',
+        },
+        {
+            'label_name': 'voltage',
+            'header': _('Voltage:'),
+            'filter': 'voltage',
+        },
+        {
+            'label_name': 'updated',
+            'header': _('Last update of the battery information:'),
+            'filter': 'updated',
+        },
+    ]
+
+    def __init__(self, parent, *args, **kwargs):
+        kwargs.setdefault('column_homogeneous', True)
+        kwargs.setdefault('column_spacing', 0)
+        kwargs.setdefault('row_spacing', 20)
+
+        super(BatteryGrid, self).__init__(*args, **kwargs)
+        self.set_halign(Gtk.Align.CENTER)
+
+        self.parent = parent
+        self.battery_grid = Gtk.Grid(column_homogeneous=True,
+                                     column_spacing=0,
+                                     row_spacing=20)
+        self.battery_grid.set_halign(Gtk.Align.CENTER)
+        self.attach(self.battery_grid, 0, 2, 2, 1)
+        self.time_to_header = None
+        self.content = {}
+        self.setup()
+        # Will allows refresh values calling complete_values if page is showing
+        self.complete_values()
+
+    def setup(self):
+        content = None
+        set_time_to_header = False
+        for line, data in enumerate(self.FIELDS, start=1):
+            header = Gtk.Label(label='')
+            label_name = data.get('label_name')
+            if 'mapping' in data:
+                data = data.get('mapping', {}).get(content, {})
+                set_time_to_header = True
+
+            if 'header' not in data and not set_time_to_header:
+                logger.error('Mapping not found for {}: {}'.format(content, data))
+                continue
+            header.set_markup('<b>{}</b>'.format(data.get('header', '')))
+            header.set_halign(Gtk.Align.START)
+            if set_time_to_header:
+                set_time_to_header = False
+                self.time_to_header = header
+            self.battery_grid.attach(header, self.HEADER, line, 2, 1)
+
+            content = _('Unknown')
+            label = Gtk.Label(label=content)
+            label.set_halign(Gtk.Align.START)
+            self.content[label_name] = label
+            self.battery_grid.attach(label, self.CONTENT, line, 2, 1)
+
+    def complete_values(self):
+        content = None
+        code, battery_raw = subprocess.getstatusoutput(
+            "upower -i `upower -e | grep 'BAT'`"
+        )
+        battery_data = {}
+        for line in battery_raw.split('\n'):
+            if ':' in line:
+                key, value = line.split(':', 1)
+                battery_data[key.strip()] = value.strip()
+
+        for data in self.FIELDS:
+            label_name = data.get('label_name')
+            if not (label_name and label_name in self.content):
+                continue
+            if 'mapping' in data:
+                data = data.get('mapping', {}).get(content, {})
+                if self.time_to_header:
+                    self.time_to_header.set_markup('<b>{}</b>'.format(data.get('header', '')))
+
+            content = _('Unknown')
+            if 'filter' in data:
+                if code == 0:
+                    content = battery_data.get(data.get('filter'))
+                    if data.get('filter') in ['time to empty', 'time to full']:
+                        time_to = content.split()
+                        if time_to[1] == 'hours':
+                            content = '{}{}'.format(time_to[0], _(' hours'))
+                        else:
+                            content = '{}{}'.format(time_to[0], _(' min'))
+            elif 'text' in data:
+                content = data.get('text')
+
+            label = self.content[label_name]
+            label.set_label(content)
+
+
 class Preferences(Gtk.ApplicationWindow):
     min_resolution = False
     state_actual = ''
@@ -2350,18 +2527,9 @@ class Preferences(Gtk.ApplicationWindow):
 
         # BATTERY INFO PAGE ******************************************************
 
-        cycles_page_grid = Gtk.Grid(column_homogeneous=True,
-                                    column_spacing=0,
-                                    row_spacing=20)
+        cycles_page_grid = BatteryGrid(self)
 
-        battery_grid = Gtk.Grid(column_homogeneous=True,
-                                column_spacing=0,
-                                row_spacing=20)
-        battery_grid.set_halign(Gtk.Align.CENTER)
-
-        cycles_page_grid.attach(battery_grid, 0, 2, 2, 1)
-
-        if self.min_resolution == True:
+        if self.min_resolution:
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
 
@@ -2372,198 +2540,6 @@ class Preferences(Gtk.ApplicationWindow):
             notebook.append_page(scrolled_window1, Gtk.Label.new(_('Battery')))
         else:
             notebook.append_page(cycles_page_grid, Gtk.Label.new(_('Battery')))
-
-        # ********* BATTERY COMPONENTS *******************************************
-
-        # GET DATA
-        data = self.read_bat()
-
-        col1 = 1
-
-        col2 = 3
-
-        lb_bat = Gtk.Label(label='')
-        lb_bat.set_markup('<b>' + (_('Battery')) + '</b>')
-        lb_bat.set_halign(Gtk.Align.START)
-        battery_grid.attach(lb_bat, col1, 1, 2, 1)
-
-        # (0, 2)
-        bat = Gtk.Label(label=data[0])
-        bat.set_halign(Gtk.Align.START)
-        battery_grid.attach(bat, col2, 1, 2, 1)
-
-        # (1, 1)
-        lbl_man = Gtk.Label(label='')
-        lbl_man.set_markup('<b>' + (_('Manufacturer:')) + '</b>')
-        lbl_man.set_halign(Gtk.Align.START)
-        battery_grid.attach(lbl_man, col1, 2, 2, 1)
-
-        # (1, 2)
-        man = Gtk.Label(label=data[1])
-        man.set_halign(Gtk.Align.START)
-        battery_grid.attach(man, col2, 2, 2, 1)
-
-        # (2, 1)
-        lbl_model = Gtk.Label(label='')
-        lbl_model.set_markup('<b>' + (_('Battery model:')) + '</b>')
-        lbl_model.set_halign(Gtk.Align.START)
-        battery_grid.attach(lbl_model, col1, 3, 2, 1)
-
-        # (2, 2)
-        model = Gtk.Label(label=data[2])
-        model.set_halign(Gtk.Align.START)
-        battery_grid.attach(model, col2, 3, 2, 1)
-
-        # (3, 1)
-        lbl_tech = Gtk.Label(label='')
-        lbl_tech.set_markup('<b>' + (_('Technology:')) + '</b>')
-        lbl_tech.set_halign(Gtk.Align.START)
-        battery_grid.attach(lbl_tech, col1, 4, 2, 1)
-
-        # (3, 2)
-        label66 = Gtk.Label(label=data[3])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 4, 2, 1)
-
-        # (4, 1)
-        label66 = Gtk.Label(label='')
-        label66.set_markup('<b>' + (_('Remaining battery:')) + '</b>')
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col1, 5, 2, 1)
-
-        # (4, 2)
-        label66 = Gtk.Label(label=data[4])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 5, 2, 1)
-
-        # (5, 1)
-        label66 = Gtk.Label(label='')
-        label66.set_markup('<b>' + (_('Maximum capacity:')) + '</b>')
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col1, 6, 2, 1)
-
-        # (5, 2)
-        label66 = Gtk.Label(label=data[5])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 6, 2, 1)
-
-        # (6, 1)
-        label66 = Gtk.Label(label='')
-        label66.set_markup('<b>' + (_('Status:')) + '</b>')
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col1, 7, 2, 1)
-
-        # (6, 2)
-        label66 = Gtk.Label(label=data[6])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 7, 2, 1)
-
-        # (7, 1)
-        if data[6].lower() == 'charging':
-            label66 = Gtk.Label(label='')
-            label66.set_markup('<b>' + (_('Time to full:')) + '</b>')
-            label66.set_halign(Gtk.Align.START)
-            battery_grid.attach(label66, col1, 8, 2, 1)
-
-        elif data[6].lower() == 'discharging':
-            label66 = Gtk.Label(label='')
-            label66.set_markup('<b>' + (_('Time to empty:')) + '</b>')
-            label66.set_halign(Gtk.Align.START)
-            battery_grid.attach(label66, col1, 8, 2, 1)
-
-        elif data[6].lower() == 'fully-charged':
-            label66 = Gtk.Label(label='')
-            label66.set_markup('<b>' + (_('Time to full:')) + '</b>')
-            label66.set_halign(Gtk.Align.START)
-            battery_grid.attach(label66, col1, 8, 2, 1)
-
-        else:
-            label66 = Gtk.Label(label='')
-            label66.set_markup('<b>' + (_('Time to full-empty charge:')) + '</b>')
-            label66.set_halign(Gtk.Align.START)
-            battery_grid.attach(label66, col1, 8, 2, 1)
-
-        # (7, 2)
-        label66 = Gtk.Label(label=data[7])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 8, 2, 1)
-
-        # (8, 1)
-        label66 = Gtk.Label(label='')
-        label66.set_markup('<b>' + (_('Rechargeable:')) + '</b>')
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col1, 9, 2, 1)
-
-        # (8, 2)
-        label66 = Gtk.Label(label=data[8])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 9, 2, 1)
-
-        # (9, 1)
-        label66 = Gtk.Label(label='')
-        label66.set_markup('<b>' + (_('Power supply:')) + '</b>')
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col1, 10, 2, 1)
-
-        # (9, 2)
-        label66 = Gtk.Label(label=data[9])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 10, 2, 1)
-
-        # (10, 1)
-        label66 = Gtk.Label(label='')
-        label66.set_markup('<b>' + (_('Energy full:')) + '</b>')
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col1, 11, 2, 1)
-
-        # (10, 2)
-        label66 = Gtk.Label(label=data[10])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 11, 2, 1)
-
-        # (11, 1)
-        label66 = Gtk.Label(label='')
-        label66.set_markup('<b>' + (_('Energy full design:')) + '</b>')
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col1, 12, 2, 1)
-
-        # (11, 2)
-        label66 = Gtk.Label(label=data[11])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 12, 2, 1)
-
-        # (12, 1)
-        label66 = Gtk.Label(label='')
-        label66.set_markup('<b>' + (_('Energy rate:')) + '</b>')
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col1, 13, 2, 1)
-
-        # (12, 2)
-        label66 = Gtk.Label(label=data[12])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 13, 2, 1)
-
-        # (13, 1)
-        label66 = Gtk.Label(label='')
-        label66.set_markup('<b>' + (_('Voltage:')) + '</b>')
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col1, 14, 2, 1)
-
-        # (13, 2)
-        label66 = Gtk.Label(label=data[13])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 14, 2, 1)
-
-        # (14, 1)
-        label66 = Gtk.Label(label='')
-        label66.set_markup('<b>' + (_('Last update of the battery information:')) + '</b>')
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col1, 15, 2, 1)
-
-        # (14, 2)
-        label66 = Gtk.Label(label=data[14])
-        label66.set_halign(Gtk.Align.START)
-        battery_grid.attach(label66, col2, 15, 2, 1)
 
         # INFO PAGE **************************************************************
         info_page_grid = InfoPageGrid(self)
@@ -2813,170 +2789,6 @@ class Preferences(Gtk.ApplicationWindow):
             switch3.set_sensitive(False)
             switch4.set_sensitive(False)
             switch5.set_sensitive(False)
-
-    def read_bat(self):
-        var = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep native-path")
-        if cmd[0] == 0:
-            batDevice = cmd[1]
-            batDevice = batDevice.split()
-            batDevice = batDevice[1]
-        else:
-            batDevice = (_('Unknown'))
-        var[0] = batDevice
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep vendor")
-        if cmd[0] == 0:
-            manufacturer = cmd[1]
-            manufacturer = manufacturer.split()
-            manufacturer = manufacturer[1]
-        else:
-            manufacturer = (_('Unknown'))
-        var[1] = manufacturer
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep model")
-        if cmd[0] == 0:
-            model = cmd[1]
-            model = model.split()
-            model = model[1]
-        else:
-            model = (_('Unknown'))
-        var[2] = model
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep technology")
-        if cmd[0] == 0:
-            technology = cmd[1]
-            technology = technology.split()
-            technology = technology[1]
-        else:
-            technology = (_('Unknown'))
-        var[3] = technology.capitalize()
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep percentage")
-        if cmd[0] == 0:
-            currentCharge = cmd[1]
-            currentCharge = currentCharge.split()
-            currentCharge = currentCharge[1]
-        else:
-            currentCharge = (_('Unknown'))
-        var[4] = currentCharge
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep capacity")
-        if cmd[0] == 0:
-            maxCapacity = cmd[1]
-            maxCapacity = maxCapacity.split()
-            maxCapacity = maxCapacity[1]
-        else:
-            maxCapacity = (_('Unknown'))
-        var[5] = maxCapacity
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep state")
-        if cmd[0] == 0:
-            status = cmd[1]
-            status = status.split()
-            status = status[1]
-        else:
-            status = (_('Unknown'))
-        var[6] = status.capitalize()
-
-        if status == 'discharging':
-            cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep 'time to empty'")
-            if cmd[0] == 0:
-                timeTo = cmd[1]
-                timeTo = timeTo.split()
-                # print(timeTo)
-                if timeTo[4] == 'hours':
-                    timeTo = timeTo[3] + (_(' hours'))
-                else:
-                    timeTo = timeTo[3] + (_(' min'))
-            else:
-                timeTo = (_('Unknown'))
-        elif status == 'charging':
-            cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep 'time to full'")
-            if cmd[0] == 0:
-                timeTo = cmd[1]
-                timeTo = timeTo.split()
-                if timeTo[4] == 'hours':
-                    timeTo = timeTo[3] + (_(' hours'))
-                else:
-                    timeTo = timeTo[3] + (_(' min'))
-            else:
-                timeTo = (_('Unknown'))
-        elif status == 'fully-charged':
-            timeTo = (_('Fully charged'))
-        else:
-            timeTo = (_('Unknown'))
-        var[7] = timeTo
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep rechargeable")
-        if cmd[0] == 0:
-            rechargeable = cmd[1]
-            rechargeable = rechargeable.split()
-            rechargeable = rechargeable[1]
-        else:
-            rechargeable = (_('Unknown'))
-        var[8] = rechargeable.capitalize()
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep 'power supply'")
-        if cmd[0] == 0:
-            powerSupply = cmd[1]
-            powerSupply = powerSupply.split()
-            powerSupply = powerSupply[2]
-        else:
-            powerSupply = (_('Unknown'))
-        var[9] = powerSupply.capitalize()
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep energy-full")
-        if cmd[0] == 0:
-            chargeFull = cmd[1]
-            chargeFull = chargeFull.split()
-            chargeFull = str(chargeFull[1]) + ' Wh'
-        else:
-            chargeFull = (_('Unknown'))
-        var[10] = chargeFull
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep energy-full-design")
-        if cmd[0] == 0:
-            chargeDesign = cmd[1]
-            chargeDesign = chargeDesign.split()
-            chargeDesign = str(chargeDesign[1]) + ' Wh'
-        else:
-            chargeDesign = (_('Unknown'))
-        var[11] = chargeDesign
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep energy-rate")
-        if cmd[0] == 0:
-            chargeRate = subprocess.getoutput("upower -i `upower -e | grep 'BAT'` | grep energy-rate")
-            chargeRate = chargeRate.split()
-            chargeRate = str(chargeRate[1]) + ' Wh'
-        else:
-            chargeRate = (_('Unknown'))
-        var[12] = chargeRate
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep voltage")
-        if cmd[0] == 0:
-            voltage = cmd[1]
-            voltage = voltage.split()
-            voltage = str(voltage[1]) + ' V'
-        else:
-            voltage = (_('Unknown'))
-        var[13] = voltage
-
-        cmd = subprocess.getstatusoutput("upower -i `upower -e | grep 'BAT'` | grep updated")
-        if cmd[0] == 0:
-            infoUpdated = cmd[1]
-            infoUpdated = infoUpdated.split()
-            date = ''
-            for i in range(len(infoUpdated)):
-                if int(i) != 0:
-                    date = str(date) + str(infoUpdated[i]) + ' '
-            infoUpdated = date
-        else:
-            infoUpdated = (_('Unknown'))
-        var[14] = infoUpdated.capitalize()
-
-        return var
 
     def on_button_toggled(self, button, name):  # Saves actual mode in a variable
         self.modo_actual = name
