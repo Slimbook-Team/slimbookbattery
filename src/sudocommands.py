@@ -47,7 +47,7 @@ file_handler = None
 try:
     file_handler = logging.FileHandler('/var/slimbookbattery.log')
 except PermissionError:
-    logger.critical('Cannot open log file /var/slimbookbattery.log ussing /tmp/slimbookbattery.log')
+    logger.critical('Cannot open log file /var/slimbookbattery.log, using /tmp/slimbookbattery.log')
     file_handler = logging.FileHandler('/tmp/slimbookbattery.log')
 if file_handler:
     file_handler.setLevel(logging.ERROR)
