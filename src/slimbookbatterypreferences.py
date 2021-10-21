@@ -495,6 +495,311 @@ class BatteryGrid(Gtk.Grid):
             label.set_label(content)
 
 
+class GeneralGrid(Gtk.Grid):
+    HEADER = 1
+    CONTENT = 3
+
+    AC_MODE = 'AC'
+    BAT_MODE = 'BAT'
+
+    MIN_RESOLUTION = 50
+    NORMAL_RESOLUTION = 100
+
+    FIELDS = [
+        {
+            'label_name': 'application_on',
+            'label': _('Application On - Off:'),
+            'type': 'switch',
+        },
+        {
+            'label_name': 'autostart',
+            'label': _('Autostart application:'),
+            'type': 'switch',
+        },
+        {
+            'label_name': 'icono',
+            'label': _('Icon on the taskbar (require restart app):'),
+            'type': 'switch',
+            'help': _('Note: If you have the autostart activated and the icon hide, '
+                      'the app will be executed with the icon hide (once you restart the system)'),
+        },
+        {
+            'label_name': 'working_failure',
+            'label': _('Working mode in case of battery failure:'),
+            'type': 'list',
+            'list': [(0, AC_MODE), (1, BAT_MODE)],
+        },
+        {
+            'label_name': 'plug_warn',
+            'label': _('Remember to disconnect charger:'),
+            'type': 'switch',
+            'help': _('Note: It is very important not to use your laptop always connected to AC, '
+                      'this option will notify you to disconnect charger if you stay 15 days connected. '
+                      'You should complete a charge cycle.'),
+        },
+    ]
+    MODES = [
+        {
+            'name': 'saving',
+            'icon': 'normal.png',
+            'label': _('Energy Saving'),
+            'value': '1',
+        },
+        {
+            'name': 'balanced',
+            'icon': 'balanced_normal.png',
+            'label': _('Balanced'),
+            'value': '2',
+        },
+        {
+            'name': 'performance',
+            'icon': 'performance_normal.png',
+            'label': _('Maximum Performance'),
+            'value': '3',
+        },
+    ]
+
+    def __init__(self, parent, *args, **kwargs):
+        kwargs.setdefault('column_homogeneous', True)
+        kwargs.setdefault('column_spacing', 0)
+        kwargs.setdefault('row_spacing', 20)
+        super(GeneralGrid, self).__init__(*args, **kwargs)
+
+        self.parent = parent
+        self.general_grid = Gtk.Grid(column_homogeneous=True,
+                                     column_spacing=0,
+                                     row_spacing=20)
+        self.general_grid.set_halign(Gtk.Align.CENTER)
+        if self.parent.min_resolution:
+            self.general_grid.set_name('smaller_label')
+        self.attach(self.general_grid, 0, 0, 1, 1)
+        self.autostart_initial = None
+        self.work_mode = None
+        self.content = {}
+        self.setup()
+        self.complete_values()
+
+    def setup(self):
+        row = 0
+        for row, data in enumerate(self.FIELDS, start=0):
+            label = Gtk.Label(label=data.get('label'))
+            if 'help' in data:
+                field = Gtk.HBox(spacing=5)
+                field.pack_start(label, True, True, 0)
+
+                icon = Gtk.Image()
+                icon.set_from_file(os.path.join(imagespath, 'help.png'))
+                icon.set_tooltip_text(data.get('help'))
+                field.pack_start(icon, True, True, 0)
+            else:
+                field = label
+
+            field.set_halign(Gtk.Align.START)
+            self.general_grid.attach(field, self.HEADER, row, 2, 1)
+
+            button = None
+            button_type = data.get('type')
+            if button_type == 'switch':
+                button = Gtk.Switch()
+                button.connect('notify::active', self.manage_events)
+            elif button_type == 'list':
+                store = Gtk.ListStore(int, str)
+                for item in data.get('list', []):
+                    store.append(item)
+                button = Gtk.ComboBox.new_with_model_and_entry(store)
+                button.set_entry_text_column(1)
+
+            button.set_name(data.get('label_name'))
+            button.set_halign(Gtk.Align.END)
+            self.content[data.get('label_name')] = button
+
+            self.general_grid.attach(button, self.CONTENT, row, 1, 1)
+
+        tdp_controller = config.get('TDP', 'tdpcontroller')
+        code, msg = subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1")
+        if code != 0:
+            logging.error(msg)
+        else:
+            if 'intel' in msg.lower():
+                if tdp_controller != 'slimbookintelcontroller':
+                    logging.info('Intel detected')
+                tdp_controller = 'slimbookintelcontroller'
+            elif 'amd' in msg.lower():
+                if tdp_controller != 'slimbookamdcontroller':
+                    logging.info('AMD detected')
+                tdp_controller = 'slimbookamdcontroller'
+            else:
+                logging.error('Could not find TDP controller for your processor')
+
+        if tdp_controller:
+            row += 1
+            config.set('TDP', 'tdpcontroller', tdp_controller)
+
+            label = Gtk.Label(label=_('Synchronice battery mode with CPU TDP mode:'))
+            label.set_halign(Gtk.Align.START)
+            self.general_grid.attach(label, self.HEADER, row, 2, 1)
+
+            button = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
+            button.set_name('saving_tdpsync')
+            button.connect('notify::active', self.manage_events)
+            self.content['saving_tdpsync'] = button
+            self.general_grid.attach(button, self.CONTENT, row, 1, 1)
+
+            code, msg = subprocess.getstatusoutput('which ' + tdp_controller)
+            if code != 0:
+                logger.error('TDP Controller not installed')
+                button.set_sensitive(False)
+                button.set_state(False)
+
+                if tdp_controller == 'slimbookintelcontroller':
+                    if idiomas == 'es':
+                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
+                    else:
+                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
+                else:
+                    if idiomas == 'es':
+                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
+                    else:
+                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
+
+                if link:
+                    row += 1
+                    label = Gtk.Label()
+                    label.set_markup("<a href='{link}'>{text}</a>".format(
+                        link=link,
+                        text=_('Learn more about TDP Controller')
+                    ))
+                    label.set_name('link')
+                    label.set_halign(Gtk.Align.START)
+                    self.general_grid.attach(label, self.HEADER, row, 2, 1)
+
+        row += 1
+        buttons_grid = Gtk.Grid(column_homogeneous=True,
+                                column_spacing=30,
+                                row_spacing=20)
+        buttons_grid.set_halign(Gtk.Align.CENTER)
+        buttons_grid.set_name('radio_grid')
+        self.general_grid.attach(buttons_grid, 0, row, 5, 3)
+
+        label = Gtk.Label(label=_('Actual energy mode:').upper())
+        label.set_name('modes')
+        buttons_grid.attach(label, 0, 0, 3, 1)
+
+        height = self.NORMAL_RESOLUTION
+        width = self.NORMAL_RESOLUTION
+        if self.parent.min_resolution:
+            height = self.MIN_RESOLUTION
+            width = self.MIN_RESOLUTION
+
+        base_toggle = None
+        for column, data in enumerate(self.MODES):
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                filename=os.path.join(imagespath, data.get('icon')),
+                width=width,
+                height=height,
+                preserve_aspect_ratio=True)
+            img = Gtk.Image.new_from_pixbuf(pixbuf)
+            img.set_halign(Gtk.Align.CENTER)
+            img.set_valign(Gtk.Align.START)
+            buttons_grid.attach(img, column, 1, 1, 1)
+
+            toggle = Gtk.RadioButton.new_with_label_from_widget(base_toggle, data.get('label'))
+            toggle.set_halign(Gtk.Align.CENTER)
+            toggle.set_name(data.get('name'))
+            toggle.connect('toggled', self.manage_events, data.get('value'))
+            buttons_grid.attach(toggle, column, 2, 1, 1)
+            if not base_toggle:
+                base_toggle = toggle
+            self.content['modo_actual_{}'.format(data.get('value'))] = toggle
+
+    def complete_values(self):
+        for field in ['saving_tdpsync']:
+            button = self.content[field]
+            button.set_active(config.getboolean('TDP', field))
+
+        for field in ['application_on', 'icono', 'plug_warn']:
+            button = self.content[field]
+            button.set_active(config.getboolean('CONFIGURATION', field))
+
+        self.autostart_initial = os.path.isfile(os.path.join(
+            user_home, ".config/autostart/slimbookbattery-autostart.desktop"
+        ))
+        button = self.content['autostart']
+        button.set_active(self.autostart_initial)
+
+        with open('/etc/tlp.conf') as f:
+            content = f.read()
+        if 'TLP_DEFAULT_MODE=AC' in content:
+            self.content['working_failure'].set_active(0)
+            self.work_mode = self.AC_MODE
+        elif 'TLP_DEFAULT_MODE=BAT' in content:
+            self.content['working_failure'].set_active(1)
+            self.work_mode = self.BAT_MODE
+        else:
+            logger.error('WorkMode: Not found')
+
+        current_mode = config.get('CONFIGURATION', 'modo_actual')
+        button = self.content['modo_actual_{}'.format(current_mode)]
+        button.set_active(True)
+
+    def manage_events(self, button, mode):
+        name = button.get_name()
+        if name in ['saving_tdpsync']:
+            config.set('TDP', name, '1' if button.get_active() else '0')
+        elif name in ['application_on', 'icono', 'plug_warn']:
+            config.set('CONFIGURATION', name, '1' if button.get_active() else '0')
+        elif name == 'autostart':
+            self.autostart_initial = button.get_active()
+        else:
+            config.set('CONFIGURATION', 'modo_actual', mode)
+
+    def save_selection(self):
+        button = self.content.get('working_failure')
+        active = button.get_active_iter()
+        if active is not None:
+            model = button.get_model()
+            work_mode = model[active][1]
+            if work_mode and work_mode != self.work_mode:
+                logger.info('Setting workmode {} ...'.format(work_mode))
+                self.work_mode = work_mode
+                code, msg = subprocess.getstatusoutput(
+                    'pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE {}'.format(work_mode)
+                )
+                if code != 0:
+                    logger.error(msg)
+
+        if self.autostart_initial:
+            logger.info('Enabling autostart ...')
+            destination = os.path.join(
+                user_home, '.config/autostart'
+            )
+            if not os.path.isdir(destination):
+                os.mkdir(destination)
+            source = os.path.join(
+                CURRENT_PATH, 'slimbookbattery-autostart.desktop'
+            )
+            shutil.copy(source, destination)
+            config.set('CONFIGURATION', 'autostart', '1')
+        else:
+            logger.info('Disabling autostart ...')
+            os.remove(os.path.join(user_home, '.config/autostart/slimbookbattery-autostart.desktop'))
+            config.set('CONFIGURATION', 'autostart', '0')
+
+        reboot_process(
+            'slimbookbatteryindicator.py',
+            os.path.join(CURRENT_PATH, 'slimbookbatteryindicator.py'),
+            config.getboolean('CONFIGURATION', 'icono')
+        )
+
+        tdp_controller = config.get('TDP', 'tdpcontroller')
+        if config.getboolean('TDP', 'saving_tdpsync'):
+            indicator = '{}indicator.py'.format(tdp_controller)
+            indicator_full_path = os.path.join('/usr/share/', tdp_controller, 'src', indicator)
+            reboot_process(indicator, indicator_full_path, True)
+        else:
+            logger.info('Mode not setting TDP')
+
+
 class Preferences(Gtk.ApplicationWindow):
     min_resolution = False
     state_actual = ''
@@ -504,7 +809,6 @@ class Preferences(Gtk.ApplicationWindow):
     icono_actual = ''
 
     def __init__(self):
-
         Gtk.Window.__init__(self, title=(_('Slimbook Battery Preferences')))
 
         self.get_style_context().add_class("bg-image")
@@ -568,8 +872,6 @@ class Preferences(Gtk.ApplicationWindow):
             self.x_in_drag, self.y_in_drag = self.get_position()
             self.x_in_drag = event.x_root
             self.y_in_drag = event.y_root
-            return True
-        return False
 
     def set_ui(self):
 
@@ -692,287 +994,10 @@ class Preferences(Gtk.ApplicationWindow):
 
         print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
 
-        general_page_grid = Gtk.Grid(column_homogeneous=True,
-                                     column_spacing=0,
-                                     row_spacing=20)
-
-        general_grid = Gtk.Grid(column_homogeneous=True,
-                                column_spacing=15,
-                                row_spacing=20)
-
-        general_page_grid.attach(general_grid, 0, 0, 1, 1)
-        general_page_grid.set_halign(Gtk.Align.CENTER)
-
-        if self.min_resolution == True:
-            general_grid.set_name('smaller_label')
-
-        # General page won't have scroll
-        notebook.append_page(general_page_grid, Gtk.Label.new(_('General')))
-
-        # ********* GENERAL PAGE COMPONENENTS ************************************
-        # IMG
-        col_1 = 1
-        col_2 = 3
-        col_3 = 1
-        col_4 = 3
-        label_width = 2
-        row = 0
-
-        alignment_1 = Gtk.Align.START
-        alignment_2 = Gtk.Align.END
-
-        # LABEL ON/OFF (0, 0)
-        label11 = Gtk.Label(label=_('Application On - Off:'))
-        label11.set_halign(alignment_1)
-        general_grid.attach(label11, col_1, row, 2, 1)
-
-        # SWITCH (0, 1)
-        self.switchOnOff = Gtk.Switch()
-        self.switchOnOff.set_halign(alignment_2)
-        general_grid.attach(self.switchOnOff, col_2, row, 1, 1)
-
-        row = row + 1
-        # LABEL AUTOSTART (1, 0)
-        label11 = Gtk.Label(label=_('Autostart application:'))
-        label11.set_halign(alignment_1)
-        general_grid.attach(label11, col_1, row, 2, 1)
-
-        # SWITCH (1, 1)
-        self.switchAutostart = Gtk.Switch()
-        self.switchAutostart.set_halign(alignment_2)
-        general_grid.attach(self.switchAutostart, col_2, row, 1, 1)
-
-        row = row + 1
-        # LABEL INDICATOR (4, 0)
-        hbox_indicator = Gtk.HBox(spacing=5)
-
-        label11 = Gtk.Label(label=_('Icon on the taskbar (require restart app):'))
-
-        icon = Gtk.Image()
-        icon_path = os.path.join(imagespath, 'help.png')
-        icon.set_from_file(icon_path)
-        icon.set_tooltip_text(
-            _('Note: If you have the autostart activated and the icon hide, '
-              'the app will be executed with the icon hide (once you restart the system)'))
-
-        hbox_indicator.pack_start(label11, True, True, 0)
-        hbox_indicator.pack_start(icon, True, True, 0)
-        hbox_indicator.set_halign(alignment_1)
-
-        general_grid.attach(hbox_indicator, col_1, row, 2, 1)
-
-        # INDICATOR SWITCH (4, 1)
-        self.switchIcon = Gtk.Switch()
-        self.switchIcon.set_halign(alignment_2)
-        general_grid.attach(self.switchIcon, col_2, row, 1, 1)
-
-        row = row + 1
-        # LABEL DEVICE WORKING (3, 0)
-        label11 = Gtk.Label(label=_('Working mode in case of battery failure'))
-        label11.set_halign(alignment_1)
-        general_grid.attach(label11, col_1, row, 2, 1)
-
-        # DEVICES COMBO (3, 1)
-        store = Gtk.ListStore(int, str)
-        store.append([1, 'AC'])
-        store.append([2, 'BAT'])
-
-        self.comboBoxWorkMode = Gtk.ComboBox.new_with_model_and_entry(store)
-        self.comboBoxWorkMode.set_entry_text_column(1)
-        self.comboBoxWorkMode.set_halign(alignment_2)
-
-        if subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_DEFAULT_MODE=AC'")[0] == 0:
-            self.workMode = 'AC'
-            self.comboBoxWorkMode.set_active(0)
-        elif subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_DEFAULT_MODE=BAT'")[0] == 0:
-            self.workMode = 'BAT'
-            self.comboBoxWorkMode.set_active(1)
-
-        general_grid.attach(self.comboBoxWorkMode, col_2, row, 1, 1)
-
-        # LABEL PLUGGED (4, 0)
-        # row = 0
-        row = row + 1
-        hbox_charger = Gtk.HBox(spacing=5)
-
-        label11 = Gtk.Label(label=_('Remember to disconnect charger:'))
-
-        icon = Gtk.Image()
-        icon_path = os.path.join(imagespath, 'help.png')
-        icon.set_from_file(icon_path)
-        icon.set_tooltip_text(
-            _('Note: It is very important not to use your laptop always connected to AC, '
-              'this option will notify you to disconnect charger if you stay 15 days connected. You should complete a charge cycle.'))
-
-        hbox_charger.pack_start(label11, True, True, 0)
-        hbox_charger.pack_start(icon, True, True, 0)
-        hbox_charger.set_halign(alignment_1)
-
-        general_grid.attach(hbox_charger, col_3, row, 2, 1)
-
-        # PLUGGED SWITCH (4, 1)
-        self.switchPlugged = Gtk.Switch()
-        self.switchPlugged.set_halign(alignment_2)
-        general_grid.attach(self.switchPlugged, col_4, row, 1, 1)
-
-        # 8 ------------- TDP ADJUST
-
-        tdpcontroller = config.get('TDP', 'tdpcontroller')
-
-        # Checks which tdp controller is needed
-        proc = subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1")
-
-        if proc[0] == 0:
-            print(proc[1])
-
-            if proc[1].lower().find('intel') != -1:
-                print('Intel')
-                tdpcontroller = 'slimbookintelcontroller'
-
-            elif proc[1].lower().find('amd') != -1:
-                print('AMD')
-                tdpcontroller = 'slimbookamdcontroller'
-
-            else:
-                print('Could not find TDP contoller for your processor')
-
-            print('TDP Controller: ' + tdpcontroller)
-            config_changed = True
-
-            if config.get('TDP', 'tdpcontroller') == '':
-                # Sets tdpcontroller if it's not set
-                config.set('TDP', 'tdpcontroller', tdpcontroller)
-
-            elif config.get('TDP', 'tdpcontroller') != tdpcontroller:
-                # Checks if tdp controller is correct
-                config.set('TDP', 'tdpcontroller', tdpcontroller)
-            else:
-                config_changed = False
-
-            if config_changed:
-                # This step is done at the end of function
-                with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
-                    config.write(configfile)
-        else:
-            print('F')
-        if tdpcontroller != '':
-
-            row = row + 1
-
-            # LABEL 7
-            label33 = Gtk.Label(label=_('Synchronice battery mode with CPU TDP mode:'))
-            label33.set_halign(Gtk.Align.START)
-            general_grid.attach(label33, col_3, row, label_width, 1)
-
-            # BUTTON 7
-            self.switchTDP = Gtk.Switch(halign=alignment_2, valign=Gtk.Align.CENTER)
-            self.switchTDP.set_name('saving_tdpsync')
-            self.check_autostart_switchTDP(self.switchTDP)
-            general_grid.attach(self.switchTDP, col_4, row, 1, 1)
-
-            if not subprocess.getstatusoutput('which ' + tdpcontroller)[0] == 0:  # if TDP controller is installed:
-                print('TDP Controller not installed')
-                self.switchTDP.set_sensitive(False)
-                self.switchTDP.set_state(False)
-
-                # LABEL 7
-                row = row + 1
-                if tdpcontroller == 'slimbookintelcontroller':
-                    if idiomas[0].find('es') != -1:
-                        self.link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
-                    else:
-                        print(idiomas)
-                        self.link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
-                else:
-                    if idiomas[0].find('es') != -1:
-                        self.link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
-                    else:
-                        print(idiomas)
-                        self.link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
-
-                label33 = Gtk.Label()
-                label33.set_markup("<a href='" + self.link + "'>" + _('Learn more about TDP Controller') + "</a>")
-                label33.set_name('link')
-                label33.set_halign(alignment_1)
-                general_grid.attach(label33, col_3, row, label_width, 1)
-
+        self.general_page_grid = GeneralGrid(self)
+        notebook.append_page(self.general_page_grid, Gtk.Label.new(_('General')))
 
     # ***************** BUTTONS **********************************************
-        row = row + 1
-        buttons_grid = Gtk.Grid(column_homogeneous=True,
-                                column_spacing=30,
-                                row_spacing=20)
-        buttons_grid.set_halign(Gtk.Align.CENTER)
-        buttons_grid.set_name('radio_grid')
-
-        general_grid.attach(buttons_grid, 0, row, 5, 3)
-
-        text = _('Actual energy mode:')
-        label = Gtk.Label(label=text.upper())
-        label.set_name('modes')
-        buttons_grid.attach(label, 0, 0, 3, 1)
-
-        # RADIOBUTTONS
-        rbutton1 = Gtk.RadioButton.new_with_label_from_widget(None, (_('Energy Saving')))
-        rbutton1.set_halign(Gtk.Align.CENTER)
-        rbutton1.connect('toggled', self.on_button_toggled, '1')
-
-        rbutton2 = Gtk.RadioButton.new_with_mnemonic_from_widget(rbutton1, (_('Balanced')))
-        rbutton2.set_halign(Gtk.Align.CENTER)
-        rbutton2.connect('toggled', self.on_button_toggled, '2')
-
-        rbutton3 = Gtk.RadioButton.new_with_mnemonic_from_widget(rbutton1, (_('Maximum Performance')))
-        rbutton3.set_halign(Gtk.Align.CENTER)
-        rbutton3.connect('toggled', self.on_button_toggled, '3')
-
-        if self.min_resolution == True:
-            height = 50
-            width = 50
-        else:
-            height = 100
-            width = 100
-
-        # IMG LOW
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'normal.png'),
-            width=width,
-            height=height,
-            preserve_aspect_ratio=True)
-        mid_img = Gtk.Image.new_from_pixbuf(pixbuf)
-        mid_img.set_halign(Gtk.Align.CENTER)
-        mid_img.set_valign(Gtk.Align.START)
-
-        buttons_grid.attach(mid_img, 0, 1, 1, 1)
-        buttons_grid.attach(rbutton1, 0, 2, 1, 1)
-
-        # IMG MEDIUM
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'balanced_normal.png'),
-            width=width,
-            height=height,
-            preserve_aspect_ratio=True)
-        mid_img = Gtk.Image.new_from_pixbuf(pixbuf)
-        mid_img.set_halign(Gtk.Align.CENTER)
-        mid_img.set_valign(Gtk.Align.START)
-
-        buttons_grid.attach(mid_img, 1, 1, 1, 1)
-        buttons_grid.attach(rbutton2, 1, 2, 1, 1)
-
-        # IMG HIGH
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'performance_normal.png'),
-            width=width,
-            height=height,
-            preserve_aspect_ratio=True)
-
-        high_img = Gtk.Image.new_from_pixbuf(pixbuf)
-        high_img.set_halign(Gtk.Align.CENTER)
-        high_img.set_valign(Gtk.Align.START)
-
-        buttons_grid.attach(high_img, 2, 1, 1, 1)
-        buttons_grid.attach(rbutton3, 2, 2, 1, 1)
-
-        self.load_components(rbutton1, rbutton2, rbutton3)
 
         # LOW MODE PAGE **********************************************************
         low_page_grid = Gtk.Grid(column_homogeneous=True,
@@ -2828,88 +2853,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.switchAlerts.set_active(config.getboolean('CONFIGURATION', 'alerts'))
         print()
 
-    def load_components(self, radiobutton1, radiobutton2, radiobutton3):
-
-        print('\nLoading variables ...\n')
-
-        variable = config.getboolean('CONFIGURATION', 'application_on')
-        if variable:
-            self.switchOnOff.set_active(True)
-            print('\tState: on')
-
-        else:
-            self.switchOnOff.set_active(False)
-            print('\tState: off')
-
-        # Autostart (system)
-        # variable = config['CONFIGURATION']['autostart']
-
-        if os.path.isfile(user_home + "/.config/autostart/slimbookbattery-autostart.desktop"):
-            self.switchAutostart.set_active(True)
-            self.autostart_inicial = '1'
-            print('\tAutostart: on')
-        else:
-            self.switchAutostart.set_active(False)
-            self.autostart_inicial = '0'
-            print('\tAutostart: off')
-
-        # Actual Mode ()
-        config.read(user_home + '/.config/slimbookbattery/slimbookbattery.conf')
-        variable = config.get('CONFIGURATION', 'modo_actual')
-
-        if variable == '1':
-            radiobutton1.set_active(True)
-            self.modo_actual = '1'
-            print('\tMode: Low')
-
-        elif variable == '2':
-            radiobutton2.set_active(True)
-            self.modo_actual = '2'
-            print('\tMode: Medium')
-
-        elif variable == '3':
-            radiobutton3.set_active(True)
-            self.modo_actual = '3'
-            print('\tMode: High')
-
-        # Work Mode (custom conf avocado)
-
-        # Se mirará el archivo original de tlp para poder comprobar que modo tiene activo.
-        # Esto se comprueba para poder devolver 0 o 1 y en el combobox poder
-        # mostrar como seleccionado el que esta activo actualmente.
-        # print('Loading workmode...')
-        if subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_DEFAULT_MODE=AC'")[0] == 0:
-            print('\tWorkMode:  AC')
-            self.comboBoxWorkMode.set_active(0)
-
-        elif subprocess.getstatusoutput("cat /etc/tlp.conf | grep 'TLP_DEFAULT_MODE=BAT'")[0] == 0:
-            print('\tWorkMode: BAT')
-            self.comboBoxWorkMode.set_active(1)
-
-        else:
-            print('\tWorkMode: Not found')
-
-        # Icon (.conf)
-
-        variable = config.getboolean('CONFIGURATION', 'icono')
-
-        if variable:
-            print('\tIcon: on')
-            self.switchIcon.set_active(True)
-
-        else:
-            print('\tIcon: off')
-            self.switchIcon.set_active(False)
-
-        variable = config.getboolean('CONFIGURATION', 'plug_warn')
-
-        if variable:
-            self.switchPlugged.set_active(True)
-        else:
-            self.switchPlugged.set_active(False)
-
-        print()
-
     def write_modes_conf(self):
 
         mode = 'ahorrodeenergia'
@@ -3767,114 +3710,10 @@ class Preferences(Gtk.ApplicationWindow):
 
         # Saving interface general values **********************************************************
 
-        state = ''
-        autostart = ''
-        workMode = ''
-        icono = ''
-
-        # Leemos switches y guardamos en variables
-
-        # State
-        if self.switchOnOff.get_state():
-            print('\tState: on')
-            state = '1'
-        else:
-            print('\tState: off')
-            state = '0'
-            self.animations('0')  # We enable animations
-
-        # Autostart
-        if self.switchAutostart.get_state():
-            print('\tAutostart: on')
-            autostart = '1'
-        else:
-            print('\tAutostart: off')
-            autostart = '0'
-
-        # Modo
-        # print(self.modo_actual)
-
-        if self.modo_actual == '1':
-            print('\tMode: Low')
-            # mode = 'ahorrodeenergia'
-
-        elif self.modo_actual == '2':
-            print('\tMode: Mid')
-            # mode = 'equilibrado'
-
-        elif self.modo_actual == '3':
-            print('\tMode: High')
-            # mode = 'maximorendimiento'
-
-        else:
-            print('Err: Could not get mode')
-
-        # Work Mode
-        iter = self.comboBoxWorkMode.get_active_iter()
-
-        if iter is not None:
-            model = self.comboBoxWorkMode.get_model()
-            row_id, name = model[iter][:2]
-
-            if name != self.workMode:
-                print('\n\n')
-                workMode = name
-
-            if not workMode == '':
-                print('Setting workmode ' + workMode + '...')
-                # exec = subprocess.getstatusoutput("sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' /etc/tlp.conf")
-                subprocess.getstatusoutput(
-                    'pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE ' + workMode)
-
-        # Icon
-        if self.switchIcon.get_state():
-            # print('\tIcon: on')
-            icono = '1'
-        else:
-            # print('\tIcon: off')
-            icono = '0'
-
-        # ACTIONS General **************************************************************************
-
-        # Checking autostart
-
-        if autostart == '1' and self.autostart_inicial == '0':
-            print('Enabling autostart ...')
-
-            if not os.path.isdir(user_home + '/.config/autostart'):
-                os.mkdir(user_home + '/.config/autostart')
-
-            shutil.copy(CURRENT_PATH + "/slimbookbattery-autostart.desktop", user_home + "/.config/autostart/")
-            config.set('CONFIGURATION', 'autostart', '1')
-
-        elif autostart == '0' and self.autostart_inicial == '1':
-            print('Disabling autostart ...')
-            config.set('CONFIGURATION', 'autostart', '0')
-            os.remove(user_home + "/.config/autostart/slimbookbattery-autostart.desktop")
-
-        # State
-        if self.switchPlugged.get_state():
-            config.set('CONFIGURATION', 'plug_warn', '1')
-        else:
-            config.set('CONFIGURATION', 'plug_warn', '0')
-
-        # UPDATING .CONF
-
-        config.set('CONFIGURATION', 'icono', icono)
-
-        config.set('CONFIGURATION', 'application_on', state)
-
-        config.set('CONFIGURATION', 'modo_actual', self.modo_actual)
+        self.general_page_grid.save_selection()
 
         with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
             config.write(configfile)
-
-        # print('pkexec slimbookbattry-pkexec change_config TLP_DEFAULT_MODE ' + workMode)
-
-        # Mode setting
-        print()
-        fichero = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
-        config.read(fichero)
 
         # Saving interface new values **************************************************************
 
@@ -3904,18 +3743,6 @@ class Preferences(Gtk.ApplicationWindow):
         command = 'pkexec slimbookbattery-pkexec apply'
         subprocess.Popen(command.split(' '))
 
-        reboot_process('slimbookbatteryindicator.py', CURRENT_PATH + '/slimbookbatteryindicator.py', True)
-
-        # This process wil only reboot if is running if not, and option is on, it will be launched
-        # actual_mode = config['CONFIGURATION']['modo_actual']
-
-        tdpcontroller = config.get('TDP', 'tdpcontroller')
-
-        if config.getboolean('TDP', 'saving_tdpsync'):
-            reboot_process(tdpcontroller + 'indicator.py',
-                           '/usr/share/' + tdpcontroller + '/src/' + tdpcontroller + 'indicator.py', True)
-        else:
-            print('Mode not setting TDP')
 
     def close(self, button, state):
         print('Button Close Clicked')
