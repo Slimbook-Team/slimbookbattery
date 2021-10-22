@@ -36,10 +36,21 @@ fi
 
 echo
 echo "Check system dependencies..."
-#system_dependencies="libindicator7 libappindicator1 gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 gir1.2-glib-2.0 libappindicator3-1 libgirepository-1.0-1 gir1.2-notify-0.7 gir1.2-appindicator3-0.1 tlp tlp-rdw libnotify-bin cron"
-echo "TODO..."
+system_dependencies="libindicator7 libappindicator1 gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 gir1.2-glib-2.0 libappindicator3-1 libgirepository-1.0-1 gir1.2-notify-0.7 gir1.2-appindicator3-0.1 tlp tlp-rdw libnotify-bin cron"
+packageman=""
+
+echo "Detecting your distro package manager..."
+if $(pamac --version &> /dev/null); then 		#Arch based distros
+	packageman="pamac list | grep"
+elif $(apt-get --version &> /dev/null); then 	#Debian based distros
+	packageman="dpkg -l |grep"
+elif $(yum --version &> /dev/null); then 		#CentOS based distros
+	packageman="rpm -qa"
+fi
+
+echo "Looking for dependencie installed in your system..."
 for lib in $system_dependencies; do
-	if ! $(whereis $lib &> /dev/null);
+	if ! $($packageman $lib &> /dev/null);
 	then
 		echo "Missing package: $lib. Try to install using your distro package manager"
 		exit 1
