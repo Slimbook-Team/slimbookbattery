@@ -1595,7 +1595,7 @@ class Preferences(Gtk.ApplicationWindow):
             if governor_name == 'intel_pstate':
                 store.append([1, 'powersave'])
                 store.append([2, 'performance'])
-            elif governor_name == 'acpi-cpufreq':
+            elif governor_name == 'acpi-cpufreq' or governor_name == 'intel_cpufreq':
                 store.append([1, 'ondemand'])
                 store.append([2, 'schedutil'])
                 store.append([3, 'powersave'])
@@ -2076,7 +2076,7 @@ class Preferences(Gtk.ApplicationWindow):
             if governor_name == 'intel_pstate':
                 store.append([1, 'powersave'])
                 store.append([2, 'performance'])
-            elif governor_name == 'acpi-cpufreq':
+            elif governor_name == 'acpi-cpufreq' or governor_name == 'intel_cpufreq':
                 store.append([1, 'ondemand'])
                 store.append([2, 'schedutil'])
                 store.append([3, 'powersave'])
