@@ -54,30 +54,30 @@ else
 fi
 echo $INFO"Check system dependencies..."
 echo -n $RESET
-system_dependencies="libindicator libappindicator gir1.2-gtk-3.0 gir1.2-gdkpixbuf-2.0 gir1.2-glib-2.0 libappindicator3-1 libgirepository-1.0-1 gir1.2-notify-0.7 gir1.2-appindicator3-0.1 tlp tlp-rdw libnotify-bin cron"
+system_dependencies="libindicator-gtk3 libappindicator-gtk3 libgirepository tlp tlp-rdw libnotify-bin cron"
 echo $INFO"Detecting your distro package manager..."
 echo $RESET"Dependencies are: $system_dependencies"
 #Detect distro package manager
 packageinstall=""
 packagecheck=""
 if which pamac; then 		#Arch based distros
-	packageinstall="pamac install"
-	packagecheck="pamac list"
+	packageinstall="sudo pamac install"
+	packagecheck="sudo pamac search -i"
 elif which apt-get; then 	#Debian based distros
-	packageinstall="apt-get install"
-	packagecheck="dpkg -l"
+	packageinstall="sudo apt-get install"
+	packagecheck="sudo apt-get list --installed | grep"
 elif which yum; then 		#CentOS based distros
-	packageinstall="yum install"
-	packagecheck="rpm -qa"
+	packageinstall="sudo yum install"
+	packagecheck="sudo yum list installed | grep"
 fi
 echo $INFO"Looking for dependencie installed in your system..."
 echo -n $RESET
 for lib in $system_dependencies; do
-	if ! $packagecheck | grep $lib;
+	if ! $packagecheck $lib;
 	then
 		echo $INFO"Trying to install $lib"
 		echo -n $RESET
-		if $packageinstall $lib; then
+		if $packageinstall $lib*; then
 			echo $DONE"... done"
 			echo -n $RESET
 		else
