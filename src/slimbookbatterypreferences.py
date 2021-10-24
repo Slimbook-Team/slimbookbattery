@@ -51,12 +51,16 @@ _ = utils.load_translation('preferences')
 
 idiomas = utils.get_languages()[0]
 
-if not os.path.isfile(config_file):
-    pass
-
 config = configparser.ConfigParser()
-config.read(config_file)
 
+if not os.path.isfile(config_file):
+    try:
+        import check_config  # Fix config and reload
+        check_config.main()
+    except:
+        pass
+
+config.read(config_file)
 
 class colors:  # You may need to change color settings
     RED = '\033[31m'
@@ -1409,8 +1413,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.connect('button-release-event', self.on_mouse_button_released)
         self.connect('motion-notify-event', self.on_mouse_moved)
 
-
-
         # Center
         # self.connect('realize', self.on_realize)
 
@@ -1713,7 +1715,7 @@ class Preferences(Gtk.ApplicationWindow):
             if governor_name == 'intel_pstate':
                 store.append([1, 'powersave'])
                 store.append([2, 'performance'])
-            elif governor_name == 'acpi-cpufreq':
+            elif governor_name == 'acpi-cpufreq' or governor_name == 'intel_cpufreq':
                 store.append([1, 'ondemand'])
                 store.append([2, 'schedutil'])
                 store.append([3, 'powersave'])
@@ -2194,7 +2196,7 @@ class Preferences(Gtk.ApplicationWindow):
             if governor_name == 'intel_pstate':
                 store.append([1, 'powersave'])
                 store.append([2, 'performance'])
-            elif governor_name == 'acpi-cpufreq':
+            elif governor_name == 'acpi-cpufreq' or governor_name == 'intel_cpufreq':
                 store.append([1, 'ondemand'])
                 store.append([2, 'schedutil'])
                 store.append([3, 'powersave'])
@@ -2722,10 +2724,7 @@ class Preferences(Gtk.ApplicationWindow):
 
     def check_autostart_switchBrightness(self, switchBrightness, scale):
         mode_brightness = switchBrightness.get_name()
-        if not config.has_option('SETTINGS', mode_brightness):
-            import check_config  # Fix config and reload
-            check_config.main()
-            config.read(config_file)
+        
 
         stat = config.getboolean('SETTINGS', mode_brightness)
         switchBrightness.set_active(stat)

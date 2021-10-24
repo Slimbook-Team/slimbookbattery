@@ -16,7 +16,7 @@ msgstr ""
 
 
 #: slimbookbatteryindicator.py:161
-msgid "It seems that you have been connected to AC for at least 15 days, we recomend you to disconnect your charger, and discharge battery"
+msgid "It seems that you have been connected to AC for at least 15 days, we recommend you to disconnect your charger, and discharge battery"
 msgstr ""
 
 #: slimbookbatteryindicator.py:220

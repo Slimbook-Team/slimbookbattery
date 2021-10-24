@@ -39,7 +39,7 @@ def main():
     else:
         logger.info('Configuration folder ({}) found!'.format(CONFIG_FOLDER))
 
-    config_folder_stat = os.stat(CONFIG_FILE)
+    config_folder_stat = os.stat(CONFIG_FOLDER)
     logger.debug("uid={} file_uid={}".format(uid, config_folder_stat.st_uid))
     f_uid = config_folder_stat.st_uid
     f_gid = config_folder_stat.st_gid
