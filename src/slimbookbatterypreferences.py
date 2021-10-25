@@ -568,7 +568,7 @@ class GeneralGrid(Gtk.Grid):
         self.parent = parent
         self.general_grid = Gtk.Grid(column_homogeneous=True,
                                      column_spacing=0,
-                                     row_spacing=20)
+                                     row_spacing=15)
         self.general_grid.set_halign(Gtk.Align.CENTER)
         if self.parent.min_resolution:
             self.general_grid.set_name('smaller_label')
