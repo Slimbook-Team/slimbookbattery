@@ -2,6 +2,11 @@ slimbookbattery (4.0.3) focal; urgency=low
   * Added --minimized argument
   * Small resolutions quick fixes
   * Added intel_cpufreq governor
+  * Deploy script
+
+  * Default system view
+  * Code separated in classes
+  *
 
 
  -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
