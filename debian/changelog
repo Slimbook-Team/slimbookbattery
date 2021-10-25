@@ -1,17 +1,19 @@
 slimbookbattery (4.0.3) focal; urgency=low
+
   * Added --minimized argument
   * Small resolutions quick fixes
   * Added intel_cpufreq governor
 
-
  -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
 
 slimbookbattery (4.0.2) focal; urgency=low
+
   * Fixed reboot bug
 
  -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
 
 slimbookbattery (4.0.1) focal; urgency=low
+
   * New interface
   * Draggable window
   * Skipping password asking
@@ -25,6 +27,7 @@ slimbookbattery (4.0.1) focal; urgency=low
  -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
 
 slimbookbattery (4.0.0) focal; urgency=low
+
   * New interface
   * Draggable window
   * Skipping password asking
@@ -44,7 +47,7 @@ slimbookbattery (3.99beta) focal; urgency=low
   * Added version 
 
  -- slimbook <dev@slimbook.es>  Wed, 11 Aug 2021 11:24:04 +0100
- 
+
 slimbookbattery (3.98beta) focal; urgency=low
 
   * New interface
