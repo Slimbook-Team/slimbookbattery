@@ -27,5 +27,8 @@ Depends: ${misc:Depends}, ${python:Depends},
 	tlp-rdw,
 	libnotify-bin,
 	cron
-Description: Slimbook Battery
- Battery optimization application for portable devices.
+Description: Battery optimization application for portable devices
+ Battery optimization application for portable devices that can increase 
+ the battery life by 50%. For this purpose, the third-party software 
+ (TLP and others) is used to manage and configure the system resources.
+
