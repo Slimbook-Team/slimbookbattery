@@ -22,6 +22,7 @@ import configparser
 import logging
 import math
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -782,7 +783,9 @@ class GeneralGrid(Gtk.Grid):
             config.set('CONFIGURATION', 'autostart', '1')
         else:
             logger.info('Disabling autostart ...')
-            os.remove(os.path.join(user_home, '.config/autostart/slimbookbattery-autostart.desktop'))
+            autostart_path = os.path.join(user_home, '.config/autostart/slimbookbattery-autostart.desktop')
+            if os.path.isfile(autostart_path):
+                os.remove(autostart_path)
             config.set('CONFIGURATION', 'autostart', '0')
 
         reboot_process(
@@ -798,6 +801,588 @@ class GeneralGrid(Gtk.Grid):
             reboot_process(indicator, indicator_full_path, True)
         else:
             logger.info('Mode not setting TDP')
+
+
+class SettingsGrid(Gtk.Grid):
+    INTEL_GOV = [
+        (1, 'powersave'),
+        (2, 'performance'),
+    ]
+    CPUFREQ_GOV = [
+        (1, 'ondemand'),
+        (2, 'schedutil'),
+        (3, 'powersave'),
+        (4, 'performance'),
+        (5, 'conservative'),
+    ]
+
+    SECTION_MAPPING = {
+        'ahorrodeenergia': {
+            'limit_cpu': 'limit_cpu_ahorro',
+            'governor': '',
+            'graphic': 'graphics_ahorro',
+            'sound': '',
+            'wifi_profile': '',
+            'bluetooth_disabled': '',
+            'wifi_disabled': '',
+            'brightness': 'ahorro_brightness',
+            'brightness_switch': 'saving_brightness_switch',
+            'animations': 'ahorro_animations',
+            'bluetooth_os': '',
+            'wifi_os': '',
+            'wifi_lan': '',
+            'usb': '',
+            'usb_list': '',
+            'bluetooth_blacklist': '',
+            'printer_blacklist': '',
+            'ethernet_blacklist': '',
+            'usb_shutdown': '',
+        },
+        'equilibrado': {
+            'limit_cpu': 'limit_cpu_equilibrado',
+            'governor': '',
+            'graphic': 'graphics_equilibrado',
+            'sound': '',
+            'wifi_profile': '',
+            'bluetooth_disabled': '',
+            'wifi_disabled': '',
+            'brightness': 'equilibrado_brightness',
+            'brightness_switch': 'balanced_brightness_switch',
+            'animations': 'equilibrado_animations',
+            'bluetooth_os': '',
+            'wifi_os': '',
+            'wifi_lan': '',
+            'usb': '',
+            'usb_list': '',
+            'bluetooth_blacklist': '',
+            'printer_blacklist': '',
+            'ethernet_blacklist': '',
+            'usb_shutdown': '',
+        },
+        'maximorendimiento': {
+            'limit_cpu': 'limit_cpu_maximorendimiento',
+            'governor': '',
+            'graphic': 'graphics_maxrendimiento',
+            'sound': '',
+            'wifi_profile': '',
+            'bluetooth_disabled': '',
+            'wifi_disabled': '',
+            'brightness': 'maxrendimiento_brightness',
+            'brightness_switch': 'power_brightness_switch',
+            'animations': 'maxrendimiento_animations',
+            'bluetooth_os': '',
+            'wifi_os': '',
+            'wifi_lan': '',
+            'usb': '',
+            'usb_list': '',
+            'bluetooth_blacklist': '',
+            'printer_blacklist': '',
+            'ethernet_blacklist': '',
+            'usb_shutdown': '',
+        },
+    }
+
+    BATTERY_FIELDS = [
+        {
+            'name': 'limit_cpu',
+            'label': _('Limit CPU profile:'),
+            'type': 'list',
+            'icon': 'warning.png',
+            'help': _('Note: this setting affects to performance'),
+            'list': [
+                (1, _('maximum')),
+                (2, _('medium')),
+                (3, _('none')),
+            ],
+        },
+        {
+            'name': 'governor',
+            'label': _('CPU scaling governor saving profile:'),
+            'type': 'governor',
+            'intel_pstate': INTEL_GOV,
+            'acpi-cpufreq': CPUFREQ_GOV,
+            'intel_cpufreq': CPUFREQ_GOV,
+        },
+        {
+            'name': 'graphic',
+            'label': _('Graphic card saving profile (Nvidia-AMD-Intel):'),
+            'type': 'switch',
+        },
+        {
+            'name': 'sound',
+            'label': _('Sound power saving profile:'),
+            'type': 'switch',
+            'help': _('Note: this setting can cause slight clicks in sound output'),
+        },
+        {
+            'name': 'wifi_profile',
+            'label': _('Wi-Fi power saving profile:'),
+            'type': 'switch',
+            'help': _('Note: power save can cause an unstable wifi connection.'),
+        },
+        {
+            'name': 'bluetooth_disabled',
+            'label': _('Bluetooth disabled when not in use:'),
+            'type': 'switch',
+        },
+        {
+            'name': 'wifi_disabled',
+            'label': _('Wi-Fi disabled when not in use:'),
+            'type': 'switch',
+        },
+    ]
+
+    PERSIST_FIELDS = [
+        {
+            'name': 'brightness',
+            'label': _('Set screen brightness:'),
+            'type': 'scale',
+            'help': _('Note: this option reduces the battery consumption considerably'),
+        },
+        {
+            'name': 'animations',
+            'label': _('Disable animations:'),
+            'type': 'animations',
+        },
+        {
+            'name': 'bluetooth_os',
+            'label': _('Bluetooth does not boot on start:'),
+            'type': 'switch',
+        },
+        {
+            'name': 'wifi_os',
+            'label': _('Wi-Fi does not boot on start:'),
+            'type': 'switch',
+        },
+        {
+            'name': 'wifi_lan',
+            'label': _('Disable Wi-Fi when LAN is connected:'),
+            'type': 'switch',
+        },
+        {
+            'name': 'usb',
+            'label': _('Autosuspend USB Ports:'),
+            'type': 'switch',
+            'help': _('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. '
+                      'Input devices like mice and keyboards as well as scanners are excluded by default')
+        },
+        {
+            'name': 'usb_list',
+            'label': _('Excluded USB IDs from USB autosuspend:'),
+            'type': 'usb',
+            'help': _('Note: You need to write in the Text Box the USB IDs '
+                      '(separate with spaces) to exclude from autosuspend')
+        },
+        {
+            'name': 'bluetooth_blacklist',
+            'label': _('Exclude bluetooth devices from USB autosuspend:'),
+            'type': 'switch',
+        },
+        {
+            'name': 'printer_blacklist',
+            'label': _('Exclude printer devices from USB autosuspend:'),
+            'type': 'switch',
+        },
+        {
+            'name': 'ethernet_blacklist',
+            'label': _('Exclude Ethernet devices from USB autosuspend:'),
+            'type': 'switch',
+        },
+        {
+            'name': 'usb_shutdown',
+            'label': _('Disable USB autosuspend mode upon system shutdown:'),
+            'type': 'switch',
+        },
+    ]
+
+    CPU_LIMIT = {
+        1: {
+            'CPU_MIN_PERF_ON_AC': 0,
+            'CPU_MAX_PERF_ON_AC': 100,
+            'CPU_MIN_PERF_ON_BAT': 0,
+            'CPU_MAX_PERF_ON_BAT': 33,
+            'CPU_BOOST_ON_AC': 1,
+            'CPU_BOOST_ON_BAT': 0,
+            'CPU_HWP_ON_AC': 'balance_performance',
+            'CPU_HWP_ON_BAT': 'power',
+            'ENERGY_PERF_POLICY_ON_AC': 'balance-performance',
+            'ENERGY_PERF_POLICY_ON_BAT': 'power',
+            'SCHED_POWERSAVE_ON_AC': 0,
+            'SCHED_POWERSAVE_ON_BAT': 1,
+        },
+        2: {
+            'CPU_MIN_PERF_ON_AC': 0,
+            'CPU_MAX_PERF_ON_AC': 100,
+            'CPU_MIN_PERF_ON_BAT': 0,
+            'CPU_MAX_PERF_ON_BAT': 80,
+            'CPU_BOOST_ON_AC': 1,
+            'CPU_BOOST_ON_BAT': 0,
+            'CPU_HWP_ON_AC': 'balance_performance',
+            'CPU_HWP_ON_BAT': 'power',
+            'ENERGY_PERF_POLICY_ON_AC': 'balance-performance',
+            'ENERGY_PERF_POLICY_ON_BAT': 'power',
+            'SCHED_POWERSAVE_ON_AC': 0,
+            'SCHED_POWERSAVE_ON_BAT': 1,
+        },
+        3: {
+            'CPU_MIN_PERF_ON_AC': 0,
+            'CPU_MAX_PERF_ON_AC': 100,
+            'CPU_MIN_PERF_ON_BAT': 0,
+            'CPU_MAX_PERF_ON_BAT': 100,
+            'CPU_BOOST_ON_AC': 1,
+            'CPU_BOOST_ON_BAT': 1,
+            'CPU_HWP_ON_AC': 'performance',
+            'CPU_HWP_ON_BAT': 'power',
+            'ENERGY_PERF_POLICY_ON_AC': 'balance-performance',
+            'ENERGY_PERF_POLICY_ON_BAT': 'balance-performance',
+            'SCHED_POWERSAVE_ON_AC': 0,
+            'SCHED_POWERSAVE_ON_BAT': 1,
+        },
+    }
+
+    @staticmethod
+    def get_governor():
+        governors = subprocess.getoutput(
+            'for i in /sys/devices/system/cpu/cpu*/cpufreq/scaling_driver; do cat $i; done'
+        ).split('\n')
+        governor_driver = None
+        for governor_driver in governors:
+            if governor_driver not in ['intel_pstate', 'acpi-cpufreq', 'intel_cpufreq']:
+                governor_driver = None
+                break
+        return governor_driver
+
+    @staticmethod
+    def get_usb_list():
+        USB_ID_REGEX = re.compile('ID ([a-f0-9]{4}:[a-f0-9]{4})')
+        usb_list = {}
+        lsusb_lines = subprocess.getoutput('lsusb').split('\n')
+        for line in lsusb_lines:
+            match = USB_ID_REGEX.search(line)
+            if match:
+                usb_id = match.groups()[0]
+                usb_list[usb_id] = line[line.find('ID'):]
+        return usb_list
+
+    def __init__(self, parent, custom_file, *args, **kwargs):
+        kwargs.setdefault('column_homogeneous', True)
+        kwargs.setdefault('column_spacing', 0)
+        kwargs.setdefault('row_spacing', 20)
+        super(SettingsGrid, self).__init__(*args, **kwargs)
+
+        self.parent = parent
+        self.custom_file = custom_file
+        self.custom_file_path = os.path.join(user_home, '.config/slimbookbattery/custom', custom_file)
+        self.grid = Gtk.Grid(column_homogeneous=True,
+                             row_homogeneous=False,
+                             column_spacing=25,
+                             row_spacing=20)
+
+        self.attach(self.grid, 0, 0, 2, 1)
+
+        self.grid.set_halign(Gtk.Align.CENTER)
+        if self.parent.min_resolution:
+            self.grid.set_name('smaller_label')
+
+        self.label_col = 0
+        self.button_col = 4
+        self.label_col2 = 5
+        self.button_col2 = 10
+        if self.parent.min_resolution:
+            self.button_col = 5
+            self.label_col2 = 0
+            self.button_col2 = 5
+
+        self.content = {}
+        self.setup()
+        self.complete_values()
+
+    def setup(self):
+        row = self.setup_battery_column()
+        if self.parent.min_resolution:
+            row = row + 1
+        else:
+            row = 1
+        self.setup_persist_column(row)
+
+    def setup_fields(self, start, fields, label_col, button_col):
+        row_correction = 0
+        row = start
+        for row, data in enumerate(fields, start=start):
+            button_type = data.get('type')
+            col_correction = 0
+            if button_type == 'governor':
+                button_type = 'list'
+                data['list'] = data.get(self.get_governor(), [])
+                if not data['list']:
+                    row_correction += 1
+                    continue
+            elif button_type == 'animations':
+                if 'gnome' not in os.environ.get('XDG_CURRENT_DESKTOP', '').lower():
+                    row_correction += 1
+                    continue
+                button_type = 'switch'
+            elif button_type == 'usb':
+                help_msg = data.get('help')
+                usb_list = self.get_usb_list()
+                data['help'] = '{}.\n\n{}'.format(
+                    help_msg,
+                    '\n'.join(usb_list.values())
+                )
+
+            label = Gtk.Label(label=data.get('label'))
+            label.set_halign(Gtk.Align.START)
+            if 'help' in data:
+                table_icon = Gtk.Table(n_columns=2, n_rows=1, homogeneous=False)
+                table_icon.set_valign(Gtk.Align.END)
+                table_icon.attach(label, 0, 1, 0, 1,
+                                  xpadding=0,
+                                  ypadding=5,
+                                  xoptions=Gtk.AttachOptions.SHRINK,
+                                  yoptions=Gtk.AttachOptions.SHRINK)
+                icon = Gtk.Image()
+                icon.set_from_file(os.path.join(imagespath, data.get('icon', 'help.png')))
+                icon.set_tooltip_text(data.get('help'))
+                icon.set_halign(Gtk.Align.START)
+                table_icon.attach(icon, 1, 2, 0, 1,
+                                  xpadding=10,
+                                  ypadding=5,
+                                  xoptions=Gtk.AttachOptions.SHRINK,
+                                  yoptions=Gtk.AttachOptions.SHRINK)
+                self.grid.attach(table_icon, label_col, row - row_correction, 3, 1)
+            else:
+                self.grid.attach(label, label_col, row - row_correction, 3, 1)
+
+            button = None
+            top = 1
+            if button_type == 'usb':
+                button = Gtk.Entry(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
+                col_correction = 1
+                top = 2
+            elif button_type == 'switch':
+                button = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
+                button.connect('notify::active', self.manage_events)
+            elif button_type == 'scale':
+                button = Gtk.Scale()
+                button.set_adjustment(Gtk.Adjustment.new(0, 0, 100, 5, 5, 0))
+                button.set_digits(0)
+                button.set_hexpand(True)
+                button.connect('change-value', self.manage_events)
+
+                button_on_off = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.END)
+                name = '{}_switch'.format(data.get('name'))
+                button_on_off.set_name(name)
+                button_on_off.connect('notify::active', self.manage_events)
+                self.content[name] = button_on_off
+                self.grid.attach(button_on_off, button_col - col_correction, row, 1, 1)
+                top = 2
+                col_correction = 2
+            elif button_type == 'list':
+                top = 2
+                store = Gtk.ListStore(int, str)
+                for item in data.get('list', []):
+                    store.append(item)
+                button = Gtk.ComboBox.new_with_model_and_entry(store)
+                if len(data.get('list', [])) == 1:
+                    button.set_active(0)
+                    button.set_sensitive(False)
+                button.set_valign(Gtk.Align.CENTER)
+                button.set_halign(Gtk.Align.END)
+                button.connect('changed', self.manage_events)
+                button.set_entry_text_column(1)
+                col_correction = 1
+
+            button.set_name(data.get('name'))
+            self.content[data.get('name')] = button
+            self.grid.attach(button, button_col - col_correction, row - row_correction, top, 1)
+        return row
+
+    def setup_battery_column(self):
+        title = Gtk.Label(label='')
+        title.set_markup(
+            '<big><b>' + (_('Battery mode parameters (disabled when you connect AC power):')) + '</b></big>')
+        title.set_halign(Gtk.Align.START)
+        self.grid.attach(title, self.label_col, 1, 6, 1)
+        row = self.setup_fields(2, self.BATTERY_FIELDS, self.label_col, self.button_col)
+        return row
+
+    def setup_persist_column(self, row):
+        title = Gtk.Label(label='')
+        title.set_markup('<big><b>' + (_('Persistent changes:')) + '</b></big>')
+        if self.parent.min_resolution:
+            title.set_name('title')
+        title.set_halign(Gtk.Align.START)
+        self.grid.attach(title, self.label_col2, row, 5, 1)
+        row += 1
+        self.setup_fields(row, self.PERSIST_FIELDS, self.label_col2, self.button_col2)
+
+    def complete_values(self):
+        button = self.content['limit_cpu']
+        value = config.getint('SETTINGS', self.SECTION_MAPPING[self.custom_file]['limit_cpu'])
+        button.set_active(value - 1)
+
+        button = self.content['brightness']
+        button.set_value(
+            config.getint(
+                'SETTINGS',
+                self.SECTION_MAPPING[self.custom_file]['brightness']
+            )
+        )
+        for switch in ['graphic', 'brightness_switch', 'animations']:
+            if switch not in self.content:
+                continue
+            button = self.content[switch]
+            button.set_active(
+                config.getboolean(
+                    'SETTINGS',
+                    self.SECTION_MAPPING[self.custom_file][switch]
+                )
+            )
+
+        with open(self.custom_file_path) as f:
+            content = f.read()
+
+        for key, search in {
+            'sound': 'SOUND_POWER_SAVE_ON_BAT=1',
+            'wifi_profile': 'WIFI_PWR_ON_BAT=on',
+            'bluetooth_blacklist': 'USB_BLACKLIST_BTUSB=1',
+            'printer_blacklist': 'USB_BLACKLIST_PRINTER=1',
+            'ethernet_blacklist': 'USB_BLACKLIST_WWAN=1',
+            'usb_shutdown': 'USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1',
+        }.items():
+            button = self.content[key]
+            button.set_active(search in content)
+
+        for key, search in {
+            'disabled': 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE',
+            'os': 'DEVICES_TO_DISABLE_ON_STARTUP',
+        }.items():
+            line = content[content.find(search):]
+            line = line[:line.find('\n')]
+            button_bluetooth = self.content['bluetooth_{}'.format(key)]
+            button_bluetooth.set_active('bluetooth' in line)
+            button_wifi = self.content['wifi_{}'.format(key)]
+            button_wifi.set_active('wifi' in line)
+
+        button = self.content['governor']
+        governor = self.get_governor()
+        line = content[content.find('CPU_SCALING_GOVERNOR_ON_BAT='):]
+        line = line[:line.find('\n')]
+        gov_mode = line[line.find('=') + 1:]
+        active_mode = None
+        if governor == 'intel_pstate':
+            values = list(dict(self.INTEL_GOV).values())
+            if gov_mode in values:
+                active_mode = values.index(gov_mode)
+        elif governor in ['acpi-cpufreq', 'intel_cpufreq']:
+            values = list(dict(self.CPUFREQ_GOV).values())
+            if gov_mode in values:
+                active_mode = values.index(gov_mode)
+
+        if active_mode is not None:
+            button.set_active(active_mode)
+
+        button = self.content['wifi_lan']
+        button.set_active(
+            'DEVICES_TO_DISABLE_ON_LAN_CONNECT="wifi"' in content and
+            'DEVICES_TO_ENABLE_ON_LAN_DISCONNECT="wifi"' in content
+        )
+
+        button = self.content['usb']
+        usb_autosuspend = bool('USB_AUTOSUSPEND=1' in content)
+        button.set_active(usb_autosuspend)
+
+        button = self.content['usb_list']
+        button.set_sensitive(usb_autosuspend)
+        usb_blacklist = content[content.find('USB_BLACKLIST'):]
+        usb_blacklist = usb_blacklist[:usb_blacklist.find('\n')]
+        usb_blacklist = usb_blacklist[len('USB_BLACKLIST="'):-1]
+        button.set_text(usb_blacklist)
+
+    def manage_events(self, button, *args):
+        name = button.get_name()
+        option = self.SECTION_MAPPING[self.custom_file][name]
+        if option:
+            if name in ['graphic', 'brightness_switch', 'animations']:
+                config.set(
+                    'SETTINGS', option,
+                    '1' if button.get_active() else '0'
+                )
+            elif name == 'brightness':
+                config.set(
+                    'SETTINGS', option,
+                    str(int(button.get_value()))
+                )
+            elif name == 'limit_cpu':
+                active = button.get_active_iter()
+                if active is not None:
+                    model = button.get_model()
+                    work_mode = model[active][0]
+                    config.set('SETTINGS', option, str(work_mode))
+
+        if name == 'brightness_switch':
+            self.content['brightness'].set_sensitive(button.get_active())
+        elif name == 'usb':
+            for field in [
+                'usb_list',
+                'bluetooth_blacklist', 'printer_blacklist',
+                'ethernet_blacklist', 'usb_shutdown',
+            ]:
+                self.content[field].set_sensitive(button.get_active())
+
+    def save_selection(self):
+        with open(self.custom_file_path) as f:
+            content = f.read()
+
+        base_cmd = 'sed -i "/{search}=/ c{search}={value}" {file}'
+
+        value = config.getint('SETTINGS', self.SECTION_MAPPING[self.custom_file]['limit_cpu'])
+        for search, value in self.CPU_LIMIT[value].items():
+            cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
+            subprocess.getstatusoutput(cmd)
+
+        for key, search in {
+            'sound': 'SOUND_POWER_SAVE_ON_BAT',
+            'bluetooth_blacklist': 'USB_BLACKLIST_BTUS',
+            'printer_blacklist': 'USB_BLACKLIST_PRINTER',
+            'ethernet_blacklist': 'USB_BLACKLIST_WWAN',
+            'usb_shutdown': 'USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN',
+            'wifi_profile': 'WIFI_PWR_ON_BAT',
+            'usb': 'USB_AUTOSUSPEND',
+        }.items():
+            button = self.content[key]
+            if search == 'WIFI_PWR_ON_BAT':
+                value = 'on' if button.get_active() else 'off'
+            else:
+                value = '1' if button.get_active() else '0'
+
+            if '{search}={value}'.format(search=search, value=value) not in content:
+                cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
+                code, msg = subprocess.getstatusoutput(cmd)
+                logger.info('Setting {} saving to {} --> Exit({}): {}'.format(search, value, code, msg))
+
+        for key, search in {
+            'disabled': 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE',
+            'os': 'DEVICES_TO_DISABLE_ON_STARTUP',
+        }.items():
+            value = []
+            button_bluetooth = self.content['bluetooth_{}'.format(key)]
+            if button_bluetooth.get_active():
+                value.append('bluetooth')
+            button_wifi = self.content['wifi_{}'.format(key)]
+            if button_wifi.get_active():
+                value.append('wifi')
+            value = ' '.join(value)
+            cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
+            code, msg = subprocess.getstatusoutput(cmd)
+            logger.info('Setting {} saving to {} --> Exit({}): {}'.format(search, value, code, msg))
+
+        button = self.content['wifi_lan']
+        value = 'wifi' if button.get_active() else ''
+        for search in ['DEVICES_TO_DISABLE_ON_LAN_CONNECT', 'DEVICES_TO_ENABLE_ON_LAN_DISCONNECT']:
+            cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
+            code, msg = subprocess.getstatusoutput(cmd)
+            logger.info('Setting {} saving to {} --> Exit({}): {}'.format(search, value, code, msg))
 
 
 class Preferences(Gtk.ApplicationWindow):
@@ -1000,29 +1585,18 @@ class Preferences(Gtk.ApplicationWindow):
     # ***************** BUTTONS **********************************************
 
         # LOW MODE PAGE **********************************************************
-        low_page_grid = Gtk.Grid(column_homogeneous=True,
-                                 column_spacing=0,
-                                 row_spacing=20)
-
-        low_grid = Gtk.Grid(column_homogeneous=True,
-                            row_homogeneous=False,
-                            column_spacing=25,
-                            row_spacing=20)
-
-        low_page_grid.attach(low_grid, 0, 0, 2, 1)
-
-        if self.min_resolution == True:
-
+        self.low_page_grid = SettingsGrid(self, 'ahorrodeenergia')
+        if self.min_resolution:
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
 
             scrolled_window1.set_min_content_height(400)
             scrolled_window1.set_min_content_width(1000)
 
-            scrolled_window1.add_with_viewport(low_page_grid)
+            scrolled_window1.add_with_viewport(self.low_page_grid)
             notebook.append_page(scrolled_window1, Gtk.Label.new(_('Energy Saving')))
         else:
-            notebook.append_page(low_page_grid, Gtk.Label.new(_('Energy Saving')))
+            notebook.append_page(self.low_page_grid, Gtk.Label.new(_('Energy Saving')))
 
         # ********* LOW MODE COMPONENTS COLUMN 1 *********************************
         print('\nLOADING LOW MODE COMPONENTS ...')
@@ -1031,7 +1605,7 @@ class Preferences(Gtk.ApplicationWindow):
         label_width2 = 4
         scale_width = 2
 
-        if self.min_resolution == True:
+        if self.min_resolution:
             label_col = 0
             button_col = 5
             label_col2 = 0
@@ -1043,461 +1617,7 @@ class Preferences(Gtk.ApplicationWindow):
             button_col2 = 10
         row = 1
 
-        # LABEL 0
-        label33 = Gtk.Label(label='')
-        label33.set_markup(
-            '<big><b>' + (_('Battery mode parameters (disabled when you connect AC power):')) + '</b></big>')
-        label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col, row, 6, 1)
 
-        # 1 ------------- CPU LIMITER *
-        # LABEL 1
-        row = row + 1
-        table_icon = Gtk.Table(n_columns=2, n_rows=1, homogeneous=False)
-        table_icon.set_valign(Gtk.Align.END)
-        low_grid.attach(table_icon, 0, row, label_width, 1)
-        label33 = Gtk.Label(label=_('Limit CPU profile:'))
-        label33.set_halign(Gtk.Align.START)
-        table_icon.attach(label33, 0, 1, 0, 1,
-                          xpadding=0,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-        icon = Gtk.Image()
-        icon_path = os.path.join(imagespath, 'warning.png')
-        icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: this setting affects to performance'))
-        icon.set_halign(Gtk.Align.START)
-        table_icon.attach(icon, 1, 2, 0, 1,
-                          xpadding=10,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-
-        # BUTTON 1
-        store = Gtk.ListStore(int, str)
-        store.append([1, (_('maximum'))])
-        store.append([2, (_('medium'))])
-        store.append([3, (_('none'))])
-        self.comboBoxLimitCPU = Gtk.ComboBox.new_with_model_and_entry(store)
-        self.comboBoxLimitCPU.set_valign(Gtk.Align.CENTER)
-        self.comboBoxLimitCPU.set_halign(Gtk.Align.END)
-        self.comboBoxLimitCPU.set_entry_text_column(1)
-
-        config.read(user_home + '/.config/slimbookbattery/slimbookbattery.conf')
-
-        value = config.get('SETTINGS', 'limit_cpu_ahorro')
-
-        if value == '1':  # Max
-            self.comboBoxLimitCPU.set_active(0)
-        elif value == '2':  # Mid
-            self.comboBoxLimitCPU.set_active(1)
-        elif value == '3':  # None
-            self.comboBoxLimitCPU.set_active(2)
-
-        low_grid.attach(self.comboBoxLimitCPU, button_col - 1, row, scale_width, 1)
-        # 2 ------------- CPU GOVERNOR *
-        # LABEL 2
-        self.governorCompatible, governor_name = governorIsCompatible()
-        if self.governorCompatible:
-            row = row + 1
-
-            # LABEL 2
-            label33 = Gtk.Label(label=_('CPU scaling governor saving profile:'))
-            label33.set_halign(Gtk.Align.START)
-            low_grid.attach(label33, label_col, row, label_width, 1)
-
-            # BUTTON 2
-            store = Gtk.ListStore(int, str)
-
-            store.append([1, 'powersave'])  # aureo
-
-            self.comboBoxGovernor = Gtk.ComboBox.new_with_model_and_entry(store)
-            self.comboBoxGovernor.set_valign(Gtk.Align.CENTER)
-            self.comboBoxGovernor.set_halign(Gtk.Align.END)
-            self.comboBoxGovernor.set_entry_text_column(1)
-            self.comboBoxGovernor.set_active(0)
-            self.comboBoxGovernor.set_sensitive(False)
-            low_grid.attach(self.comboBoxGovernor, button_col - 1, row, scale_width, 1)
-        # 3 ------------- GRAPHICS SAVING *
-        # LABEL 3
-        row = row + 1
-        # (3, 0)
-        label33 = Gtk.Label(label=_('Graphic card saving profile (Nvidia-AMD-Intel):'))
-        label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col, row, label_width, 1)
-
-        # BUTTON 3
-        self.switchGraphics = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchGraphics.set_name('ahorrodeenergia')
-
-        self.check_autostart_Graphics(self.switchGraphics)
-
-        config.read(user_home + '/.config/slimbookbattery/slimbookbattery.conf')
-
-        low_grid.attach(self.switchGraphics, button_col, row, 1, 1)
-        # 4 ------------- SOUND SAVING *
-        # LABEL 3
-        row = row + 1
-        table_icon = Gtk.Table(n_columns=2, n_rows=1, homogeneous=False)
-        low_grid.attach(table_icon, label_col, row, label_width, 1)
-        label33 = Gtk.Label(label=_('Sound power saving profile:'))
-        label33.set_halign(Gtk.Align.START)
-        table_icon.attach(label33, 0, 1, 0, 1,
-                          xpadding=0,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-        icon = Gtk.Image()
-        icon_path = os.path.join(imagespath, 'help.png')
-        icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: this setting can cause slight clicks in sound output'))
-        icon.set_halign(Gtk.Align.START)
-        table_icon.attach(icon, 1, 2, 0, 1,
-                          xpadding=10,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-
-        # BUTTON 4
-        self.switchSound = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchSound.set_name('ahorrodeenergia')
-        self.check_autostart_switchSound(self.switchSound)
-
-        low_grid.attach(self.switchSound, button_col, row, 1, 1)
-        # 5 ------------- WIFI SAVING *
-        # LABEL 5
-        row = row + 1
-        table_icon = Gtk.Table(n_columns=2, n_rows=1, homogeneous=False)
-        low_grid.attach(table_icon, label_col, row, label_width, 1)
-        label33 = Gtk.Label(label=_('Wi-Fi power saving profile:'))
-        label33.set_halign(Gtk.Align.START)
-        table_icon.attach(label33, 0, 1, 0, 1,
-                          xpadding=0,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-        icon = Gtk.Image()
-        icon_path = os.path.join(imagespath, 'help.png')
-        icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: power save can cause an unstable wifi connection.'))
-        icon.set_halign(Gtk.Align.START)
-        table_icon.attach(icon, 1, 2, 0, 1,
-                          xpadding=10,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-
-        # BUTTON 5
-        self.switchWifiPower = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchWifiPower.set_name('ahorrodeenergia')
-        self.check_autostart_switchWifiPower(self.switchWifiPower)
-
-        low_grid.attach(self.switchWifiPower, button_col, row, 1, 1)
-        # 6 ------------- DISABLE BLUETOOTH IF NOT IN USE *
-        # LABEL 6
-        row = row + 1
-        label33 = Gtk.Label(label=_('Bluetooth disabled when not in use:'))
-        label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col, row, label_width, 1)
-
-        # BUTTON 6
-        self.switchBluetoothNIU = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchBluetoothNIU.set_valign(Gtk.Align.CENTER)
-        self.switchBluetoothNIU.set_name('ahorrodeenergia')
-        self.check_switchBluetooth(self.switchBluetoothNIU)
-
-        low_grid.attach(self.switchBluetoothNIU, button_col, row, 1, 1)
-        # 7 ------------- DISABLE WIFI IF NOT IN USE *
-        # LABEL 7
-        row = row + 1
-        label33 = Gtk.Label(label=_('Wi-Fi disabled when not in use:'))
-        label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col, row, label_width, 1)
-
-        # BUTTON 7
-        self.switchWifiNIU = Gtk.Switch()
-        self.switchWifiNIU.set_name('ahorrodeenergia')
-        self.switchWifiNIU.set_halign(Gtk.Align.END)
-        self.switchWifiNIU.set_valign(Gtk.Align.CENTER)
-        self.check_autostart_switchWifiNIU(self.switchWifiNIU)
-        low_grid.attach(self.switchWifiNIU, button_col, row, 1, 1)
-
-        # ********* LOW MODE COMPONENTS COLUMN 2 *********************************
-
-        if not self.min_resolution == True:
-            row = 1
-        else:
-            row = row + 1
-
-        label33 = Gtk.Label(label='')
-        label33.set_markup('<big><b>' + (_('Persistent changes:')) + '</b></big>')
-        if self.min_resolution == True:
-            label33.set_name('title')
-
-        label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col2, row, 5, 1)
-        # 1 ------------- BRIGHTNESS *
-        # LABEL 1
-        row = row + 1
-        table_icon = Gtk.Table(n_columns=2, n_rows=1, homogeneous=False)
-        table_icon.set_valign(Gtk.Align.END)
-        low_grid.attach(table_icon, label_col2, row, label_width2 - 1, 1)
-        label33 = Gtk.Label(label=_('Set screen brightness:'))
-        label33.set_halign(Gtk.Align.START)
-        table_icon.attach(label33, 0, 1, 0, 1,
-                          xpadding=0,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-        icon = Gtk.Image()
-        icon_path = os.path.join(imagespath, 'help.png')
-        icon.set_from_file(icon_path)
-        icon.set_tooltip_text(_('Note: this option reduces the battery consumption considerably'))
-        icon.set_halign(Gtk.Align.START)
-        table_icon.attach(icon, 1, 2, 0, 1,
-                          xpadding=10,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-
-        # BUTTON 1
-
-        self.scaleBrightness = Gtk.Scale()
-        ahorroBrightness = config.getint('SETTINGS', 'ahorro_brightness')
-        self.scaleBrightness.set_adjustment(Gtk.Adjustment.new(ahorroBrightness, 00, 100, 5, 5, 0))
-        self.scaleBrightness.set_digits(0)
-        self.scaleBrightness.set_hexpand(True)
-
-        self.brightness_switch1 = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.END)
-        self.brightness_switch1.set_name('saving_brightness_switch')
-
-        self.brightness_switch1.connect("state-set", self.brightness_switch_changed, self.scaleBrightness)
-        self.check_autostart_switchBrightness(self.brightness_switch1, self.scaleBrightness)
-
-        low_grid.attach(self.brightness_switch1, button_col2, row, 1, 1)
-        low_grid.attach(self.scaleBrightness, button_col2 - 2, row, scale_width, 1)
-
-        exec = subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')
-        if exec[0] == 0:
-            row = row + 1
-            # print('Gnome')
-            # LABEL 2
-            label33 = Gtk.Label(label=_('Disable animations:'))
-            label33.set_halign(Gtk.Align.START)
-            low_grid.attach(label33, label_col2, row, label_width2, 1)
-            # BUTTON 2
-            self.switchAnimations = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-            self.switchAnimations.set_name('ahorro_animations')
-
-            self.check_autostart_switchAnimations(self.switchAnimations)
-
-            low_grid.attach(self.switchAnimations, button_col2, row, 1, 1)
-
-        row = row + 1
-        # 3 ------------- DISABLE BLUETOOTH ON STARTUP *
-        # LABEL 3
-        label33 = Gtk.Label(label=_("Bluetooth does not boot on start:"))
-        label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col2, row, label_width2, 1)
-        # BUTTON 3
-        self.switchBluetoothOS = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchBluetoothOS.set_name('ahorrodeenergia')
-
-        self.check_switchBluetoothOS(self.switchBluetoothOS)
-
-        # self.switchBluetoothOS.set_active(self.check_autostart_switchBluetoothOS(self.switchBluetoothOS))
-        low_grid.attach(self.switchBluetoothOS, button_col2, row, 1, 1)
-
-        row = row + 1
-        # 4 ------------- DISABLE WIFI ON STARTUP *
-        # LABEL 4
-        label33 = Gtk.Label(label=_("Wi-Fi does not boot on start:"))
-        label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col2, row, label_width2, 1)
-        # BUTTON 4
-        self.switchWifiOS = Gtk.Switch()
-        self.switchWifiOS.set_name('ahorrodeenergia')
-        self.switchWifiOS.set_halign(Gtk.Align.END)
-        self.switchWifiOS.set_valign(Gtk.Align.CENTER)
-        self.check_autostart_switchWifiOS(self.switchWifiOS)
-
-        low_grid.attach(self.switchWifiOS, button_col2, row, 1, 1)
-
-        row = row + 1
-        # 5 ------------- DISABLE WIFI WHEN LAN *
-        # LABEL 5
-        label33 = Gtk.Label(label=_('Disable Wi-Fi when LAN is connected:'))
-        label33.set_halign(Gtk.Align.START)
-        low_grid.attach(label33, label_col2, row, label_width2, 1)
-        # BUTTON 5
-        self.switchWifiDisableLAN = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchWifiDisableLAN.set_name('ahorrodeenergia')
-        self.check_autostart_switchDisableLAN(self.switchWifiDisableLAN)
-        low_grid.attach(self.switchWifiDisableLAN, button_col2, row, 1, 1)
-
-        row = row + 1
-
-        # 6 ------------- USB AUTOSUSPENSION
-        # LABEL 6
-        table_icon = Gtk.Table(n_columns=2, n_rows=1, homogeneous=False)
-        low_grid.attach(table_icon, label_col2, row, label_width2, 1)
-        label33 = Gtk.Label(label=_('Autosuspend USB Ports:'))
-        label33.set_halign(Gtk.Align.START)
-        table_icon.attach(label33, 0, 1, 0, 1,
-                          xpadding=0,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-        icon = Gtk.Image()
-        icon_path = os.path.join(imagespath, 'help.png')
-        icon.set_from_file(icon_path)
-        icon.set_tooltip_text(
-            _('Note: Set autosuspend mode for all USB devices upon system start or a change of power source. '
-              'Input devices like mice and keyboards as well as scanners are excluded by default'))
-        icon.set_halign(Gtk.Align.START)
-        table_icon.attach(icon, 1, 2, 0, 1,
-                          xpadding=10,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-
-        # BUTTON 6
-        self.switchUSBSuspend = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchUSBSuspend.set_name('ahorrodeenergia')
-
-        self.check_autostart_USBSuspend(self.switchUSBSuspend)
-        low_grid.attach(self.switchUSBSuspend, button_col2, row, 1, 1)
-
-        row = row + 1
-        # 7 ------------- AUTOSUSPENSION EXCLUDED IDS
-        # LABEL 7
-        table_icon = Gtk.Table(n_columns=2, n_rows=1, homogeneous=False)
-        low_grid.attach(table_icon, label_col2, row, label_width2, 1)
-        label33 = Gtk.Label(label=_('Excluded USB IDs from USB autosuspend:'))
-        label33.set_halign(Gtk.Align.START)
-        table_icon.attach(label33, 0, 1, 0, 1,
-                          xpadding=0,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-        icon = Gtk.Image()
-        icon_path = os.path.join(imagespath, 'help.png')
-        icon.set_from_file(icon_path)
-        # Se leen los diferentes USB que hay disponibles y se almacenan en un archivo temporalmente
-
-        if os.system('lsusb | grep ID >> ' + user_home + '/.config/slimbookbattery/usbidlist') == 0:
-            try:
-                USBIDsList = ''
-                # Se lee el archivo temporal que se ha creado y
-                # se va sacando para que solo nos muestre el ID junto con el nombre del USB
-                f = open(user_home + '/.config/slimbookbattery/usbidlist', 'r')
-                line = f.readline()
-                while line:
-                    lineaActual = line
-                    # Saca la posición del ID en la linea
-                    IDPos = lineaActual.find("ID")
-                    # Saca la última posición de la linea
-                    longitud = len(lineaActual) - 1
-                    # Una vez teniendo estas 2 posiciones ya tenemos el ID junto con el nombre del USB
-                    # y se concatena al string USBIDsList
-                    USBIDsList = USBIDsList + lineaActual[IDPos:longitud] + '\n'
-                    line = f.readline()
-                f.close()
-
-                # Se elimina el archivo temporal
-                os.system('rm ' + user_home + '/.config/slimbookbattery/usbidlist')
-            except Exception:
-                print('USB ID list 403')
-        else:
-            print('USB ID list 404')
-
-        # En este tooltip
-        msg = _('Note: You need to write in the Text Box the USB IDs '
-                '(separate with spaces) to exclude from autosuspend')
-        icon.set_tooltip_text(msg + '.\n\n' + USBIDsList)
-        icon.set_halign(Gtk.Align.START)
-        table_icon.attach(icon, 1, 2, 0, 1,
-                          xpadding=10,
-                          ypadding=5,
-                          xoptions=Gtk.AttachOptions.SHRINK,
-                          yoptions=Gtk.AttachOptions.SHRINK)
-
-        # BUTTON 7
-        self.entryBlacklistUSBIDs = Gtk.Entry(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        if self.switchUSBSuspend.get_active():
-            self.entryBlacklistUSBIDs.set_sensitive(True)
-        else:
-            self.entryBlacklistUSBIDs.set_sensitive(False)
-        self.entryBlacklistUSBIDs.set_text(str(self.gen_blacklist('ahorrodeenergia')))
-
-        low_grid.attach(self.entryBlacklistUSBIDs, button_col2 - 1, row, scale_width, 1)
-
-        row = row + 1
-        # 8 ------------- EXCLUDE BLUETOOTH *
-        # LABEL 8
-        label44 = Gtk.Label(label=_('Exclude bluetooth devices from USB autosuspend:'))
-        label44.set_halign(Gtk.Align.START)
-        low_grid.attach(label44, label_col2, row, label_width2, 1)
-        # BUTTON 8
-        self.switchBlacklistBUSB = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchBlacklistBUSB.set_valign(Gtk.Align.CENTER)
-        self.switchBlacklistBUSB.set_name('ahorrodeenergia')
-        self.check_autostart_BlacklistBUSB(self.switchBlacklistBUSB)
-
-        low_grid.attach(self.switchBlacklistBUSB, button_col2, row, 1, 1)
-
-        row = row + 1
-        # 9 ------------- EXCLUDE PRINTERS *
-        # LABEL 9
-        label44 = Gtk.Label(label=_('Exclude printer devices from USB autosuspend:'))
-        label44.set_halign(Gtk.Align.START)
-        low_grid.attach(label44, label_col2, row, label_width2, 1)
-
-        # BUTTON 9
-        self.switchBlacklistPrintUSB = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchBlacklistPrintUSB.set_name('ahorrodeenergia')
-        self.check_autostart_BlacklistPrintUSB(self.switchBlacklistPrintUSB)
-
-        low_grid.attach(self.switchBlacklistPrintUSB, button_col2, row, 1, 1)
-
-        row = row + 1
-        # 10 ------------ EXCLUDE NET DEVICES *
-        # LABEL 10
-        label44 = Gtk.Label(label=_('Exclude Ethernet devices from USB autosuspend:'))
-        label44.set_halign(Gtk.Align.START)
-        low_grid.attach(label44, label_col2, row, label_width2, 1)
-
-        # BUTTON 10
-        self.switchBlacklistWWANUSB = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchBlacklistWWANUSB.set_name('ahorrodeenergia')
-
-        self.check_autostart_BlacklistWWANUSB(self.switchBlacklistWWANUSB)
-
-        low_grid.attach(self.switchBlacklistWWANUSB, button_col2, row, 1, 1)
-
-        row = row + 1
-        # 11 ------------ DISABLE USB AUTOSUSPENSION ON SHUTDOWN *
-        # LABEL 11
-        label44 = Gtk.Label(label=_('Disable USB autosuspend mode upon system shutdown:'))
-        label44.set_halign(Gtk.Align.START)
-        low_grid.attach(label44, label_col2, row, label_width2, 1)
-
-        # BUTTON 11
-        self.switchShutdownSuspendUSB = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
-        self.switchShutdownSuspendUSB.set_name('ahorrodeenergia')
-
-        self.check_autostart_ShutdownSuspendUSB(self.switchShutdownSuspendUSB)
-
-        low_grid.attach(self.switchShutdownSuspendUSB, button_col2, row, 1, 1)
-
-        # Connections
-        self.switchUSBSuspend.connect("notify::active", self.on_switchUSBSuspend_change, self.entryBlacklistUSBIDs,
-                                      self.switchBlacklistBUSB, self.switchBlacklistPrintUSB,
-                                      self.switchBlacklistWWANUSB, self.switchShutdownSuspendUSB)
-        self.on_switchUSBSuspend_change(self.switchUSBSuspend, 'x', self.entryBlacklistUSBIDs, self.switchBlacklistBUSB,
-                                        self.switchBlacklistPrintUSB, self.switchBlacklistWWANUSB,
-                                        self.switchShutdownSuspendUSB)
 
         # MID MODE PAGE **********************************************************
 
@@ -2868,18 +2988,14 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -2892,18 +3008,14 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -2915,19 +3027,14 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3135,18 +3242,14 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3159,18 +3262,14 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3181,18 +3280,14 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3396,18 +3491,14 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=33' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3421,18 +3512,14 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=80' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=balance_performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3444,18 +3531,14 @@ class Preferences(Gtk.ApplicationWindow):
                 exec = subprocess.getstatusoutput('''
                     sed -i '/CPU_MIN_PERF_ON_AC/ cCPU_MIN_PERF_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_AC/ cCPU_MAX_PERF_ON_AC=100' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_MIN_PERF_ON_BAT/ cCPU_MIN_PERF_ON_BAT=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_MAX_PERF_ON_BAT/ cCPU_MAX_PERF_ON_BAT=100' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_AC/ cCPU_BOOST_ON_AC=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_BOOST_ON_BAT/ cCPU_BOOST_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/CPU_HWP_ON_AC/ cCPU_HWP_ON_AC=performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/CPU_HWP_ON_BAT/ cCPU_HWP_ON_BAT=power' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/ENERGY_PERF_POLICY_ON_AC/ cENERGY_PERF_POLICY_ON_AC=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/ENERGY_PERF_POLICY_ON_BAT/ cENERGY_PERF_POLICY_ON_BAT=balance-performance' ~/.config/slimbookbattery/custom/''' + mode + '''
-
                     sed -i '/SCHED_POWERSAVE_ON_AC/ cSCHED_POWERSAVE_ON_AC=0' ~/.config/slimbookbattery/custom/''' + mode + '''
                     sed -i '/SCHED_POWERSAVE_ON_BAT/ cSCHED_POWERSAVE_ON_BAT=1' ~/.config/slimbookbattery/custom/''' + mode + '''
                     ''')
@@ -3711,6 +3794,7 @@ class Preferences(Gtk.ApplicationWindow):
         # Saving interface general values **********************************************************
 
         self.general_page_grid.save_selection()
+        self.low_page_grid.save_selection()
 
         with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
             config.write(configfile)
