@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-
+import utils
 import gi
 
 gi.require_version('Gtk', '3.0')
@@ -37,8 +37,23 @@ class Splash(Gtk.Window):
             self.set_visual(visual)
         self.set_app_paintable(True)
 
+        height, width = utils.get_display_resolution()
+        if (int(width) >= 1550) and (int(height) >= 850):
+            width=300
+            height=300
+        
+        else:
+            width=400
+            height=400
+
         # set content for the spash window
-        pix_buffer = GdkPixbuf.Pixbuf.new_from_file(filename=os.path.join(IMAGES_PATH, 'slimbook_splash.png'))
+        pix_buffer = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=os.path.join(IMAGES_PATH, 'slimbook_splash.png'),
+            width=width,
+            height=height,
+            preserve_aspect_ratio=True
+        )
+
         logo = Gtk.Image.new_from_pixbuf(pix_buffer)
 
         pix_buffer_animation = GdkPixbuf.PixbufAnimation.new_from_file(os.path.join(IMAGES_PATH, "splash.gif"))

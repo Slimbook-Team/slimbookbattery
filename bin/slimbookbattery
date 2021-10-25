@@ -44,10 +44,10 @@ def main():
     if len(num_proc_running) > 1:
         sys.stdout.write("Slimbook Battery is in execution\n")
     elif args.minimize:
-        indicator_py = os.path.join(CURRENT_PATH, '../src/slimbookbatteryindicator.py')
+        indicator_py = os.path.join('/usr/share/slimbookbattery/src/slimbookbatteryindicator.py')
         os.system('python3 {}'.format(indicator_py))
     else:
-        preference_py = os.path.join(CURRENT_PATH, '../src/slimbookbatterypreferences.py')
+        preference_py = os.path.join('/usr/share/slimbookbattery/src/slimbookbatterypreferences.py')
         os.system('python3 {}'.format(preference_py))
 
 
