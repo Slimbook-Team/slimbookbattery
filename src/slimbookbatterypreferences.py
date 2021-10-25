@@ -246,8 +246,8 @@ class InfoPageGrid(Gtk.Grid):
         info = Gtk.Label(label='')
         msg = "<span><b>{}</b> {} {}</span>".format(
             _("Info:"),
-            _("Contact with us if you find something wrong. "
-              "We would appreciate that you attach the file that is generated"),
+            _("Contact with us if you find something wrong. "),
+            _("\nWe would appreciate that you attach the file that is generated"),
             _("by clicking the button below")
         )
         info.set_markup(msg)
@@ -562,13 +562,13 @@ class GeneralGrid(Gtk.Grid):
     def __init__(self, parent, *args, **kwargs):
         kwargs.setdefault('column_homogeneous', True)
         kwargs.setdefault('column_spacing', 0)
-        kwargs.setdefault('row_spacing', 20)
+        kwargs.setdefault('row_spacing', 10)
         super(GeneralGrid, self).__init__(*args, **kwargs)
 
         self.parent = parent
         self.general_grid = Gtk.Grid(column_homogeneous=True,
                                      column_spacing=0,
-                                     row_spacing=20)
+                                     row_spacing=15)
         self.general_grid.set_halign(Gtk.Align.CENTER)
         if self.parent.min_resolution:
             self.general_grid.set_name('smaller_label')
@@ -815,7 +815,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.set_position(Gtk.WindowPosition.CENTER)  # // Allow movement
 
-        self.set_size_request(1100, 400)
+        self.set_size_request(0, 0)
 
         self.set_decorated(False)
         self.set_resizable(True)
@@ -883,13 +883,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.set_default_icon(pixbuf)
 
-        dimensiones = subprocess.getoutput("xdpyinfo | grep 'dimensions:'")
-        dimensiones = dimensiones.split()
-        dimensiones = dimensiones[1]
-        dimensiones = dimensiones.split('x')
-
-        ancho = dimensiones[0]
-        alto = dimensiones[1]
+        ancho, alto = utils.get_display_resolution()
 
         if (int(ancho) >= 1550) and (int(alto) >= 850):
             print(_('Full window is displayed'))
@@ -903,20 +897,17 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.add(win_grid)
 
-        self.RestoreValues = Gtk.Button(label=(_('Restore default values')))
+        self.RestoreValues = Gtk.Button(label=(_('Restore default values')), valign=Gtk.Align.END, halign=Gtk.Align.END)
         self.RestoreValues.set_name('restore')
         self.RestoreValues.connect("clicked", self.on_buttonRestGeneral_clicked)
-        self.RestoreValues.set_halign(Gtk.Align.END)
 
-        self.btnCancel = Gtk.Button(label=(_('Cancel')))
+        self.btnCancel = Gtk.Button(label=(_('Cancel')), valign=Gtk.Align.END, halign=Gtk.Align.END)
         self.btnCancel.set_name('cancel')
         self.btnCancel.connect("clicked", self.close, 'x')
-        self.btnCancel.set_halign(Gtk.Align.END)
-
-        self.btnAccept = Gtk.Button(label=(_('Accept')))
+       
+        self.btnAccept = Gtk.Button(label=(_('Accept')), valign=Gtk.Align.END, halign=Gtk.Align.END)
         self.btnAccept.set_name('accept')
         self.btnAccept.connect("clicked", self.close_ok)
-        self.btnAccept.set_halign(Gtk.Align.END)
 
         hbox = Gtk.Box()
         hbox.pack_start(self.btnCancel, True, True, 0)
@@ -931,6 +922,7 @@ class Preferences(Gtk.ApplicationWindow):
         label77.set_halign(Gtk.Align.START)
         label77.set_name('version')
         version_line = subprocess.getstatusoutput("cat " + CURRENT_PATH + "/changelog |head -n1| egrep -o '\(.*\)'")
+        
         if version_line[0] == 0:
             version = version_line[1]
             label77.set_markup('<span font="10">Version ' + version[1:len(version) - 1] + '</span>')
@@ -3823,7 +3815,7 @@ if __name__ == "__main__":
     logger.addHandler(handler)
 
     style_provider = Gtk.CssProvider()
-    style_provider.load_from_path(CURRENT_PATH + '/css/style.css')
+    style_provider.load_from_path(CURRENT_PATH + '/css/style-copy.css')
 
     Gtk.StyleContext.add_provider_for_screen(
         Gdk.Screen.get_default(), style_provider,
