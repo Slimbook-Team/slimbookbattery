@@ -47,3 +47,11 @@ def load_translation(filename):
         languages=languages,
         fallback=True
     ).gettext
+
+def get_display_resolution():
+    dimensions = subprocess.getoutput("xdpyinfo | grep 'dimensions:'")
+    dimensions = dimensions.split()
+    dimensions = dimensions[1]
+    dimensions = dimensions.split('x')
+
+    return dimensions
