@@ -1466,7 +1466,7 @@ class Preferences(Gtk.ApplicationWindow):
         try:
             self.set_ui()
         except Exception as e:
-            print(e)
+            logger.exception('Unexpected error')
             self.child_process.terminate()
 
         # print(str(self.get_size()))
@@ -1606,7 +1606,8 @@ class Preferences(Gtk.ApplicationWindow):
 
         check = Gtk.CheckButton.new_with_label(label=_('System style'))
         check.set_tooltip_text(_('Style will be changed once you reopen the preferences window.'))
-        if config.get('CONFIGURATION', 'style') == 'system':
+        style = config.get('CONFIGURATION', 'style') if config.has_option('CONFIGURATION', 'style') else 'system'
+        if style == 'system':
             check.set_active(True)
 
         check.connect('clicked', self.style_check)
