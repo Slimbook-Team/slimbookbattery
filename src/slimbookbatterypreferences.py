@@ -1085,9 +1085,9 @@ class SettingsGrid(Gtk.Grid):
             self.grid.set_name('smaller_label')
 
         self.label_col = 0
-        self.button_col = 4
-        self.label_col2 = 5
-        self.button_col2 = 10
+        self.button_col = 3
+        self.label_col2 = 4
+        self.button_col2 = 8
         if self.parent.min_resolution:
             self.button_col = 5
             self.label_col2 = 0
@@ -1202,7 +1202,7 @@ class SettingsGrid(Gtk.Grid):
         title.set_markup(
             '<big><b>' + (_('Battery mode parameters (disabled when you connect AC power):')) + '</b></big>')
         title.set_halign(Gtk.Align.START)
-        self.grid.attach(title, self.label_col, 1, 6, 1)
+        self.grid.attach(title, self.label_col, 1, 4, 1)
         row = self.setup_fields(2, self.BATTERY_FIELDS, self.label_col, self.button_col)
         return row
 
@@ -1432,6 +1432,9 @@ class Preferences(Gtk.ApplicationWindow):
     icono_actual = ''
 
     def __init__(self):
+
+        self.__setup_css()
+    
         Gtk.Window.__init__(self, title=(_('Slimbook Battery Preferences')))
 
         self.get_style_context().add_class("bg-image")
@@ -1545,15 +1548,18 @@ class Preferences(Gtk.ApplicationWindow):
         if self.min_resolution:
             hbox.set_name('smaller_label')
 
-        label77 = Gtk.Label(label='')
-        label77.set_halign(Gtk.Align.START)
+        label77 = Gtk.Label(label='', halign = Gtk.Align.START)
         label77.set_name('version')
-        version_line = subprocess.getstatusoutput("cat " + CURRENT_PATH + "/changelog |head -n1| egrep -o '\(.*\)'")
-        
-        if version_line[0] == 0:
-            version = version_line[1]
-            label77.set_markup('<span font="10">Version ' + version[1:len(version) - 1] + '</span>')
-        label77.set_justify(Gtk.Justification.CENTER)
+
+        desk_config = configparser.ConfigParser()
+        desk_config.read('')
+        desk_config.read('/usr/share/applications/slimbookbattery.desktop')
+        try:
+            version = desk_config.get('Desktop Entry', 'Version')
+        except:
+            version = 'Unknown'
+
+        label77.set_markup('<span font="10">Version: ' + version + '</span>')
 
         win_grid.attach(hbox, 0, 4, 1, 1)
         win_grid.attach(label77, 0, 4, 1, 1)
@@ -1562,16 +1568,6 @@ class Preferences(Gtk.ApplicationWindow):
             print('Copiying configuration files ...')
             subprocess.getoutput('cp /usr/share/slimbookbattery/default ' + user_home + '/.config/slimbookbattery/')
             subprocess.getoutput('cp /usr/share/slimbookbattery/custom ' + user_home + '/.config/slimbookbattery/')
-
-        # NOTEBOOK ***************************************************************
-
-        notebook = Gtk.Notebook.new()
-        if self.min_resolution == True:
-            notebook.set_name('notebook_min')
-        else:
-            notebook.set_name('notebook')
-
-        notebook.set_tab_pos(Gtk.PositionType.TOP)
 
         if self.min_resolution == True:
             height = 175
@@ -1591,6 +1587,8 @@ class Preferences(Gtk.ApplicationWindow):
         logo.set_valign(Gtk.Align.START)
         win_grid.attach(logo, 0, 0, 1, 4)
 
+        hbox = Gtk.HBox(halign=Gtk.Align.END, valign=Gtk.Align.START)
+
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename=os.path.join(imagespath, 'cross.png'),
             width=20,
@@ -1606,17 +1604,41 @@ class Preferences(Gtk.ApplicationWindow):
         evnt_close.set_valign(Gtk.Align.START)
         evnt_close.connect('button-press-event', self.close)
 
-        win_grid.attach(evnt_close, 0, 0, 1, 4)
+        check = Gtk.CheckButton.new_with_label(label=_('System style'))
+        check.set_tooltip_text(_('Style will be changed once you reopen the preferences window.'))
+        if config.get('CONFIGURATION', 'style') == 'system':
+            check.set_active(True)
+
+        check.connect('clicked', self.style_check)
+
+        hbox.add(check)
+        hbox.add(evnt_close)
+        
+        win_grid.attach(hbox, 0, 0, 1, 4)
+        
+
+
+    # NOTEBOOK ***************************************************************
+
+        notebook = Gtk.Notebook.new()
+        if self.min_resolution == True:
+            notebook.set_name('smaller_label')
+            notebook.set_vexpand(True)
+            notebook.set_hexpand(False)
+        
+
+        notebook.set_tab_pos(Gtk.PositionType.TOP)
         win_grid.attach(notebook, 0, 3, 1, 1)
 
-        # GENERAL PAGE  **********************************************************
+        
+    # GENERAL PAGE  **********************************************************
 
         print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
 
         self.general_page_grid = GeneralGrid(self)
         notebook.append_page(self.general_page_grid, Gtk.Label.new(_('General')))
 
-        # CONFIG MODE PAGES ********************************************************
+    # CONFIG MODE PAGES ********************************************************
         for data in self.CONFIG_TABS:
             setattr(
                 self, data.get('attr'),
@@ -1633,9 +1655,10 @@ class Preferences(Gtk.ApplicationWindow):
 
                 scrolled_window.add_with_viewport(page_grid)
                 page_grid = scrolled_window
+
             notebook.append_page(page_grid, Gtk.Label.new(data.get('title')))
 
-        # CYCLES PAGE ************************************************************
+    # CYCLES PAGE ************************************************************
 
         cycles_page_grid = Gtk.Grid(column_homogeneous=True,
                                     column_spacing=0,
@@ -1660,7 +1683,7 @@ class Preferences(Gtk.ApplicationWindow):
         else:
             notebook.append_page(cycles_page_grid, Gtk.Label.new(_('Cycles')))
 
-        # ********* CYCLES COMPONENTS ********************************************
+    # ********* CYCLES COMPONENTS ********************************************
         # (0, 0)
         label22 = Gtk.Label(label=_('Enable cycle alerts'))
         label22.set_halign(Gtk.Align.START)
@@ -1733,7 +1756,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.scaleTimeWarnings.set_hexpand(True)
         cycles_grid.attach(self.scaleTimeWarnings, 1, 4, 1, 1)
 
-        # BATTERY INFO PAGE ******************************************************
+    # BATTERY INFO PAGE ******************************************************
 
         cycles_page_grid = BatteryGrid(self)
 
@@ -1749,7 +1772,7 @@ class Preferences(Gtk.ApplicationWindow):
         else:
             notebook.append_page(cycles_page_grid, Gtk.Label.new(_('Battery')))
 
-        # INFO PAGE **************************************************************
+    # INFO PAGE **************************************************************
         info_page_grid = InfoPageGrid(self)
 
         if self.min_resolution:
@@ -1773,6 +1796,37 @@ class Preferences(Gtk.ApplicationWindow):
 
     # CLASS FUNCTIONS ***********************************
 
+    def style_check(self, button):
+
+        if button.get_active():
+            print('system')
+            self.update_config('CONFIGURATION', 'style', 'system')
+        else:
+            
+            print('original')
+            self.update_config('CONFIGURATION', 'style', 'original')
+
+        # To do: restore css provider
+        # self.hide()
+        # self.__setup_css()
+        # self.show_all()
+
+    def __setup_css(self):
+        """Setup the CSS and load it."""
+        try:
+            style = config.get('CONFIGURATION', 'style')
+        except:
+            style='original'
+
+        provider_file = '{}/css/{}-style.css'.format(CURRENT_PATH, style)
+        provider = Gtk.CssProvider()
+        screen = Gdk.Screen.get_default()
+        context = Gtk.StyleContext()
+        provider.load_from_path(provider_file)
+        context.add_provider_for_screen(screen, provider,
+                                        Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        logger.debug("Loading CSS") 
+        
     def on_buttonRestGeneral_clicked(self, buttonRestGeneral):
         print('Reset values called')
         os.system('pkexec slimbookbattery-pkexec restore')
@@ -1965,13 +2019,7 @@ if __name__ == "__main__":
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    style_provider = Gtk.CssProvider()
-    style_provider.load_from_path(CURRENT_PATH + '/css/style-copy.css')
-
-    Gtk.StyleContext.add_provider_for_screen(
-        Gdk.Screen.get_default(), style_provider,
-        Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-    )
+    
 
     win = Preferences()
     win.connect("destroy", Gtk.main_quit)
