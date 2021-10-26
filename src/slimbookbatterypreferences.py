@@ -1406,6 +1406,96 @@ class SettingsGrid(Gtk.Grid):
             ))
 
 
+class CyclesGrid(Gtk.Grid):
+    FIELDS = [
+        {
+            'label_name': 'alerts',
+            'label': _('Enable cycle alerts'),
+            'type': 'switch',
+        },
+        {
+            'label_name': 'max_battery_value',
+            'label': _('Max battery value:'),
+            'type': 'scale',
+        },
+        {
+            'label_name': 'min_battery_value',
+            'label': _('Min battery value:'),
+            'type': 'scale',
+        },
+        {
+            'label_name': 'max_battery_times',
+            'label': _('Number of times:'),
+            'type': 'scale',
+        },
+        {
+            'label_name': 'time_between_warnings',
+            'label': _('Time between Warnings:'),
+            'type': 'scale',
+        },
+    ]
+
+    def __init__(self, parent, *args, **kwargs):
+        kwargs.setdefault('column_homogeneous', True)
+        kwargs.setdefault('column_spacing', 0)
+        kwargs.setdefault('row_spacing', 20)
+        super(CyclesGrid, self).__init__(*args, **kwargs)
+
+        self.parent = parent
+        self.grid = Gtk.Grid(column_homogeneous=True,
+                             column_spacing=40,
+                             row_spacing=20)
+        self.grid.set_halign(Gtk.Align.CENTER)
+
+        self.attach(self.grid, 0, 3, 2, 1)
+
+        self.content = {}
+        self.setup()
+        self.complete_values()
+
+    def setup(self):
+        for row, data in enumerate(self.FIELDS):
+            button_type = data.get('type')
+
+            label = Gtk.Label(label=data.get('label'))
+            label.set_halign(Gtk.Align.START)
+            self.grid.attach(label, 0, row, 1, 1)
+
+            button = None
+            if button_type == 'switch':
+                button = Gtk.Switch(halign=Gtk.Align.START)
+                button.connect('notify::active', self.manage_events)
+            elif button_type == 'scale':
+                button = Gtk.Scale()
+                button.set_size_request(200, 10)
+                button.set_adjustment(Gtk.Adjustment.new(0, 0, 100, 5, 5, 0))
+                button.set_digits(0)
+                button.set_hexpand(True)
+                button.connect('change-value', self.manage_events)
+
+            button.set_name(data.get('label_name'))
+            self.content[data.get('label_name')] = button
+            self.grid.attach(button, 1, row, 1, 1)
+
+    def complete_values(self):
+        for data in self.FIELDS:
+            name = data.get('label_name')
+            button_type = data.get('type')
+            button = self.content[name]
+            if button_type == 'switch':
+                button.set_active(config.getboolean('CONFIGURATION', name))
+            elif button_type == 'scale':
+                button.set_value(config.getint('CONFIGURATION', name))
+
+    def manage_events(self, button, *args):
+        name = button.get_name()
+        if isinstance(button, Gtk.Switch):
+            value = '1' if button.get_active() else '0'
+        else:
+            value = str(button.get_value())
+        config.set('CONFIGURATION', name, value)
+
+
 class Preferences(Gtk.ApplicationWindow):
     CONFIG_TABS = [
         {
@@ -1630,7 +1720,7 @@ class Preferences(Gtk.ApplicationWindow):
         notebook.set_tab_pos(Gtk.PositionType.TOP)
         win_grid.attach(notebook, 0, 3, 1, 1)
 
-        
+
     # GENERAL PAGE  **********************************************************
 
         print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
@@ -1660,101 +1750,19 @@ class Preferences(Gtk.ApplicationWindow):
 
     # CYCLES PAGE ************************************************************
 
-        cycles_page_grid = Gtk.Grid(column_homogeneous=True,
-                                    column_spacing=0,
-                                    row_spacing=20)
+        self.cycles_page_grid = CyclesGrid(self)
 
-        cycles_grid = Gtk.Grid(column_homogeneous=True,
-                               column_spacing=40,
-                               row_spacing=20)
-        cycles_grid.set_halign(Gtk.Align.CENTER)
-
-        cycles_page_grid.attach(cycles_grid, 0, 3, 2, 1)
-
-        if self.min_resolution == True:
+        if self.min_resolution:
             scrolled_window1 = Gtk.ScrolledWindow()
             scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
 
             scrolled_window1.set_min_content_height(400)
             scrolled_window1.set_min_content_width(1000)
 
-            scrolled_window1.add_with_viewport(cycles_page_grid)
+            scrolled_window1.add_with_viewport(self.cycles_page_grid)
             notebook.append_page(scrolled_window1, Gtk.Label.new(_('Cycles')))
         else:
-            notebook.append_page(cycles_page_grid, Gtk.Label.new(_('Cycles')))
-
-    # ********* CYCLES COMPONENTS ********************************************
-        # (0, 0)
-        label22 = Gtk.Label(label=_('Enable cycle alerts'))
-        label22.set_halign(Gtk.Align.START)
-        cycles_grid.attach(label22, 0, 0, 1, 1)
-
-        # (0, 1)
-        self.switchAlerts = Gtk.Switch()
-        self.switchAlerts.set_halign(Gtk.Align.START)
-
-        if config.getboolean('CONFIGURATION', 'alerts'):
-            self.switchAlerts.set_active(True)
-
-        # self.switchAlerts.set_active(self.check_autostart_switchAlerts(self.switchAlerts))
-        cycles_grid.attach(self.switchAlerts, 1, 0, 1, 1)
-
-        # (1, 0)
-        label22 = Gtk.Label(label=_('Max battery value:'))
-        label22.set_halign(Gtk.Align.START)
-        cycles_grid.attach(label22, 0, 1, 1, 1)
-
-        # (1, 1)
-        self.scaleMaxBatVal = Gtk.Scale()
-        self.scaleMaxBatVal.set_size_request(200, 10)
-        max_value = config.getint('CONFIGURATION', 'max_battery_value')
-        self.scaleMaxBatVal.set_adjustment(Gtk.Adjustment.new(max_value, 0, 100, 5, 5, 0))
-        self.scaleMaxBatVal.set_digits(0)
-        self.scaleMaxBatVal.set_hexpand(True)
-        cycles_grid.attach(self.scaleMaxBatVal, 1, 1, 1, 1)
-
-        # (2, 0)
-        label22 = Gtk.Label(label=_('Min battery value:'))
-        label22.set_halign(Gtk.Align.START)
-        cycles_grid.attach(label22, 0, 2, 1, 1)
-
-        # (2, 1)
-        self.scaleMinBatVal = Gtk.Scale()
-        self.scaleMinBatVal.set_size_request(200, 10)
-        min_value = config.getint('CONFIGURATION', 'min_battery_value')
-        self.scaleMinBatVal.set_adjustment(Gtk.Adjustment.new(min_value, 0, 100, 5, 5, 0))
-        self.scaleMinBatVal.set_digits(0)
-        self.scaleMinBatVal.set_hexpand(True)
-        cycles_grid.attach(self.scaleMinBatVal, 1, 2, 1, 1)
-
-        # (3, 0)
-        label22 = Gtk.Label(label=_('Number of times:'))
-        label22.set_halign(Gtk.Align.START)
-        cycles_grid.attach(label22, 0, 3, 1, 1)
-
-        # (3, 1)
-        self.scaleNumTimes = Gtk.Scale()
-        self.scaleNumTimes.set_size_request(200, 10)
-
-        max_value = config.getint('CONFIGURATION', 'max_battery_times')
-        self.scaleNumTimes.set_adjustment(Gtk.Adjustment.new(max_value, 0, 10, 5, 5, 0))
-        self.scaleNumTimes.set_digits(0)
-        self.scaleNumTimes.set_hexpand(True)
-        cycles_grid.attach(self.scaleNumTimes, 1, 3, 1, 1)
-
-        # (4, 0)
-        label22 = Gtk.Label(label=_('Time between Warnings:'))
-        label22.set_halign(Gtk.Align.START)
-        cycles_grid.attach(label22, 0, 4, 1, 1)
-
-        # (4, 1)
-        self.scaleTimeWarnings = Gtk.Scale()
-        self.scaleTimeWarnings.set_size_request(200, 10)
-        min_value = config.getint('CONFIGURATION', 'time_between_warnings')
-        self.scaleTimeWarnings.set_adjustment(Gtk.Adjustment.new(min_value, 0, 300, 5, 5, 0))
-        self.scaleTimeWarnings.set_digits(0)
-        self.scaleTimeWarnings.set_hexpand(True)
-        cycles_grid.attach(self.scaleTimeWarnings, 1, 4, 1, 1)
+            notebook.append_page(self.cycles_page_grid, Gtk.Label.new(_('Cycles')))
 
     # BATTERY INFO PAGE ******************************************************
 
@@ -1858,11 +1866,6 @@ class Preferences(Gtk.ApplicationWindow):
         dialog.run()
         dialog.destroy()
 
-    def load_cycles_components(self):
-        # SWITCH ALERTS
-        self.switchAlerts.set_active(config.getboolean('CONFIGURATION', 'alerts'))
-        print()
-
     def animations(self, mode):
 
         check_desktop = subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')
@@ -1928,24 +1931,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.low_page_grid.save_selection()
         self.mid_page_grid.save_selection()
         self.high_page_grid.save_selection()
-
-        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
-            config.write(configfile)
-
-        # Saving interface new values **************************************************************
-
-        # Solo cambia en el conf.
-
-        print('Switch alerts: ' + str(self.switchAlerts.get_state()))
-        if self.switchAlerts.get_state():
-            config.set('CONFIGURATION', 'alerts', str(1))
-        else:
-            config.set('CONFIGURATION', 'alerts', str(0))
-
-        config.set('CONFIGURATION', 'max_battery_value', str(int(self.scaleMaxBatVal.get_value())))
-        config.set('CONFIGURATION', 'min_battery_value', str(int(self.scaleMinBatVal.get_value())))
-        config.set('CONFIGURATION', 'max_battery_times', str(int(self.scaleNumTimes.get_value())))
-        config.set('CONFIGURATION', 'time_between_warnings', str(int(self.scaleTimeWarnings.get_value())))
 
         with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
             config.write(configfile)
