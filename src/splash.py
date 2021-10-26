@@ -76,12 +76,6 @@ def splash_window():
 
 
 if __name__ == '__main__':
-    style_provider = Gtk.CssProvider()
-    style_provider.load_from_path(os.path.join(CURRENT_PATH, 'css/style.css'))
 
-    Gtk.StyleContext.add_provider_for_screen(
-        Gdk.Screen.get_default(), style_provider,
-        Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-    )
     splash_window()
     Gtk.main()
