@@ -62,6 +62,7 @@ if not os.path.isfile(config_file):
 
 config.read(config_file)
 
+
 class colors:  # You may need to change color settings
     RED = '\033[31m'
     ENDC = '\033[m'
@@ -72,7 +73,70 @@ class colors:  # You may need to change color settings
     BOLD = "\033[;1m"
 
 
-class InfoPageGrid(Gtk.Grid):
+class BasePageGrid(Gtk.Grid):
+    tab_name = None
+    allow_minimize = True
+    SUPER_KWARGS = {
+        'column_homogeneous': True,
+        'column_spacing': 0,
+        'row_spacing': 20,
+    }
+    GRID_KWARGS = {
+        'column_homogeneous': True,
+        'column_spacing': 0,
+        'row_spacing': 15,
+    }
+
+    def __init__(self, parent, *args, **kwargs):
+        kwargs.update(self.SUPER_KWARGS)
+        super(BasePageGrid, self).__init__(*args, **kwargs)
+        self.parent = parent
+        self.content = {}
+        self.grid = Gtk.Grid(**self.GRID_KWARGS)
+        self.setup()
+        self.complete_values()
+
+    def get_page(self):
+        if not (self.allow_minimize and self.parent.min_resolution):
+            return self
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+
+        scrolled_window.set_min_content_height(400)
+        scrolled_window.set_min_content_width(1000)
+
+        scrolled_window.add_with_viewport(self)
+        return scrolled_window
+
+    def setup(self):
+        """
+            Create the items inside the page
+        """
+        raise NotImplementedError()
+
+    def complete_values(self):
+        """
+            Complete the content of the page
+        """
+        pass
+
+    def manage_events(self, button, *args):
+        """
+            Function where received events
+            :param button: Gtk objects that receive the event
+            :param args: Depends of the event
+        """
+        pass
+
+    def save_selection(self):
+        """
+            Save options to storage
+        """
+        pass
+
+
+class InfoPageGrid(BasePageGrid):
+    tab_name = _('Information')
     SOCIAL = [
         {
             'icon': 'twitter.png',
@@ -94,18 +158,6 @@ class InfoPageGrid(Gtk.Grid):
         }
     ]
 
-    def __init__(self, parent, *args, **kwargs):
-        kwargs.setdefault('column_homogeneous', True)
-        kwargs.setdefault('column_spacing', 0)
-        kwargs.setdefault('row_spacing', 20)
-        super(InfoPageGrid, self).__init__(*args, **kwargs)
-
-        self.parent = parent
-        self.info_grid = Gtk.Grid(column_homogeneous=True,
-                                  column_spacing=0,
-                                  row_spacing=15)
-        self.setup()
-
     def setup(self):
         self.setup_title()
         self.setup_description()
@@ -115,7 +167,7 @@ class InfoPageGrid(Gtk.Grid):
         self.setup_contact()
         self.setup_licence()
 
-        self.attach(self.info_grid, 0, 0, 2, 4)
+        self.attach(self.grid, 0, 0, 2, 4)
 
     def setup_title(self):
         box = Gtk.HBox(spacing=15)
@@ -134,7 +186,7 @@ class InfoPageGrid(Gtk.Grid):
             height=60,
             preserve_aspect_ratio=True)
         box.add(Gtk.Image.new_from_pixbuf(pixbuf))
-        self.info_grid.attach(box, 0, 1, 5, 1)
+        self.grid.attach(box, 0, 1, 5, 1)
 
     def setup_description(self):
         line = Gtk.Label(label='')
@@ -146,14 +198,14 @@ class InfoPageGrid(Gtk.Grid):
         )
         line.set_markup(msg)
         line.set_justify(Gtk.Justification.CENTER)
-        self.info_grid.attach(line, 0, 2, 5, 1)
+        self.grid.attach(line, 0, 2, 5, 1)
 
         thanks = Gtk.Label(label='')
         thanks.set_markup("<span>" + (
             _("Special thanks to TLP (© 2019, linrunner), Nvidia, AMD and Intel "
               "for offering us the necessary tools to make it possible!")) + "</span>")
         thanks.set_justify(Gtk.Justification.CENTER)
-        self.info_grid.attach(thanks, 0, 3, 5, 1)
+        self.grid.attach(thanks, 0, 3, 5, 1)
 
     def setup_social(self):
         line = Gtk.Label(label='')
@@ -161,7 +213,7 @@ class InfoPageGrid(Gtk.Grid):
             _("If this application has been useful to you, "
               "consider saying it in our social networks or even buy a SLIMBOOK ;)")) + "</span>")
         line.set_justify(Gtk.Justification.CENTER)
-        self.info_grid.attach(line, 0, 4, 5, 1)
+        self.grid.attach(line, 0, 4, 5, 1)
         box = Gtk.HBox(spacing=5)
         for social in self.SOCIAL:
             icon = Gtk.Image.new_from_pixbuf(
@@ -181,7 +233,7 @@ class InfoPageGrid(Gtk.Grid):
             label.set_justify(Gtk.Justification.CENTER)
             box.pack_start(label, False, False, 0)
         box.set_halign(Gtk.Align.CENTER)
-        self.info_grid.attach(box, 0, 6, 5, 1)
+        self.grid.attach(box, 0, 6, 5, 1)
 
     def setup_disclaimer(self):
         disclaimer = Gtk.Label(label='')
@@ -193,7 +245,7 @@ class InfoPageGrid(Gtk.Grid):
         )
         disclaimer.set_markup(msg)
         disclaimer.set_justify(Gtk.Justification.CENTER)
-        self.info_grid.attach(disclaimer, 0, 7, 5, 1)
+        self.grid.attach(disclaimer, 0, 7, 5, 1)
 
     def setup_links(self):
         box = Gtk.HBox()
@@ -214,7 +266,7 @@ class InfoPageGrid(Gtk.Grid):
         link.set_name('link')
         link.set_halign(Gtk.Align.CENTER)
         box.add(link)
-        self.info_grid.attach(box, 0, 10, 5, 1)
+        self.grid.attach(box, 0, 10, 5, 1)
 
         box = Gtk.HBox()
         box.set_halign(Gtk.Align.CENTER)
@@ -231,7 +283,7 @@ class InfoPageGrid(Gtk.Grid):
         github.set_halign(Gtk.Align.CENTER)
         github.set_image(icon)
         box.add(github)
-        self.info_grid.attach(box, 0, 11, 5, 1)
+        self.grid.attach(box, 0, 11, 5, 1)
 
         patreon = Gtk.Label()
         msg = "<span>{}<a href='https://www.patreon.com/slimbook'>Patreon</a>{}</span>".format(
@@ -241,7 +293,7 @@ class InfoPageGrid(Gtk.Grid):
         )
         patreon.set_markup(msg)
         patreon.set_justify(Gtk.Justification.CENTER)
-        self.info_grid.attach(patreon, 0, 12, 5, 1)
+        self.grid.attach(patreon, 0, 12, 5, 1)
 
     def setup_contact(self):
         info = Gtk.Label(label='')
@@ -253,7 +305,7 @@ class InfoPageGrid(Gtk.Grid):
         )
         info.set_markup(msg)
         info.set_justify(Gtk.Justification.CENTER)
-        self.info_grid.attach(info, 0, 13, 5, 1)
+        self.grid.attach(info, 0, 13, 5, 1)
 
         info = Gtk.Label(label=' ')
         info.set_markup("<span><b>" + (_("Send an e-mail to: ")) + "dev@slimbook.es</b></span>")
@@ -261,16 +313,16 @@ class InfoPageGrid(Gtk.Grid):
 
         box = Gtk.HBox()
         report = Gtk.Button(label=(_('Generate report file')))
-        report.connect("clicked", self.on_click)
+        report.connect("clicked", self.manage_events)
         report.set_halign(Gtk.Align.CENTER)
         box.add(report)
-        self.info_grid.attach(box, 1, 15, 3, 1)
+        self.grid.attach(box, 1, 15, 3, 1)
 
     def setup_licence(self):
         licence = Gtk.Label(label='')
         licence.set_markup(_('The software is provided  as is , without warranty of any kind.'))
         licence.set_justify(Gtk.Justification.CENTER)
-        self.info_grid.attach(licence, 0, 16, 5, 1)
+        self.grid.attach(licence, 0, 16, 5, 1)
 
         box = Gtk.HBox()
         box.set_halign(Gtk.Align.CENTER)
@@ -286,9 +338,9 @@ class InfoPageGrid(Gtk.Grid):
         link.set_halign(Gtk.Align.CENTER)
         link.set_image(icon)
         box.add(link)
-        self.info_grid.attach(box, 0, 17, 5, 1)
+        self.grid.attach(box, 0, 17, 5, 1)
 
-    def on_click(self, button):
+    def manage_events(self, button, *args):
         save_dialog = Gtk.FileChooserDialog(title="Please select a folder to save the file",
                                             parent=self.parent,
                                             action=Gtk.FileChooserAction.SELECT_FOLDER)
@@ -301,9 +353,9 @@ class InfoPageGrid(Gtk.Grid):
         if response == 1:
             path = os.path.join(
                 save_dialog.get_filename(),
-                '/report_{}.txt'.format(time.strftime("%d-%m-%y_%H:%M"))
+                'report_{}.txt'.format(time.strftime("%d-%m-%y_%H:%M"))
             )
-            desktop = subprocess.getoutput("echo $XDG_CURRENT_DESKTOP")
+            desktop = os.environ.get("XDG_CURRENT_DESKTOP")
 
             cmd = "pkexec slimbookbattery-pkexec report {path} {desktop} {user_home}".format(
                 path=path, desktop=desktop, user_home=user_home
@@ -319,7 +371,14 @@ class InfoPageGrid(Gtk.Grid):
         save_dialog.destroy()
 
 
-class BatteryGrid(Gtk.Grid):
+class BatteryGrid(BasePageGrid):
+    tab_name = _('Battery')
+    GRID_KWARGS = {
+        'column_homogeneous': True,
+        'column_spacing': 0,
+        'row_spacing': 20,
+        'halign': Gtk.Align.CENTER,
+    }
     HEADER = 1
     CONTENT = 3
 
@@ -414,24 +473,10 @@ class BatteryGrid(Gtk.Grid):
     ]
 
     def __init__(self, parent, *args, **kwargs):
-        kwargs.setdefault('column_homogeneous', True)
-        kwargs.setdefault('column_spacing', 0)
-        kwargs.setdefault('row_spacing', 20)
-
-        super(BatteryGrid, self).__init__(*args, **kwargs)
-        self.set_halign(Gtk.Align.CENTER)
-
-        self.parent = parent
-        self.battery_grid = Gtk.Grid(column_homogeneous=True,
-                                     column_spacing=0,
-                                     row_spacing=20)
-        self.battery_grid.set_halign(Gtk.Align.CENTER)
-        self.attach(self.battery_grid, 0, 2, 2, 1)
         self.time_to_header = None
-        self.content = {}
-        self.setup()
-        # Will allows refresh values calling complete_values if page is showing
-        self.complete_values()
+        super(BatteryGrid, self).__init__(parent, *args, **kwargs)
+        self.set_halign(Gtk.Align.CENTER)
+        self.attach(self.grid, 0, 2, 2, 1)
 
     def setup(self):
         content = None
@@ -451,13 +496,13 @@ class BatteryGrid(Gtk.Grid):
             if set_time_to_header:
                 set_time_to_header = False
                 self.time_to_header = header
-            self.battery_grid.attach(header, self.HEADER, line, 2, 1)
+            self.grid.attach(header, self.HEADER, line, 2, 1)
 
             content = _('Unknown')
             label = Gtk.Label(label=content)
             label.set_halign(Gtk.Align.START)
             self.content[label_name] = label
-            self.battery_grid.attach(label, self.CONTENT, line, 2, 1)
+            self.grid.attach(label, self.CONTENT, line, 2, 1)
 
     def complete_values(self):
         content = None
@@ -496,7 +541,9 @@ class BatteryGrid(Gtk.Grid):
             label.set_label(content)
 
 
-class GeneralGrid(Gtk.Grid):
+class GeneralGrid(BasePageGrid):
+    tab_name = _('General')
+    allow_minimize = False
     HEADER = 1
     CONTENT = 3
 
@@ -561,24 +608,13 @@ class GeneralGrid(Gtk.Grid):
     ]
 
     def __init__(self, parent, *args, **kwargs):
-        kwargs.setdefault('column_homogeneous', True)
-        kwargs.setdefault('column_spacing', 0)
-        kwargs.setdefault('row_spacing', 10)
-        super(GeneralGrid, self).__init__(*args, **kwargs)
-
-        self.parent = parent
-        self.general_grid = Gtk.Grid(column_homogeneous=True,
-                                     column_spacing=0,
-                                     row_spacing=15)
-        self.general_grid.set_halign(Gtk.Align.CENTER)
-        if self.parent.min_resolution:
-            self.general_grid.set_name('smaller_label')
-        self.attach(self.general_grid, 0, 0, 1, 1)
         self.autostart_initial = None
         self.work_mode = None
-        self.content = {}
-        self.setup()
-        self.complete_values()
+        super(GeneralGrid, self).__init__(parent, *args, **kwargs)
+        self.grid.set_halign(Gtk.Align.CENTER)
+        if self.parent.min_resolution:
+            self.grid.set_name('smaller_label')
+        self.attach(self.grid, 0, 0, 1, 1)
 
     def setup(self):
         row = 0
@@ -596,7 +632,7 @@ class GeneralGrid(Gtk.Grid):
                 field = label
 
             field.set_halign(Gtk.Align.START)
-            self.general_grid.attach(field, self.HEADER, row, 2, 1)
+            self.grid.attach(field, self.HEADER, row, 2, 1)
 
             button = None
             button_type = data.get('type')
@@ -614,7 +650,7 @@ class GeneralGrid(Gtk.Grid):
             button.set_halign(Gtk.Align.END)
             self.content[data.get('label_name')] = button
 
-            self.general_grid.attach(button, self.CONTENT, row, 1, 1)
+            self.grid.attach(button, self.CONTENT, row, 1, 1)
 
         tdp_controller = config.get('TDP', 'tdpcontroller')
         code, msg = subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1")
@@ -638,13 +674,13 @@ class GeneralGrid(Gtk.Grid):
 
             label = Gtk.Label(label=_('Synchronice battery mode with CPU TDP mode:'))
             label.set_halign(Gtk.Align.START)
-            self.general_grid.attach(label, self.HEADER, row, 2, 1)
+            self.grid.attach(label, self.HEADER, row, 2, 1)
 
             button = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
             button.set_name('saving_tdpsync')
             button.connect('notify::active', self.manage_events)
             self.content['saving_tdpsync'] = button
-            self.general_grid.attach(button, self.CONTENT, row, 1, 1)
+            self.grid.attach(button, self.CONTENT, row, 1, 1)
 
             code, msg = subprocess.getstatusoutput('which ' + tdp_controller)
             if code != 0:
@@ -672,7 +708,7 @@ class GeneralGrid(Gtk.Grid):
                     ))
                     label.set_name('link')
                     label.set_halign(Gtk.Align.START)
-                    self.general_grid.attach(label, self.HEADER, row, 2, 1)
+                    self.grid.attach(label, self.HEADER, row, 2, 1)
 
         row += 1
         buttons_grid = Gtk.Grid(column_homogeneous=True,
@@ -680,7 +716,7 @@ class GeneralGrid(Gtk.Grid):
                                 row_spacing=20)
         buttons_grid.set_halign(Gtk.Align.CENTER)
         buttons_grid.set_name('radio_grid')
-        self.general_grid.attach(buttons_grid, 0, row, 5, 3)
+        self.grid.attach(buttons_grid, 0, row, 5, 3)
 
         label = Gtk.Label(label=_('Actual energy mode:').upper())
         label.set_name('modes')
@@ -743,7 +779,7 @@ class GeneralGrid(Gtk.Grid):
         button = self.content['modo_actual_{}'.format(current_mode)]
         button.set_active(True)
 
-    def manage_events(self, button, mode):
+    def manage_events(self, button, *args):
         name = button.get_name()
         if name in ['saving_tdpsync']:
             config.set('TDP', name, '1' if button.get_active() else '0')
@@ -752,7 +788,8 @@ class GeneralGrid(Gtk.Grid):
         elif name == 'autostart':
             self.autostart_initial = button.get_active()
         else:
-            config.set('CONFIGURATION', 'modo_actual', mode)
+            if args:
+                config.set('CONFIGURATION', 'modo_actual', args[0])
 
     def save_selection(self):
         button = self.content.get('working_failure')
@@ -803,7 +840,15 @@ class GeneralGrid(Gtk.Grid):
             logger.info('Mode not setting TDP')
 
 
-class SettingsGrid(Gtk.Grid):
+class SettingsGrid(BasePageGrid):
+    GRID_KWARGS = {
+        'column_homogeneous': True,
+        'row_homogeneous': False,
+        'column_spacing': 25,
+        'row_spacing': 20,
+        'halign': Gtk.Align.CENTER,
+    }
+
     INTEL_GOV = [
         (1, 'powersave'),
         (2, 'performance'),
@@ -1065,37 +1110,22 @@ class SettingsGrid(Gtk.Grid):
         return usb_list
 
     def __init__(self, parent, custom_file, *args, **kwargs):
-        kwargs.setdefault('column_homogeneous', True)
-        kwargs.setdefault('column_spacing', 0)
-        kwargs.setdefault('row_spacing', 20)
-        super(SettingsGrid, self).__init__(*args, **kwargs)
-
-        self.parent = parent
         self.custom_file = custom_file
         self.custom_file_path = os.path.join(user_home, '.config/slimbookbattery/custom', custom_file)
-        self.grid = Gtk.Grid(column_homogeneous=True,
-                             row_homogeneous=False,
-                             column_spacing=25,
-                             row_spacing=20)
-
-        self.attach(self.grid, 0, 0, 2, 1)
-
-        self.grid.set_halign(Gtk.Align.CENTER)
-        if self.parent.min_resolution:
-            self.grid.set_name('smaller_label')
 
         self.label_col = 0
         self.button_col = 3
         self.label_col2 = 4
         self.button_col2 = 8
-        if self.parent.min_resolution:
+        if parent.min_resolution:
             self.button_col = 5
             self.label_col2 = 0
             self.button_col2 = 5
 
-        self.content = {}
-        self.setup()
-        self.complete_values()
+        super(SettingsGrid, self).__init__(parent, *args, **kwargs)
+        if self.parent.min_resolution:
+            self.grid.set_name('smaller_label')
+        self.attach(self.grid, 0, 0, 2, 1)
 
     def setup(self):
         row = self.setup_battery_column()
@@ -1406,7 +1436,14 @@ class SettingsGrid(Gtk.Grid):
             ))
 
 
-class CyclesGrid(Gtk.Grid):
+class CyclesGrid(BasePageGrid):
+    tab_name = _('Cycles')
+    GRID_KWARGS = {
+        'column_homogeneous': True,
+        'column_spacing': 40,
+        'row_spacing': 20,
+        'halign': Gtk.Align.CENTER,
+    }
     FIELDS = [
         {
             'label_name': 'alerts',
@@ -1435,24 +1472,6 @@ class CyclesGrid(Gtk.Grid):
         },
     ]
 
-    def __init__(self, parent, *args, **kwargs):
-        kwargs.setdefault('column_homogeneous', True)
-        kwargs.setdefault('column_spacing', 0)
-        kwargs.setdefault('row_spacing', 20)
-        super(CyclesGrid, self).__init__(*args, **kwargs)
-
-        self.parent = parent
-        self.grid = Gtk.Grid(column_homogeneous=True,
-                             column_spacing=40,
-                             row_spacing=20)
-        self.grid.set_halign(Gtk.Align.CENTER)
-
-        self.attach(self.grid, 0, 3, 2, 1)
-
-        self.content = {}
-        self.setup()
-        self.complete_values()
-
     def setup(self):
         for row, data in enumerate(self.FIELDS):
             button_type = data.get('type')
@@ -1476,6 +1495,7 @@ class CyclesGrid(Gtk.Grid):
             button.set_name(data.get('label_name'))
             self.content[data.get('label_name')] = button
             self.grid.attach(button, 1, row, 1, 1)
+        self.attach(self.grid, 0, 3, 2, 1)
 
     def complete_values(self):
         for data in self.FIELDS:
@@ -1711,91 +1731,41 @@ class Preferences(Gtk.ApplicationWindow):
     # NOTEBOOK ***************************************************************
 
         notebook = Gtk.Notebook.new()
-        if self.min_resolution == True:
+        if self.min_resolution:
             notebook.set_name('smaller_label')
             notebook.set_vexpand(True)
             notebook.set_hexpand(False)
-        
 
         notebook.set_tab_pos(Gtk.PositionType.TOP)
         win_grid.attach(notebook, 0, 3, 1, 1)
 
-
-    # GENERAL PAGE  **********************************************************
-
         print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
 
+        # CREATE TABS
         self.general_page_grid = GeneralGrid(self)
-        notebook.append_page(self.general_page_grid, Gtk.Label.new(_('General')))
+        notebook.append_page(self.general_page_grid.get_page(),
+                             Gtk.Label.new(self.general_page_grid.tab_name))
 
-    # CONFIG MODE PAGES ********************************************************
         for data in self.CONFIG_TABS:
             setattr(
                 self, data.get('attr'),
                 SettingsGrid(self, data.get('filename'))
             )
             page_grid = getattr(self, data.get('attr'))
-            if self.min_resolution:
-                scrolled_window = Gtk.ScrolledWindow()
-                scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC,
-                                           Gtk.PolicyType.AUTOMATIC)
+            notebook.append_page(page_grid.get_page(),
+                                 Gtk.Label.new(data.get('title')))
 
-                scrolled_window.set_min_content_height(400)
-                scrolled_window.set_min_content_width(1000)
+        cycles_page_grid = CyclesGrid(self)
+        notebook.append_page(cycles_page_grid.get_page(),
+                             Gtk.Label.new(cycles_page_grid.tab_name))
 
-                scrolled_window.add_with_viewport(page_grid)
-                page_grid = scrolled_window
+        battery_page_grid = BatteryGrid(self)
+        notebook.append_page(battery_page_grid.get_page(),
+                             Gtk.Label.new(battery_page_grid.tab_name))
 
-            notebook.append_page(page_grid, Gtk.Label.new(data.get('title')))
-
-    # CYCLES PAGE ************************************************************
-
-        self.cycles_page_grid = CyclesGrid(self)
-
-        if self.min_resolution:
-            scrolled_window1 = Gtk.ScrolledWindow()
-            scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-
-            scrolled_window1.set_min_content_height(400)
-            scrolled_window1.set_min_content_width(1000)
-
-            scrolled_window1.add_with_viewport(self.cycles_page_grid)
-            notebook.append_page(scrolled_window1, Gtk.Label.new(_('Cycles')))
-        else:
-            notebook.append_page(self.cycles_page_grid, Gtk.Label.new(_('Cycles')))
-
-    # BATTERY INFO PAGE ******************************************************
-
-        cycles_page_grid = BatteryGrid(self)
-
-        if self.min_resolution:
-            scrolled_window1 = Gtk.ScrolledWindow()
-            scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-
-            scrolled_window1.set_min_content_height(400)
-            scrolled_window1.set_min_content_width(1000)
-
-            scrolled_window1.add_with_viewport(cycles_page_grid)
-            notebook.append_page(scrolled_window1, Gtk.Label.new(_('Battery')))
-        else:
-            notebook.append_page(cycles_page_grid, Gtk.Label.new(_('Battery')))
-
-    # INFO PAGE **************************************************************
         info_page_grid = InfoPageGrid(self)
-
-        if self.min_resolution:
-            info_page_grid.info_grid.set_name('smaller_label')
-
-            scrolled_window1 = Gtk.ScrolledWindow()
-            scrolled_window1.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
-
-            scrolled_window1.set_min_content_height(400)
-            scrolled_window1.set_min_content_width(1000)
-
-            scrolled_window1.add_with_viewport(info_page_grid)
-            notebook.append_page(scrolled_window1, Gtk.Label.new(_('Information')))
-        else:
-            notebook.append_page(info_page_grid, Gtk.Label.new(_('Information')))
+        notebook.append_page(info_page_grid.get_page(),
+                             Gtk.Label.new(info_page_grid.tab_name))
 
         # END
         self.child_process.terminate()
