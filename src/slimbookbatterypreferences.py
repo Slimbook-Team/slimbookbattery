@@ -1315,17 +1315,15 @@ class SettingsGrid(BasePageGrid):
         button = self.content['wifi_lan']
 
         lan_disconnect = content[content.find('DEVICES_TO_ENABLE_ON_LAN_DISCONNECT='):]
-        lan_disconnect = lan_disconnect[:line.find('\n')]
-        
+        lan_disconnect = lan_disconnect[:lan_disconnect.find('\n')]
+
         lan_connect = content[content.find('DEVICES_TO_DISABLE_ON_LAN_CONNECT='):]
-        lan_connect = lan_connect[:line.find('\n')]
+        lan_connect = lan_connect[:lan_connect.find('\n')]
         
         button.set_active(
             'wifi' in lan_disconnect and 'wifi' in lan_connect
         )
-        
-        print(line)
-        print(lan_connect)
+
 
 
         button = self.content['usb']
@@ -1475,26 +1473,31 @@ class CyclesGrid(BasePageGrid):
             'label_name': 'alerts',
             'label': _('Enable cycle alerts'),
             'type': 'switch',
+            'lenght': 10
         },
         {
             'label_name': 'max_battery_value',
             'label': _('Max battery value:'),
             'type': 'scale',
+            'lenght': 100
         },
         {
             'label_name': 'min_battery_value',
             'label': _('Min battery value:'),
             'type': 'scale',
+            'lenght': 100
         },
         {
             'label_name': 'max_battery_times',
             'label': _('Number of times:'),
             'type': 'scale',
+            'lenght': 10
         },
         {
             'label_name': 'time_between_warnings',
             'label': _('Time between Warnings:'),
             'type': 'scale',
+            'lenght': 100
         },
     ]
 
@@ -1513,7 +1516,7 @@ class CyclesGrid(BasePageGrid):
             elif button_type == 'scale':
                 button = Gtk.Scale()
                 button.set_size_request(200, 10)
-                button.set_adjustment(Gtk.Adjustment.new(0, 0, 100, 5, 5, 0))
+                button.set_adjustment(Gtk.Adjustment.new(0, 0, data.get('lenght'), 5, 5, 0))
                 button.set_digits(0)
                 button.set_hexpand(True)
                 button.connect('change-value', self.manage_events)
@@ -1538,7 +1541,7 @@ class CyclesGrid(BasePageGrid):
         if isinstance(button, Gtk.Switch):
             value = '1' if button.get_active() else '0'
         else:
-            value = str(button.get_value())
+            value = str(int(button.get_value()))
         config.set('CONFIGURATION', name, value)
 
 
