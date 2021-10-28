@@ -1313,10 +1313,20 @@ class SettingsGrid(BasePageGrid):
             button.set_active(active_mode)
 
         button = self.content['wifi_lan']
+
+        lan_disconnect = content[content.find('DEVICES_TO_ENABLE_ON_LAN_DISCONNECT='):]
+        lan_disconnect = lan_disconnect[:line.find('\n')]
+        
+        lan_connect = content[content.find('DEVICES_TO_DISABLE_ON_LAN_CONNECT='):]
+        lan_connect = lan_connect[:line.find('\n')]
+        
         button.set_active(
-            'DEVICES_TO_DISABLE_ON_LAN_CONNECT="wifi"' in content and
-            'DEVICES_TO_ENABLE_ON_LAN_DISCONNECT="wifi"' in content
+            'wifi' in lan_disconnect and 'wifi' in lan_connect
         )
+        
+        print(line)
+        print(lan_connect)
+
 
         button = self.content['usb']
         usb_autosuspend = bool('USB_AUTOSUSPEND=1' in content)
