@@ -6,7 +6,7 @@ slimbookbattery (4.0.3) focal; urgency=low
 
   * Default system view
   * Code separated in classes
-  *
+  * Compatibility with TLP 1.4
 
 
  -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100

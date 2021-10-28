@@ -1292,12 +1292,12 @@ class SettingsGrid(Gtk.Grid):
         usb_autosuspend = bool('USB_AUTOSUSPEND=1' in content)
         button.set_active(usb_autosuspend)
 
-        button = self.content['usb_list']
-        button.set_sensitive(usb_autosuspend)
+        self.button = self.content['usb_list']
+        self.button.set_sensitive(usb_autosuspend)
         usb_blacklist = content[content.find('USB_BLACKLIST'):]
-        usb_blacklist = usb_blacklist[:usb_blacklist.find('\n')]
-        usb_blacklist = usb_blacklist[len('USB_BLACKLIST="'):-1]
-        button.set_text(usb_blacklist)
+        usb_blacklist = usb_blacklist[usb_blacklist.find('=')+1:usb_blacklist.find('\n')]
+
+        self.button.set_text(usb_blacklist)
 
     def manage_events(self, button, *args):
         name = button.get_name()
@@ -1358,25 +1358,28 @@ class SettingsGrid(Gtk.Grid):
 
         for key, search in {
             'sound': 'SOUND_POWER_SAVE_ON_BAT',
-            'bluetooth_blacklist': 'USB_BLACKLIST_BTUS',
-            'printer_blacklist': 'USB_BLACKLIST_PRINTER',
-            'ethernet_blacklist': 'USB_BLACKLIST_WWAN',
+            'bluetooth_blacklist': 'USB_BLACKLIST_BTUSB USB_EXCLUDE_BTUSB',
+            'printer_blacklist': 'USB_BLACKLIST_PRINTER USB_EXCLUDE_PRINTER',
+            'ethernet_blacklist': 'USB_BLACKLIST_WWAN USB_EXCLUDE_WWAN',
             'usb_shutdown': 'USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN',
             'wifi_profile': 'WIFI_PWR_ON_BAT',
             'usb': 'USB_AUTOSUSPEND',
         }.items():
+            
             button = self.content[key]
             if search == 'WIFI_PWR_ON_BAT':
                 value = 'on' if button.get_active() else 'off'
             else:
                 value = '1' if button.get_active() else '0'
 
-            if '{search}={value}'.format(search=search, value=value) not in content:
-                cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
-                code, msg = subprocess.getstatusoutput(cmd)
-                logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                    self.custom_file, search, value, code, msg
-                ))
+            for search in search.split(' '):
+                print('\n\n\n\n\n'+search, value)
+                if '{search}={value}'.format(search=search, value=value) not in content:
+                    cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
+                    code, msg = subprocess.getstatusoutput(cmd)
+                    logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
+                        self.custom_file, search, value, code, msg
+                    ))
 
         for key, search in {
             'disabled': 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE',
@@ -1404,6 +1407,19 @@ class SettingsGrid(Gtk.Grid):
             logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
                 self.custom_file, search, value, code, msg
             ))
+
+        for key, search in {
+            'old_usb_list': 'USB_BLACKLIST',
+            'new_usb_list': 'USB_DENYLIST',
+        }.items():
+            value = self.button.get_text()
+            cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
+            code, msg = subprocess.getstatusoutput(cmd)
+            logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
+                self.custom_file, search, value, code, msg
+            ))
+
+
 
 
 class Preferences(Gtk.ApplicationWindow):
@@ -1469,7 +1485,6 @@ class Preferences(Gtk.ApplicationWindow):
             print(e)
             self.child_process.terminate()
 
-        # print(str(self.get_size()))
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
