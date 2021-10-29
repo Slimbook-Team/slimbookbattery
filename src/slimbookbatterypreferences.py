@@ -63,7 +63,7 @@ if not os.path.isfile(config_file):
 config.read(config_file)
 
 
-class colors:  # You may need to change color settings
+class Colors:  # You may need to change color settings
     RED = '\033[31m'
     ENDC = '\033[m'
     GREEN = '\033[32m'
@@ -807,7 +807,6 @@ class GeneralGrid(BasePageGrid):
                     logger.error(msg)
 
         if self.autostart_initial:
-            logger.info('Enabling autostart ...')
             destination = os.path.join(
                 user_home, '.config/autostart'
             )
@@ -816,8 +815,10 @@ class GeneralGrid(BasePageGrid):
             source = os.path.join(
                 CURRENT_PATH, 'slimbookbattery-autostart.desktop'
             )
-            shutil.copy(source, destination)
-            config.set('CONFIGURATION', 'autostart', '1')
+            if not os.path.isfile(os.path.join(destination, 'slimbookbattery-autostart.desktop')):
+                logger.info('Enabling autostart ...')
+                shutil.copy(source, destination)
+                config.set('CONFIGURATION', 'autostart', '1')
         else:
             logger.info('Disabling autostart ...')
             autostart_path = os.path.join(user_home, '.config/autostart/slimbookbattery-autostart.desktop')
@@ -1304,10 +1305,22 @@ class SettingsGrid(BasePageGrid):
             values = list(dict(self.INTEL_GOV).values())
             if gov_mode in values:
                 active_mode = values.index(gov_mode)
+            else: 
+                # Setting default mode to save energy
+                if self.custom_file == 'ahorrodeenergia':
+                    active_mode = values.index('powersave')
+                else:
+                    active_mode = values.index('performance')
         elif governor in ['acpi-cpufreq', 'intel_cpufreq']:
             values = list(dict(self.CPUFREQ_GOV).values())
             if gov_mode in values:
                 active_mode = values.index(gov_mode)
+            else:
+                # Setting default mode
+                if self.custom_file == 'ahorrodeenergia':
+                    active_mode = values.index('powersave')
+                else:
+                    active_mode = values.index('ondemand')
 
         if active_mode is not None:
             button.set_active(active_mode)
@@ -1334,6 +1347,7 @@ class SettingsGrid(BasePageGrid):
         self.button.set_sensitive(usb_autosuspend)
         usb_blacklist = content[content.find('USB_BLACKLIST'):]
         usb_blacklist = usb_blacklist[usb_blacklist.find('=')+1:usb_blacklist.find('\n')]
+        usb_blacklist = usb_blacklist.replace('"', '')
 
         self.button.set_text(usb_blacklist)
 
@@ -1380,19 +1394,21 @@ class SettingsGrid(BasePageGrid):
             search = 'CPU_SCALING_GOVERNOR_ON_BAT'
             model = button.get_model()
             value = model[active][1]
-            cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
-            code, msg = subprocess.getstatusoutput(cmd)
-            logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                self.custom_file, search, value, code, msg
-            ))
+            if '{search}={value}'.format(search=search, value=value) not in content:
+                cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
+                code, msg = subprocess.getstatusoutput(cmd)
+                logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
+                    self.custom_file, search, value, code, msg
+                ))
 
         value = config.getint('SETTINGS', self.SECTION_MAPPING[self.custom_file]['limit_cpu'])
         for search, value in self.CPU_LIMIT[value].items():
-            cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
-            code, msg = subprocess.getstatusoutput(cmd)
-            logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                self.custom_file, search, value, code, msg
-            ))
+            if '{search}={value}'.format(search=search, value=value) not in content:
+                cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
+                code, msg = subprocess.getstatusoutput(cmd)
+                logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
+                    self.custom_file, search, value, code, msg
+                ))
 
         for key, search in {
             'sound': 'SOUND_POWER_SAVE_ON_BAT',
@@ -1411,13 +1427,15 @@ class SettingsGrid(BasePageGrid):
                 value = '1' if button.get_active() else '0'
 
             for search in search.split(' '):
-                print('\n\n\n\n\n'+search, value)
+                # print('{}'.format(Colors.RED)+search+'{}'.format(Colors.ENDC))
                 if '{search}={value}'.format(search=search, value=value) not in content:
-                    cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
-                    code, msg = subprocess.getstatusoutput(cmd)
-                    logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                        self.custom_file, search, value, code, msg
-                    ))
+                    # print('{}Not in content{}'.format(Colors.GREEN, Colors.ENDC))               
+                    if search in content:
+                        cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
+                        code, msg = subprocess.getstatusoutput(cmd)
+                        logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
+                            self.custom_file, search, value, code, msg
+                        ))
 
         for key, search in {
             'disabled': 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE',
@@ -1451,11 +1469,13 @@ class SettingsGrid(BasePageGrid):
             'new_usb_list': 'USB_DENYLIST',
         }.items():
             value = self.button.get_text()
-            cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
-            code, msg = subprocess.getstatusoutput(cmd)
-            logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                self.custom_file, search, value, code, msg
-            ))
+            if '{search}={value}'.format(search=search, value=value) not in content :
+                if search in content:
+                    cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
+                    code, msg = subprocess.getstatusoutput(cmd)
+                    logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
+                        self.custom_file, search, value, code, msg
+                    ))
 
 
 
@@ -1654,7 +1674,7 @@ class Preferences(Gtk.ApplicationWindow):
         ancho, alto = utils.get_display_resolution()
 
         if (int(ancho) >= 1550) and (int(alto) >= 850):
-            print(_('Full window is displayed'))
+            logger.info(_('Full window is displayed'))
         else:
             self.resize(1100, 650)
             self.min_resolution = True
@@ -1703,7 +1723,7 @@ class Preferences(Gtk.ApplicationWindow):
         win_grid.attach(label77, 0, 4, 1, 1)
 
         if subprocess.getstatusoutput('ls ' + user_home + '/.config/slimbookbattery/default/equilibrado')[0] != 0:
-            print('Copiying configuration files ...')
+            logger.info('Copying configuration files ...')
             subprocess.getoutput('cp /usr/share/slimbookbattery/default ' + user_home + '/.config/slimbookbattery/')
             subprocess.getoutput('cp /usr/share/slimbookbattery/custom ' + user_home + '/.config/slimbookbattery/')
 
@@ -1768,7 +1788,7 @@ class Preferences(Gtk.ApplicationWindow):
         notebook.set_tab_pos(Gtk.PositionType.TOP)
         win_grid.attach(notebook, 0, 3, 1, 1)
 
-        print((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
+        logger.info((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
 
         # CREATE TABS
         self.general_page_grid = GeneralGrid(self)
@@ -1802,15 +1822,16 @@ class Preferences(Gtk.ApplicationWindow):
         self.show_all()
 
     # CLASS FUNCTIONS ***********************************
+        logger.info('\n')
 
     def style_check(self, button):
 
         if button.get_active():
-            print('system')
+            logger.info('system')
             self.update_config('CONFIGURATION', 'style', 'system')
         else:
             
-            print('original')
+            logger.info('original')
             self.update_config('CONFIGURATION', 'style', 'original')
 
         # To do: restore css provider
@@ -1835,7 +1856,7 @@ class Preferences(Gtk.ApplicationWindow):
         logger.debug("Loading CSS") 
         
     def on_buttonRestGeneral_clicked(self, buttonRestGeneral):
-        print('Reset values called')
+        logger.info('Reset values called')
         os.system('pkexec slimbookbattery-pkexec restore')
         config.read(config_file)
         self.hide()
@@ -1870,59 +1891,58 @@ class Preferences(Gtk.ApplicationWindow):
         check_desktop = subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')
 
         if check_desktop[0] == 0:
-            print('Setting mode ' + mode + ' animations')
+            logger.info('Setting mode ' + mode + ' animations')
             if mode == '0':  # Application off
-                print('Animations Active')
+                logger.info('Animations Active')
                 os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
                 os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
                 os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
             elif mode == '1':
                 if config.getboolean('SETTINGS', 'ahorro_animations'):
-                    print('Animations Inactive')
+                    logger.info('Animations Inactive')
                     os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch false')
                 else:
-                    print('Animations Active')
+                    logger.info('Animations Active')
                     os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
 
             elif mode == '2':
                 if config.getboolean('SETTINGS', 'equilibrado_animations'):
-                    print('Animations Inactive')
+                    logger.info('Animations Inactive')
                     os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch false')
                 else:
-                    print('Animations Active')
+                    logger.info('Animations Active')
                     os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
 
             elif mode == '3':
-                print('xd')
                 if config.getboolean('SETTINGS', 'maxrendimiento_animations'):
-                    print('Animations Inactive')
+                    logger.info('Animations Inactive')
                     os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch false')
                 else:
-                    print('Animations Active')
+                    logger.info('Animations Active')
                     os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
             else:
-                print('mode not found')
+                logger.info('mode not found')
         else:
-            print('Not Gnome desktop ' + str(check_desktop[0]), check_desktop[1])
+            logger.info('Not Gnome desktop {} {}'.format(str(check_desktop[0]), check_desktop[1]))
 
     def close_ok(self, button):
         self.apply_conf()
         exit(0)
 
     def apply_conf(self):
-        print('\nClosing window ...')
+        logger.info('Closing window ...\n')
 
         # Saving interface general values **********************************************************
 
@@ -1937,11 +1957,13 @@ class Preferences(Gtk.ApplicationWindow):
         self.animations(config.get('CONFIGURATION', 'modo_actual'))
 
         # Settings application
-        command = 'pkexec slimbookbattery-pkexec apply'
-        subprocess.Popen(command.split(' '))
+        # command = 'pkexec slimbookbattery-pkexec apply'
+        # print(subprocess.getoutput(command.split(' ')))
+        os.system('pkexec slimbookbattery-pkexec apply')
+
 
     def close(self, button, state):
-        print('Button Close Clicked')
+        logger.info('Button Close Clicked')
         Gtk.main_quit()
         exit(0)
 
@@ -1957,14 +1979,14 @@ class Preferences(Gtk.ApplicationWindow):
         with open(fichero, 'w') as configfile:
             config.write(configfile)
 
-        print("\n- Variable |" + variable + "| updated in .conf, actual value: " + value)
+        logger.info("\n- Variable |" + variable + "| updated in .conf, actual value: " + value)
 
 
 def reboot_process(process_name, path, start):
-    print('Rebooting ' + process_name + ' ...')
-    # print(path)
+    logger.info('Rebooting ' + process_name + ' ...')
+    # logger.info(path)
     process = subprocess.getoutput('pgrep -f ' + process_name)
-    # print(process)
+    # logger.info(process)
 
     # If it find a process, kills it
     if len(process.split('\n')) > 1:
@@ -1972,27 +1994,26 @@ def reboot_process(process_name, path, start):
 
         for i in range(len(proc_list) - 1):
             exit = subprocess.getstatusoutput('kill -9 ' + proc_list[i])
-            print('Killing process ' + proc_list[i] + ' Exit: ' + str(exit[0]))
+            logger.info('Killing process ' + proc_list[i] + ' Exit: ' + str(exit[0]))
             if exit[0] == 1:
-                print(exit[1])
+                logger.info(exit[1])
 
-        print('Launching process...')
+        logger.info('Launching process...')
         if os.system('python3 ' + path + '  &') == 0:
-            print('Done')
+            logger.info('Done')
         else:
-            print("Couldn't launch process")
+            logger.info("Couldn't launch process")
 
     else:
-        print(process_name + ' was not running')
+        logger.info(process_name + ' was not running')
 
         if start:
-            print('Launching process...')
+            logger.info('Launching process...')
             if os.system('python3 ' + path + '  &') == 0:
-                print('Done')
+                logger.info('Done\n')
             else:
-                print("Couldn't launch process")
-
-    print()
+                logger.info("Couldn't launch process\n")
+    logger.info('\n')
 
 
 if __name__ == "__main__":
