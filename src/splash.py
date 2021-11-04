@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-import utils
+
 import gi
 
+import utils
+
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GdkPixbuf
+from gi.repository import Gtk, GdkPixbuf
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '../images'))
@@ -39,12 +41,12 @@ class Splash(Gtk.Window):
 
         height, width = utils.get_display_resolution()
         if (int(width) >= 1550) and (int(height) >= 850):
-            width=300
-            height=300
-        
+            width = 300
+            height = 300
+
         else:
-            width=400
-            height=400
+            width = 400
+            height = 400
 
         # set content for the spash window
         pix_buffer = GdkPixbuf.Pixbuf.new_from_file_at_scale(
@@ -76,6 +78,5 @@ def splash_window():
 
 
 if __name__ == '__main__':
-
     splash_window()
     Gtk.main()

@@ -49,6 +49,11 @@ IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
 CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
 
+INTEL_ES = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
+INTEL_EN = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
+AMD_ES = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
+AMD_EN = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
+
 _ = utils.load_translation('preferences')
 
 lang = utils.get_languages()[0]
@@ -300,7 +305,7 @@ class InfoPageGrid(BasePageGrid):
 
     def setup_contact(self):
         info = Gtk.Label(label='')
-        msg = "<span><b>{}</b> {} {}</span>".format(
+        msg = "<span><b>{}</b> {} {} {}</span>".format(
             _("Info:"),
             _("Contact with us if you find something wrong. "),
             _("\nWe would appreciate that you attach the file that is generated"),
@@ -693,14 +698,14 @@ class GeneralGrid(BasePageGrid):
 
                 if tdp_controller == 'slimbookintelcontroller':
                     if lang == 'es':
-                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
+                        link = INTEL_ES
                     else:
-                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
+                        link = INTEL_EN
                 else:
                     if lang == 'es':
-                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
+                        link = AMD_ES
                     else:
-                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
+                        link = AMD_EN
 
                 if link:
                     row += 1
@@ -1344,13 +1349,13 @@ class SettingsGrid(BasePageGrid):
         usb_autosuspend = bool('USB_AUTOSUSPEND=1' in content)
         button.set_active(usb_autosuspend)
 
-        self.button = self.content['usb_list']
-        self.button.set_sensitive(usb_autosuspend)
+        button = self.content['usb_list']
+        button.set_sensitive(usb_autosuspend)
         usb_blacklist = content[content.find('USB_BLACKLIST'):]
-        usb_blacklist = usb_blacklist[usb_blacklist.find('=')+1:usb_blacklist.find('\n')]
+        usb_blacklist = usb_blacklist[usb_blacklist.find('=') + 1:usb_blacklist.find('\n')]
         usb_blacklist = usb_blacklist.replace('"', '')
 
-        self.button.set_text(usb_blacklist)
+        button.set_text(usb_blacklist)
 
     def manage_events(self, button, *args):
         name = button.get_name()
@@ -1465,11 +1470,12 @@ class SettingsGrid(BasePageGrid):
                 self.custom_file, search, value, code, msg
             ))
 
+        button = self.content['usb_list']
         for key, search in {
             'old_usb_list': 'USB_BLACKLIST',
             'new_usb_list': 'USB_DENYLIST',
         }.items():
-            value = self.button.get_text()
+            value = button.get_text()
             if '{search}={value}'.format(search=search, value=value) not in content:
                 if search in content:
                     cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
