@@ -1719,8 +1719,8 @@ class Preferences(Gtk.ApplicationWindow):
 
         label77.set_markup('<span font="10">Version: ' + version + '</span>')
 
-        win_grid.attach(hbox, 0, 4, 1, 1)
-        win_grid.attach(label77, 0, 4, 1, 1)
+        win_grid.attach(hbox, 3, 5, 2, 1)
+        win_grid.attach(label77, 0, 5, 1, 1)
 
         if subprocess.getstatusoutput('ls ' + user_home + '/.config/slimbookbattery/default/equilibrado')[0] != 0:
             logger.info('Copying configuration files ...')
@@ -1743,7 +1743,7 @@ class Preferences(Gtk.ApplicationWindow):
         logo = Gtk.Image.new_from_pixbuf(pixbuf)
         logo.set_halign(Gtk.Align.START)
         logo.set_valign(Gtk.Align.START)
-        win_grid.attach(logo, 0, 0, 1, 4)
+        win_grid.attach(logo, 0, 0, 4, 2)
 
         hbox = Gtk.HBox(halign=Gtk.Align.END, valign=Gtk.Align.START)
 
@@ -1773,7 +1773,7 @@ class Preferences(Gtk.ApplicationWindow):
         hbox.add(check)
         hbox.add(evnt_close)
         
-        win_grid.attach(hbox, 0, 0, 1, 4)
+        win_grid.attach(hbox, 4, 0, 1, 4)
         
 
 
@@ -1786,7 +1786,7 @@ class Preferences(Gtk.ApplicationWindow):
             notebook.set_hexpand(False)
 
         notebook.set_tab_pos(Gtk.PositionType.TOP)
-        win_grid.attach(notebook, 0, 3, 1, 1)
+        win_grid.attach(notebook, 0, 1, 5, 4)
 
         logger.info((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
 
