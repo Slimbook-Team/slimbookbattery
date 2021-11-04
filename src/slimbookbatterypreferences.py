@@ -27,6 +27,7 @@ import shutil
 import subprocess
 import sys
 import time
+from distutils.dir_util import copy_tree
 
 import gi
 
@@ -41,26 +42,28 @@ from gi.repository import Gtk, Gdk, GdkPixbuf
 
 logger = logging.getLogger()
 
-user = utils.get_user()
-user_home = os.path.expanduser("~{}".format(user))
+USER_NAME = utils.get_user()
+HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 
-imagespath = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
-config_file = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
+IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
+CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
+CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
 
 _ = utils.load_translation('preferences')
 
-idiomas = utils.get_languages()[0]
+lang = utils.get_languages()[0]
 
 config = configparser.ConfigParser()
 
-if not os.path.isfile(config_file):
+if not os.path.isfile(CONFIG_FILE):
     try:
         import check_config  # Fix config and reload
-        check_config.main()
-    except:
-        pass
 
-config.read(config_file)
+        check_config.main()
+    except Exception:
+        logger.exception('Error fixing config file')
+
+config.read(CONFIG_FILE)
 
 
 class Colors:  # You may need to change color settings
@@ -181,7 +184,7 @@ class InfoPageGrid(BasePageGrid):
 
         # Icon
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'normal.png'),
+            filename=os.path.join(IMAGES_PATH, 'normal.png'),
             width=60,
             height=60,
             preserve_aspect_ratio=True)
@@ -218,7 +221,7 @@ class InfoPageGrid(BasePageGrid):
         for social in self.SOCIAL:
             icon = Gtk.Image.new_from_pixbuf(
                 GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                    filename=os.path.join(imagespath, social.get('icon')),
+                    filename=os.path.join(IMAGES_PATH, social.get('icon')),
                     width=25,
                     height=25,
                     preserve_aspect_ratio=True
@@ -272,7 +275,7 @@ class InfoPageGrid(BasePageGrid):
         box.set_halign(Gtk.Align.CENTER)
 
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'GitHub_Logo_White.png'),
+            filename=os.path.join(IMAGES_PATH, 'GitHub_Logo_White.png'),
             width=150,
             height=30,
             preserve_aspect_ratio=True)
@@ -327,7 +330,7 @@ class InfoPageGrid(BasePageGrid):
         box = Gtk.HBox()
         box.set_halign(Gtk.Align.CENTER)
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'cc.png'),
+            filename=os.path.join(IMAGES_PATH, 'cc.png'),
             width=150,
             height=30,
             preserve_aspect_ratio=True)
@@ -358,7 +361,7 @@ class InfoPageGrid(BasePageGrid):
             desktop = os.environ.get("XDG_CURRENT_DESKTOP")
 
             cmd = "pkexec slimbookbattery-pkexec report {path} {desktop} {user_home}".format(
-                path=path, desktop=desktop, user_home=user_home
+                path=path, desktop=desktop, user_home=HOMEDIR
             )
             code, output = subprocess.getstatusoutput(cmd)
             if code == 0:
@@ -543,7 +546,7 @@ class BatteryGrid(BasePageGrid):
 
 class GeneralGrid(BasePageGrid):
     tab_name = _('General')
-    allow_minimize = False
+    allow_minimize = True
     HEADER = 1
     CONTENT = 3
 
@@ -625,7 +628,7 @@ class GeneralGrid(BasePageGrid):
                 field.pack_start(label, True, True, 0)
 
                 icon = Gtk.Image()
-                icon.set_from_file(os.path.join(imagespath, 'help.png'))
+                icon.set_from_file(os.path.join(IMAGES_PATH, 'help.png'))
                 icon.set_tooltip_text(data.get('help'))
                 field.pack_start(icon, True, True, 0)
             else:
@@ -689,12 +692,12 @@ class GeneralGrid(BasePageGrid):
                 button.set_state(False)
 
                 if tdp_controller == 'slimbookintelcontroller':
-                    if idiomas == 'es':
+                    if lang == 'es':
                         link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
                     else:
                         link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
                 else:
-                    if idiomas == 'es':
+                    if lang == 'es':
                         link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
                     else:
                         link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
@@ -731,7 +734,7 @@ class GeneralGrid(BasePageGrid):
         base_toggle = None
         for column, data in enumerate(self.MODES):
             pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename=os.path.join(imagespath, data.get('icon')),
+                filename=os.path.join(IMAGES_PATH, data.get('icon')),
                 width=width,
                 height=height,
                 preserve_aspect_ratio=True)
@@ -759,7 +762,7 @@ class GeneralGrid(BasePageGrid):
             button.set_active(config.getboolean('CONFIGURATION', field))
 
         self.autostart_initial = os.path.isfile(os.path.join(
-            user_home, ".config/autostart/slimbookbattery-autostart.desktop"
+            HOMEDIR, ".config/autostart/slimbookbattery-autostart.desktop"
         ))
         button = self.content['autostart']
         button.set_active(self.autostart_initial)
@@ -808,7 +811,7 @@ class GeneralGrid(BasePageGrid):
 
         if self.autostart_initial:
             destination = os.path.join(
-                user_home, '.config/autostart'
+                HOMEDIR, '.config/autostart'
             )
             if not os.path.isdir(destination):
                 os.mkdir(destination)
@@ -821,7 +824,7 @@ class GeneralGrid(BasePageGrid):
                 config.set('CONFIGURATION', 'autostart', '1')
         else:
             logger.info('Disabling autostart ...')
-            autostart_path = os.path.join(user_home, '.config/autostart/slimbookbattery-autostart.desktop')
+            autostart_path = os.path.join(HOMEDIR, '.config/autostart/slimbookbattery-autostart.desktop')
             if os.path.isfile(autostart_path):
                 os.remove(autostart_path)
             config.set('CONFIGURATION', 'autostart', '0')
@@ -1112,7 +1115,7 @@ class SettingsGrid(BasePageGrid):
 
     def __init__(self, parent, custom_file, *args, **kwargs):
         self.custom_file = custom_file
-        self.custom_file_path = os.path.join(user_home, '.config/slimbookbattery/custom', custom_file)
+        self.custom_file_path = os.path.join(HOMEDIR, '.config/slimbookbattery/custom', custom_file)
 
         self.label_col = 0
         self.button_col = 3
@@ -1172,7 +1175,7 @@ class SettingsGrid(BasePageGrid):
                                   xoptions=Gtk.AttachOptions.SHRINK,
                                   yoptions=Gtk.AttachOptions.SHRINK)
                 icon = Gtk.Image()
-                icon.set_from_file(os.path.join(imagespath, data.get('icon', 'help.png')))
+                icon.set_from_file(os.path.join(IMAGES_PATH, data.get('icon', 'help.png')))
                 icon.set_tooltip_text(data.get('help'))
                 icon.set_halign(Gtk.Align.START)
                 table_icon.attach(icon, 1, 2, 0, 1,
@@ -1305,7 +1308,7 @@ class SettingsGrid(BasePageGrid):
             values = list(dict(self.INTEL_GOV).values())
             if gov_mode in values:
                 active_mode = values.index(gov_mode)
-            else: 
+            else:
                 # Setting default mode to save energy
                 if self.custom_file == 'ahorrodeenergia':
                     active_mode = values.index('powersave')
@@ -1332,12 +1335,10 @@ class SettingsGrid(BasePageGrid):
 
         lan_connect = content[content.find('DEVICES_TO_DISABLE_ON_LAN_CONNECT='):]
         lan_connect = lan_connect[:lan_connect.find('\n')]
-        
+
         button.set_active(
             'wifi' in lan_disconnect and 'wifi' in lan_connect
         )
-
-
 
         button = self.content['usb']
         usb_autosuspend = bool('USB_AUTOSUSPEND=1' in content)
@@ -1410,7 +1411,7 @@ class SettingsGrid(BasePageGrid):
                     self.custom_file, search, value, code, msg
                 ))
 
-        for key, search in {
+        for key, search_items in {
             'sound': 'SOUND_POWER_SAVE_ON_BAT',
             'bluetooth_blacklist': 'USB_BLACKLIST_BTUSB USB_EXCLUDE_BTUSB',
             'printer_blacklist': 'USB_BLACKLIST_PRINTER USB_EXCLUDE_PRINTER',
@@ -1419,17 +1420,17 @@ class SettingsGrid(BasePageGrid):
             'wifi_profile': 'WIFI_PWR_ON_BAT',
             'usb': 'USB_AUTOSUSPEND',
         }.items():
-            
+
             button = self.content[key]
-            if search == 'WIFI_PWR_ON_BAT':
+            if search_items == 'WIFI_PWR_ON_BAT':
                 value = 'on' if button.get_active() else 'off'
             else:
                 value = '1' if button.get_active() else '0'
 
-            for search in search.split(' '):
+            for search in search_items.split(' '):
                 # print('{}'.format(Colors.RED)+search+'{}'.format(Colors.ENDC))
                 if '{search}={value}'.format(search=search, value=value) not in content:
-                    # print('{}Not in content{}'.format(Colors.GREEN, Colors.ENDC))               
+                    # print('{}Not in content{}'.format(Colors.GREEN, Colors.ENDC))
                     if search in content:
                         cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
                         code, msg = subprocess.getstatusoutput(cmd)
@@ -1469,15 +1470,13 @@ class SettingsGrid(BasePageGrid):
             'new_usb_list': 'USB_DENYLIST',
         }.items():
             value = self.button.get_text()
-            if '{search}={value}'.format(search=search, value=value) not in content :
+            if '{search}={value}'.format(search=search, value=value) not in content:
                 if search in content:
                     cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
                     code, msg = subprocess.getstatusoutput(cmd)
                     logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
                         self.custom_file, search, value, code, msg
                     ))
-
-
 
 
 class CyclesGrid(BasePageGrid):
@@ -1583,21 +1582,19 @@ class Preferences(Gtk.ApplicationWindow):
             'title': _('Maximum Performance'),
         },
     ]
+    ANIMATIONS = {
+        '1': 'ahorro_animations',
+        '2': 'equilibrado_animations',
+        '3': 'maxrendimiento_animations',
+    }
+
     min_resolution = False
-    state_actual = ''
-    autostart_inicial = ''
-    modo_actual = ''
-    workMode = ''
-    icono_actual = ''
 
     def __init__(self):
-
         self.__setup_css()
-    
         Gtk.Window.__init__(self, title=(_('Slimbook Battery Preferences')))
 
         self.get_style_context().add_class("bg-image")
-
         self.set_position(Gtk.WindowPosition.CENTER)  # // Allow movement
 
         self.set_size_request(0, 0)
@@ -1614,9 +1611,10 @@ class Preferences(Gtk.ApplicationWindow):
         self.connect('motion-notify-event', self.on_mouse_moved)
 
         # Center
-        # self.connect('realize', self.on_realize)
+        self.connect('realize', self.on_realize)
+        splash = os.path.join(CURRENT_PATH, 'splash.py')
 
-        self.child_process = subprocess.Popen(CURRENT_PATH + '/splash.py', stdout=subprocess.PIPE)
+        self.child_process = subprocess.Popen(splash, stdout=subprocess.PIPE)
 
         self.general_page_grid = None
         self.low_page_grid = None
@@ -1624,10 +1622,9 @@ class Preferences(Gtk.ApplicationWindow):
         self.high_page_grid = None
         try:
             self.set_ui()
-        except Exception as e:
+        except Exception:
             logger.exception('Unexpected error')
             self.child_process.terminate()
-
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -1662,19 +1659,16 @@ class Preferences(Gtk.ApplicationWindow):
             self.y_in_drag = event.y_root
 
     def set_ui(self):
-
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'normal.png'),
+        self.set_default_icon(GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=os.path.join(IMAGES_PATH, 'normal.png'),
             width=825,
             height=225,
             preserve_aspect_ratio=True)
+        )
 
-        self.set_default_icon(pixbuf)
-
-        ancho, alto = utils.get_display_resolution()
-
-        if (int(ancho) >= 1550) and (int(alto) >= 850):
-            logger.info(_('Full window is displayed'))
+        display_width, display_height = utils.get_display_resolution()
+        if int(display_width) >= 1550 and int(display_height) >= 850:
+            logger.debug(_('Full window is displayed'))
         else:
             self.resize(1100, 650)
             self.min_resolution = True
@@ -1685,99 +1679,115 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.add(win_grid)
 
-        self.RestoreValues = Gtk.Button(label=(_('Restore default values')), valign=Gtk.Align.END, halign=Gtk.Align.END)
-        self.RestoreValues.set_name('restore')
-        self.RestoreValues.connect("clicked", self.on_buttonRestGeneral_clicked)
+        restore_values = Gtk.Button(label=(_('Restore default values')), valign=Gtk.Align.END, halign=Gtk.Align.END)
+        restore_values.set_name('restore')
+        restore_values.connect("clicked", self.manage_events)
 
-        self.btnCancel = Gtk.Button(label=(_('Cancel')), valign=Gtk.Align.END, halign=Gtk.Align.END)
-        self.btnCancel.set_name('cancel')
-        self.btnCancel.connect("clicked", self.close, 'x')
-       
-        self.btnAccept = Gtk.Button(label=(_('Accept')), valign=Gtk.Align.END, halign=Gtk.Align.END)
-        self.btnAccept.set_name('accept')
-        self.btnAccept.connect("clicked", self.close_ok)
+        btn_cancel = Gtk.Button(label=(_('Cancel')), valign=Gtk.Align.END, halign=Gtk.Align.END)
+        btn_cancel.set_name('cancel')
+        btn_cancel.connect("clicked", self.manage_events, 'x')
 
-        hbox = Gtk.Box()
-        hbox.pack_start(self.btnCancel, True, True, 0)
-        hbox.pack_start(self.RestoreValues, True, True, 0)
-        hbox.pack_start(self.btnAccept, True, True, 0)
-        hbox.set_halign(Gtk.Align.END)
+        btn_accept = Gtk.Button(label=(_('Accept')), valign=Gtk.Align.END, halign=Gtk.Align.END)
+        btn_accept.set_name('accept')
+        btn_accept.connect("clicked", self.manage_events)
+
+        buttons_box = Gtk.Box()
+        buttons_box.pack_start(btn_cancel, True, True, 0)
+        buttons_box.pack_start(restore_values, True, True, 0)
+        buttons_box.pack_start(btn_accept, True, True, 0)
+        buttons_box.set_halign(Gtk.Align.END)
 
         if self.min_resolution:
-            hbox.set_name('smaller_label')
+            buttons_box.set_name('smaller_label')
 
-        label77 = Gtk.Label(label='', halign = Gtk.Align.START)
-        label77.set_name('version')
+        label_version = Gtk.Label(label='', halign=Gtk.Align.START)
+        label_version.set_name('version')
 
         desk_config = configparser.ConfigParser()
-        desk_config.read('')
         desk_config.read('/usr/share/applications/slimbookbattery.desktop')
-        try:
+        if desk_config.has_option('Desktop Entry', 'Version'):
             version = desk_config.get('Desktop Entry', 'Version')
-        except:
-            version = 'Unknown'
-
-        label77.set_markup('<span font="10">Version: ' + version + '</span>')
-
-        win_grid.attach(hbox, 3, 5, 2, 1)
-        win_grid.attach(label77, 0, 5, 1, 1)
-
-        if subprocess.getstatusoutput('ls ' + user_home + '/.config/slimbookbattery/default/equilibrado')[0] != 0:
-            logger.info('Copying configuration files ...')
-            subprocess.getoutput('cp /usr/share/slimbookbattery/default ' + user_home + '/.config/slimbookbattery/')
-            subprocess.getoutput('cp /usr/share/slimbookbattery/custom ' + user_home + '/.config/slimbookbattery/')
-
-        if self.min_resolution == True:
-            height = 175
-            width=775
         else:
-            height=225
-            width=825
-            
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename=os.path.join(imagespath, 'slimbookbattery-header-2.png'),
-                width=width,
-                height=height,
-                preserve_aspect_ratio=True)
+            version = 'Unknown'
+        label_version.set_markup('<span font="10">Version: {}</span>'.format(version))
 
-        logo = Gtk.Image.new_from_pixbuf(pixbuf)
-        logo.set_halign(Gtk.Align.START)
-        logo.set_valign(Gtk.Align.START)
-        win_grid.attach(logo, 0, 0, 4, 2)
+        win_grid.attach(buttons_box, 3, 5, 2, 1)
+        win_grid.attach(label_version, 0, 5, 1, 1)
 
-        hbox = Gtk.HBox(halign=Gtk.Align.END, valign=Gtk.Align.START)
+        if not os.path.isfile(os.path.join(CONFIG_FOLDER, 'default/equilibrado')):
+            logger.debug('Copy configuration files ...')
+            base_folder = '/usr/share/slimbookbattery/'
+            if not os.path.isdir(base_folder):
+                base_folder = os.path.normpath(os.path.join(CURRENT_PATH, '..'))
+            copy_tree(os.path.join(base_folder, 'default'), os.path.join(CONFIG_FOLDER, 'default'))
+            copy_tree(os.path.join(base_folder, 'custom'), os.path.join(CONFIG_FOLDER, 'custom'))
 
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(imagespath, 'cross.png'),
+        if self.min_resolution:
+            height = 200
+            width = 800
+        else:
+            height = 210
+            width = 810
+
+        pixbuff = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=os.path.join(IMAGES_PATH, 'slimbookbattery-header-2.png'),
+            width=width,
+            height=height,
+            preserve_aspect_ratio=True
+        )
+        self.logo = Gtk.Image.new_from_pixbuf(pixbuff)
+        
+        self.logo.set_halign(Gtk.Align.START)
+        self.logo.set_valign(Gtk.Align.START)
+        win_grid.attach(self.logo, 0, 0, 4, 2)
+
+        
+        
+        """ pixbuff = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=os.path.join(IMAGES_PATH, 'slimbookbattery-header-rev.png'),
+            width=width,
+            height=height,
+            preserve_aspect_ratio=True
+        )
+        self.logo_rev = Gtk.Image.new_from_pixbuf(pixbuff)
+        
+        self.logo_rev.set_halign(Gtk.Align.END)
+        self.logo_rev.set_valign(Gtk.Align.END)
+        win_grid.attach(self.logo_rev, 0, 4, 5, 2) """
+
+
+
+        close_box = Gtk.HBox(halign=Gtk.Align.END, valign=Gtk.Align.START)
+
+        close = Gtk.Image.new_from_pixbuf(GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=os.path.join(IMAGES_PATH, 'cross.png'),
             width=20,
             height=20,
-            preserve_aspect_ratio=True)
-
-        close = Gtk.Image.new_from_pixbuf(pixbuf)
+            preserve_aspect_ratio=True
+        ))
         close.set_name('close_button')
 
-        evnt_close = Gtk.EventBox()
-        evnt_close.add(close)
-        evnt_close.set_halign(Gtk.Align.END)
-        evnt_close.set_valign(Gtk.Align.START)
-        evnt_close.connect('button-press-event', self.close)
+        event_close_box = Gtk.EventBox()
+        event_close_box.set_name('close_box')
+        event_close_box.add(close)
+        event_close_box.set_halign(Gtk.Align.END)
+        event_close_box.set_valign(Gtk.Align.START)
+        event_close_box.connect('button-press-event', self.manage_events)
 
         check = Gtk.CheckButton.new_with_label(label=_('System style'))
+        check.set_name('style')
         check.set_tooltip_text(_('Style will be changed once you reopen the preferences window.'))
         style = config.get('CONFIGURATION', 'style') if config.has_option('CONFIGURATION', 'style') else 'system'
         if style == 'system':
             check.set_active(True)
 
-        check.connect('clicked', self.style_check)
+        check.connect('clicked', self.manage_events)
 
-        hbox.add(check)
-        hbox.add(evnt_close)
-        
-        win_grid.attach(hbox, 4, 0, 1, 4)
-        
+        close_box.add(check)
+        close_box.add(event_close_box)
+        win_grid.attach(close_box, 4, 0, 1, 4)
 
-
-    # NOTEBOOK ***************************************************************
+        # NOTEBOOK ***************************************************************
 
         notebook = Gtk.Notebook.new()
         if self.min_resolution:
@@ -1788,7 +1798,10 @@ class Preferences(Gtk.ApplicationWindow):
         notebook.set_tab_pos(Gtk.PositionType.TOP)
         win_grid.attach(notebook, 0, 1, 5, 4)
 
-        logger.info((_('Width: ')) + str(ancho) + ' ' + (_(' Height: ')) + str(alto))
+        logger.debug("{}{} {}{}".format(
+            _('Width: '), display_width,
+            _(' Height: '), display_height
+        ))
 
         # CREATE TABS
         self.general_page_grid = GeneralGrid(self)
@@ -1824,27 +1837,56 @@ class Preferences(Gtk.ApplicationWindow):
     # CLASS FUNCTIONS ***********************************
         logger.info('\n')
 
-    def style_check(self, button):
+    def manage_events(self, button, *args):
+        name = button.get_name()
+        if name == 'style':
+            value = 'system' if button.get_active() else 'original'
+            logger.info(value)
+            config.set('CONFIGURATION', 'style', value)
 
-        if button.get_active():
-            logger.info('system')
-            self.update_config('CONFIGURATION', 'style', 'system')
-        else:
-            
-            logger.info('original')
-            self.update_config('CONFIGURATION', 'style', 'original')
+            with open(CONFIG_FILE, 'w') as configfile:
+                config.write(configfile)
 
-        # To do: restore css provider
-        # self.hide()
-        # self.__setup_css()
-        # self.show_all()
+            height = 200
+            width = 800
+            if button.get_active():
+                file = os.path.join(IMAGES_PATH, 'slimbookbattery-header-1.png')
+            else:
+                file = os.path.join(IMAGES_PATH, 'slimbookbattery-header-2.png')
+
+            """ pixbuff = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                filename=file,
+                width=width,
+                height=height,
+                preserve_aspect_ratio=True
+                )
+            self.logo.set_from_pixbuf(pixbuff) """
+
+            # To do: restore css provider
+            # self.hide()
+            # self.__setup_css()
+            # self.show_all()
+    
+        elif name == 'restore':
+            os.system('pkexec slimbookbattery-pkexec restore')
+            config.read(CONFIG_FILE)
+            self.hide()
+
+            win = Preferences()
+            win.connect("destroy", Gtk.main_quit)
+            win.show_all()
+        elif name == 'accept':
+            self.apply_conf()
+
+        if name in ['accept', 'close_box', 'cancel']:
+            Gtk.main_quit()
+            exit(0)
 
     def __setup_css(self):
         """Setup the CSS and load it."""
-        try:
+        style = 'original'
+        if config.has_option('CONFIGURATION', 'style'):
             style = config.get('CONFIGURATION', 'style')
-        except:
-            style='original'
 
         provider_file = '{}/css/{}-style.css'.format(CURRENT_PATH, style)
         provider = Gtk.CssProvider()
@@ -1853,76 +1895,20 @@ class Preferences(Gtk.ApplicationWindow):
         provider.load_from_path(provider_file)
         context.add_provider_for_screen(screen, provider,
                                         Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        logger.debug("Loading CSS") 
-        
-    def on_buttonRestGeneral_clicked(self, buttonRestGeneral):
-        logger.info('Reset values called')
-        os.system('pkexec slimbookbattery-pkexec restore')
-        config.read(config_file)
-        self.hide()
-
-        win = Preferences()
-        win.connect("destroy", Gtk.main_quit)
-        win.show_all()
-
-    def on_switch_activated(self, switch):  # Returns switch state
-
-        if switch.get_active():
-            state = True
-            return state
-        else:
-            state = False
-            return state
-
-    def messagedialog(self, title, message):
-
-        dialog = Gtk.MessageDialog(None,
-                                   Gtk.DialogFlags.MODAL,
-                                   Gtk.MessageType.INFO,
-                                   buttons=Gtk.ButtonsType.OK)
-
-        dialog.set_markup("<b>%s</b>" % title)
-        dialog.format_secondary_markup(message)
-        dialog.run()
-        dialog.destroy()
+        logger.debug("Loading CSS - {}".format(style))
 
     def animations(self, mode):
+        check_desktop = 'gnome' in os.environ.get("XDG_CURRENT_DESKTOP", '').lower()
 
-        check_desktop = subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')
-
-        if check_desktop[0] == 0:
+        if check_desktop:
             logger.info('Setting mode ' + mode + ' animations')
             if mode == '0':  # Application off
                 logger.info('Animations Active')
                 os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
                 os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
                 os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
-            elif mode == '1':
-                if config.getboolean('SETTINGS', 'ahorro_animations'):
-                    logger.info('Animations Inactive')
-                    os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
-                    os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
-                    os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch false')
-                else:
-                    logger.info('Animations Active')
-                    os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
-                    os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
-                    os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
-
-            elif mode == '2':
-                if config.getboolean('SETTINGS', 'equilibrado_animations'):
-                    logger.info('Animations Inactive')
-                    os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
-                    os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
-                    os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch false')
-                else:
-                    logger.info('Animations Active')
-                    os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
-                    os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
-                    os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
-
-            elif mode == '3':
-                if config.getboolean('SETTINGS', 'maxrendimiento_animations'):
+            elif mode in self.ANIMATIONS:
+                if config.getboolean('SETTINGS', self.ANIMATIONS.get(mode)):
                     logger.info('Animations Inactive')
                     os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
                     os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
@@ -1935,11 +1921,8 @@ class Preferences(Gtk.ApplicationWindow):
             else:
                 logger.info('mode not found')
         else:
-            logger.info('Not Gnome desktop {} {}'.format(str(check_desktop[0]), check_desktop[1]))
 
-    def close_ok(self, button):
-        self.apply_conf()
-        exit(0)
+            logger.info('Not Gnome desktop')
 
     def apply_conf(self):
         logger.info('Closing window ...\n')
@@ -1951,7 +1934,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.mid_page_grid.save_selection()
         self.high_page_grid.save_selection()
 
-        with open(user_home + '/.config/slimbookbattery/slimbookbattery.conf', 'w') as configfile:
+        with open(os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf'), 'w') as configfile:
             config.write(configfile)
 
         self.animations(config.get('CONFIGURATION', 'modo_actual'))
@@ -1960,26 +1943,6 @@ class Preferences(Gtk.ApplicationWindow):
         # command = 'pkexec slimbookbattery-pkexec apply'
         # print(subprocess.getoutput(command.split(' ')))
         os.system('pkexec slimbookbattery-pkexec apply')
-
-
-    def close(self, button, state):
-        logger.info('Button Close Clicked')
-        Gtk.main_quit()
-        exit(0)
-
-    def update_config(self, section, variable, value):
-
-        fichero = user_home + '/.config/slimbookbattery/slimbookbattery.conf'
-        config.read(fichero)
-
-        # We change our variable: config.set(section, variable, value)
-        config.set(str(section), str(variable), str(value))
-
-        # Writing our configuration file
-        with open(fichero, 'w') as configfile:
-            config.write(configfile)
-
-        logger.info("\n- Variable |" + variable + "| updated in .conf, actual value: " + value)
 
 
 def reboot_process(process_name, path, start):
@@ -1999,7 +1962,8 @@ def reboot_process(process_name, path, start):
                 logger.info(exit[1])
 
         logger.info('Launching process...')
-        if os.system('python3 ' + path + '  &') == 0:
+        if os.path.isfile(path):
+            os.system('python3 {} &'.format(path))
             logger.info('Done')
         else:
             logger.info("Couldn't launch process")
@@ -2009,7 +1973,8 @@ def reboot_process(process_name, path, start):
 
         if start:
             logger.info('Launching process...')
-            if os.system('python3 ' + path + '  &') == 0:
+            if os.path.isfile(path):
+                os.system('python3 {} &'.format(path))
                 logger.info('Done\n')
             else:
                 logger.info("Couldn't launch process\n")
@@ -2020,11 +1985,10 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    #formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(lineno)d - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-
-    
 
     win = Preferences()
     win.connect("destroy", Gtk.main_quit)

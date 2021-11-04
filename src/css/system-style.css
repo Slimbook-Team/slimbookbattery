@@ -20,9 +20,9 @@ stack>grid>grid, scrolledwindow grid{
 }
 
 window notebook{
-    margin-left: 70px;
-    margin-right: 70px;
-    margin-top: 30px;
+    margin-left: 55px;
+    margin-right: 55px;
+    margin-top: 35px;
     margin-bottom: 0px;
 }
 #smaller_label label {
