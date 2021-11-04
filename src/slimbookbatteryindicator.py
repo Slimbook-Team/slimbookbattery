@@ -190,7 +190,9 @@ class Indicator(Gtk.Application):
         subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
 
         tdpcontroller = config.get('TDP', 'tdpcontroller')
-        controller_path = os.path.join('/usr/share/', tdpcontroller, 'src', tdpcontroller, 'indicator.py')
+        indicator = '{}indicator.py'.format(tdpcontroller)
+
+        controller_path = os.path.join('/usr/share/', tdpcontroller, 'src', indicator)
         reboot_process(tdpcontroller, controller_path)
         animations(self.current_mode)
 
