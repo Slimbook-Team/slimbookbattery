@@ -27,7 +27,6 @@ import shutil
 import subprocess
 import sys
 import time
-from distutils.dir_util import copy_tree
 
 import gi
 
@@ -45,6 +44,7 @@ logger = logging.getLogger()
 USER_NAME = utils.get_user()
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 
+UPDATES_DIR = os.path.join(CURRENT_PATH, 'updates','_updates')
 IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
 CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
@@ -1591,6 +1591,14 @@ class Preferences(Gtk.ApplicationWindow):
     min_resolution = False
 
     def __init__(self):
+        
+        if os.path.isdir(UPDATES_DIR):
+            logging.info('Loading updates ...')
+            for file in os.listdir(UPDATES_DIR):
+                update = os.path.join(UPDATES_DIR,file)
+                subprocess.Popen('bash {}'.format(update), shell=True)
+            
+
         self.__setup_css()
         Gtk.Window.__init__(self, title=(_('Slimbook Battery Preferences')))
 
@@ -1611,7 +1619,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.connect('motion-notify-event', self.on_mouse_moved)
 
         # Center
-        self.connect('realize', self.on_realize)
+        #self.connect('realize', self.on_realize)  # On Wayland, monitor = None --> ERROR
         splash = os.path.join(CURRENT_PATH, 'splash.py')
 
         self.child_process = subprocess.Popen(splash, stdout=subprocess.PIPE)
@@ -1625,6 +1633,8 @@ class Preferences(Gtk.ApplicationWindow):
         except Exception:
             logger.exception('Unexpected error')
             self.child_process.terminate()
+
+        
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -1719,8 +1729,9 @@ class Preferences(Gtk.ApplicationWindow):
             base_folder = '/usr/share/slimbookbattery/'
             if not os.path.isdir(base_folder):
                 base_folder = os.path.normpath(os.path.join(CURRENT_PATH, '..'))
-            copy_tree(os.path.join(base_folder, 'default'), os.path.join(CONFIG_FOLDER, 'default'))
-            copy_tree(os.path.join(base_folder, 'custom'), os.path.join(CONFIG_FOLDER, 'custom'))
+            
+            shutil.copytree(os.path.join(base_folder, 'custom'), os.path.join(CONFIG_FOLDER, 'custom'))
+            shutil.copytree(os.path.join(base_folder, 'default'), os.path.join(CONFIG_FOLDER, 'default'))
 
         if self.min_resolution:
             height = 200
@@ -1877,6 +1888,8 @@ class Preferences(Gtk.ApplicationWindow):
             win.show_all()
         elif name == 'accept':
             self.apply_conf()
+            if os.path.isdir(UPDATES_DIR):
+                shutil.rmtree(UPDATES_DIR)
 
         if name in ['accept', 'close_box', 'cancel']:
             Gtk.main_quit()
