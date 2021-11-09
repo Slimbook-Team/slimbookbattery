@@ -1,6 +1,7 @@
 #!/bin/bash
 # This file must be executed inside locale
 # 1. Removing .mo
+cd ../../src/translations/
 for archivo in ./*/LC_MESSAGES/*.mo
 do
 { # try
