@@ -35,10 +35,11 @@ if CURRENT_PATH not in sys.path:
 import utils
 
 gi.require_version('Gtk', '3.0')
-gi.require_version('AppIndicator3', '0.1')
+gi.require_version('AyatanaAppIndicator3', '0.1')
 gi.require_version('Notify', '0.7')
 
-from gi.repository import Gtk, GdkPixbuf, AppIndicator3, Notify
+from gi.repository import Gtk, GdkPixbuf, Notify
+from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 
 USER_NAME = utils.get_user()
 _ = utils.load_translation('slimbookbattery')
