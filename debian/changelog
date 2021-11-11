@@ -4,10 +4,11 @@ slimbookbattery (4.0.3) focal; urgency=low
   * Small resolutions quick fixes
   * Added intel_cpufreq governor
   * Deploy script
-
   * Default system view
   * Code separated in classes
   * Compatibility with TLP 1.4
+  * Switched to ayatana appindicator
+  * Indicator extension easier to enable for GNOME Desktops
 
  -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
 

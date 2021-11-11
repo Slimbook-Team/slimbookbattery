@@ -1594,10 +1594,19 @@ class Preferences(Gtk.ApplicationWindow):
         
         if os.path.isdir(UPDATES_DIR):
             logging.info('Loading updates ...')
+
             for file in os.listdir(UPDATES_DIR):
-                update = os.path.join(UPDATES_DIR,file)
-                subprocess.Popen('bash {}'.format(update), shell=True)
-            
+
+                process = os.path.join(UPDATES_DIR,file)
+                proc = subprocess.Popen('bash {}'.format(process), shell=True)
+
+                # Wait for child process to terminate. Returns returncode attribute.
+                proc.wait()
+                logger.info('\n{} returned exit code {}.'.format(process, proc.returncode))
+                
+                if proc.returncode == 0:
+                    os.remove(process)
+
 
         self.__setup_css()
         Gtk.Window.__init__(self, title=(_('Slimbook Battery Preferences')))
@@ -1701,15 +1710,7 @@ class Preferences(Gtk.ApplicationWindow):
         btn_accept.set_name('accept')
         btn_accept.connect("clicked", self.manage_events)
 
-        buttons_box = Gtk.Box()
-        buttons_box.pack_start(btn_cancel, True, True, 0)
-        buttons_box.pack_start(restore_values, True, True, 0)
-        buttons_box.pack_start(btn_accept, True, True, 0)
-        buttons_box.set_halign(Gtk.Align.END)
-
-        if self.min_resolution:
-            buttons_box.set_name('smaller_label')
-
+                
         label_version = Gtk.Label(label='', halign=Gtk.Align.START)
         label_version.set_name('version')
 
@@ -1720,8 +1721,7 @@ class Preferences(Gtk.ApplicationWindow):
         else:
             version = 'Unknown'
         label_version.set_markup('<span font="10">Version: {}</span>'.format(version))
-
-        win_grid.attach(buttons_box, 3, 5, 2, 1)
+        
         win_grid.attach(label_version, 0, 5, 1, 1)
 
         if not os.path.isfile(os.path.join(CONFIG_FOLDER, 'default/equilibrado')):
@@ -1741,7 +1741,7 @@ class Preferences(Gtk.ApplicationWindow):
             width = 810
 
         pixbuff = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'slimbookbattery-header-2.png'),
+            filename=os.path.join(IMAGES_PATH, 'slimbookbattery-header-4.png'),
             width=width,
             height=height,
             preserve_aspect_ratio=True
@@ -1751,22 +1751,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.logo.set_halign(Gtk.Align.START)
         self.logo.set_valign(Gtk.Align.START)
         win_grid.attach(self.logo, 0, 0, 4, 2)
-
-        
-        
-        """ pixbuff = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'slimbookbattery-header-rev.png'),
-            width=width,
-            height=height,
-            preserve_aspect_ratio=True
-        )
-        self.logo_rev = Gtk.Image.new_from_pixbuf(pixbuff)
-        
-        self.logo_rev.set_halign(Gtk.Align.END)
-        self.logo_rev.set_valign(Gtk.Align.END)
-        win_grid.attach(self.logo_rev, 0, 4, 5, 2) """
-
-
 
         close_box = Gtk.HBox(halign=Gtk.Align.END, valign=Gtk.Align.START)
 
@@ -1794,11 +1778,23 @@ class Preferences(Gtk.ApplicationWindow):
 
         check.connect('clicked', self.manage_events)
 
-        close_box.add(check)
+        buttons_box = Gtk.Box()
+        buttons_box.pack_start(check, True, True, 0)
+        buttons_box.pack_start(btn_cancel, True, True, 0)
+        buttons_box.pack_start(restore_values, True, True, 0)
+        buttons_box.pack_start(btn_accept, True, True, 0)
+        buttons_box.set_halign(Gtk.Align.END)
+        win_grid.attach(buttons_box, 2, 5, 3, 1)
+
+        if self.min_resolution:
+            buttons_box.set_name('smaller_label')
+
+
+        #close_box.add(check)
         close_box.add(event_close_box)
         win_grid.attach(close_box, 4, 0, 1, 4)
 
-        # NOTEBOOK ***************************************************************
+    # NOTEBOOK ***************************************************************
 
         notebook = Gtk.Notebook.new()
         if self.min_resolution:
@@ -1860,18 +1856,6 @@ class Preferences(Gtk.ApplicationWindow):
 
             height = 200
             width = 800
-            if button.get_active():
-                file = os.path.join(IMAGES_PATH, 'slimbookbattery-header-1.png')
-            else:
-                file = os.path.join(IMAGES_PATH, 'slimbookbattery-header-2.png')
-
-            """ pixbuff = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                filename=file,
-                width=width,
-                height=height,
-                preserve_aspect_ratio=True
-                )
-            self.logo.set_from_pixbuf(pixbuff) """
 
             # To do: restore css provider
             # self.hide()
@@ -1888,8 +1872,12 @@ class Preferences(Gtk.ApplicationWindow):
             win.show_all()
         elif name == 'accept':
             self.apply_conf()
+
             if os.path.isdir(UPDATES_DIR):
-                shutil.rmtree(UPDATES_DIR)
+                try:
+                    os.rmdir(UPDATES_DIR)
+                except:
+                    logger.error('Updates folder not empty')
 
         if name in ['accept', 'close_box', 'cancel']:
             Gtk.main_quit()

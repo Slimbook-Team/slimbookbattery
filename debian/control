@@ -8,7 +8,7 @@ Homepage: http://slimbook.es
 
 Package: slimbookbattery
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends},
+Depends: ${misc:Depends}, ${python:Depends}, ${dist:Depends}
 	python3,
 	python3-gi,
 	python3-pil,
@@ -19,11 +19,11 @@ Depends: ${misc:Depends}, ${python:Depends},
 	gir1.2-glib-2.0,
 	gir1.2-notify-0.7,
 	gir1.2-ayatanaappindicator3-0.1,
-	gnome-shell-extension-appindicator,
 	tlp,
 	tlp-rdw,
 	libnotify-bin,
 	cron
+Suggests: gnome-shell-extension-appindicator
 Description: Battery optimization application for portable devices
  Battery optimization application for portable devices that can increase 
  the battery life by 50%. For this purpose, the third-party software 
