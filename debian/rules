@@ -1,10 +1,14 @@
 #!/usr/bin/make -f
 # See debhelper(7) (uncomment to enable)
 # output every command that modifies files on the build system.
-#export DH_VERBOSE = 1
+# export DH_VERBOSE = 1
 
-DPKG_EXPORT_BUILDFLAGS = 1
-include /usr/share/dpkg/default.mk
+# DPKG_EXPORT_BUILDFLAGS = 1
+# include /usr/share/dpkg/default.mk
+
+# ifeq ($(shell echo $XDG_CURRENT_DESKTOP | grep -qi gnome && echo yes),yes)
+# 	SUBSTVARS = -Vdist:Depends="gnome-shell-extension-appindicator"
+# endif
 
 %:
-	dh $@ 
+	dh $@

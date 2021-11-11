@@ -43,8 +43,8 @@ class Splash(Gtk.Window):
             height=300
         
         else:
-            width=400
-            height=400
+            width=500
+            height=500
 
         # set content for the spash window
         pix_buffer = GdkPixbuf.Pixbuf.new_from_file_at_scale(
