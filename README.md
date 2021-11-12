@@ -33,11 +33,6 @@ Run command:
 		sudo apt install slimbookbattery
 <br />
 
-* ## Install from our Open Build Service Repository:
-	[Slimbook Battery Open Build Service Repository](https://software.opensuse.org//download.html?project=home%3ASlimbook%3ASlimbookBattery&package=slimbookbattery)
-<br />
-
-
 * ## From this repository-source   
 	Donwload entire repo. Navigate to it in a terminal. And run deploy.sh script:
 
