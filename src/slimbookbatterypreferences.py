@@ -59,6 +59,9 @@ _ = utils.load_translation('preferences')
 lang = utils.get_languages()[0]
 
 config = configparser.ConfigParser()
+# Add section to prevent configparser.NoSectionError when save
+for section in ['TDP', 'CONFIGURATION', 'SETTINGS']:
+    config.add_section(section)
 
 if not os.path.isfile(CONFIG_FILE):
     try:
@@ -1899,7 +1902,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.mid_page_grid.save_selection()
         self.high_page_grid.save_selection()
 
-        with open(os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf'), 'w') as configfile:
+        with open(CONFIG_FILE, 'w') as configfile:
             config.write(configfile)
 
         self.animations(config.get('CONFIGURATION', 'modo_actual'))
