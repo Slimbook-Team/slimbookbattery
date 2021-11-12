@@ -59,6 +59,9 @@ _ = utils.load_translation('preferences')
 lang = utils.get_languages()[0]
 
 config = configparser.ConfigParser()
+# Add section to prevent configparser.NoSectionError when save
+for section in ['TDP', 'CONFIGURATION', 'SETTINGS']:
+    config.add_section(section)
 
 if not os.path.isfile(CONFIG_FILE):
     try:
@@ -66,9 +69,6 @@ if not os.path.isfile(CONFIG_FILE):
 
         check_config.main()
     except Exception:
-        # Add section to prevent configparser.NoSectionError when save
-        for section in ['TDP', 'CONFIGURATION', 'SETTINGS']:
-            config.add_section(section)
         logger.exception('Error fixing config file')
 
 config.read(CONFIG_FILE)
