@@ -38,7 +38,7 @@ if CURRENT_PATH not in sys.path:
 import utils
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GdkPixbuf
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
 logger = logging.getLogger()
 
@@ -393,6 +393,29 @@ class BatteryGrid(BasePageGrid):
     HEADER = 1
     CONTENT = 3
 
+    TIME_TO_MAPPING = {
+        'discharging': {
+            'header': _('Time to empty:'),
+            'filter': 'time to empty',
+        },
+        'charging': {
+            'header': _('Time to full:'),
+            'filter': 'time to full',
+        },
+        'fully-charged': {
+            'header': _('Time to full:'),
+            'text': _('Fully charged'),
+        },
+    }
+
+    UPDATE_FIELDS = [
+        ('percentage', 'percentage'),
+        ('voltage', 'voltage'),
+        ('rate', 'energy-rate'),
+        ('state', 'state'),
+        ('updated', 'updated'),
+    ]
+
     FIELDS = [
         {
             'label_name': 'native',
@@ -431,20 +454,7 @@ class BatteryGrid(BasePageGrid):
         },
         {
             'label_name': 'time_to',
-            'mapping': {
-                'discharging': {
-                    'header': _('Time to empty:'),
-                    'filter': 'time to empty',
-                },
-                'charging': {
-                    'header': _('Time to full:'),
-                    'filter': 'time to full',
-                },
-                'fully-charged': {
-                    'header': _('Time to full:'),
-                    'text': _('Fully charged'),
-                },
-            },
+            'mapping': TIME_TO_MAPPING,
         },
         {
             'label_name': 'rechargeable',
@@ -514,9 +524,10 @@ class BatteryGrid(BasePageGrid):
             label.set_halign(Gtk.Align.START)
             self.content[label_name] = label
             self.grid.attach(label, self.CONTENT, line, 2, 1)
+        GLib.timeout_add_seconds(2, self._update_labels)
 
-    def complete_values(self):
-        content = None
+    @staticmethod
+    def get_battery_data():
         code, battery_raw = subprocess.getstatusoutput(
             "upower -i `upower -e | grep 'BAT'`"
         )
@@ -525,6 +536,30 @@ class BatteryGrid(BasePageGrid):
             if ':' in line:
                 key, value = line.split(':', 1)
                 battery_data[key.strip()] = value.strip()
+        return code, battery_data
+
+    def _update_labels(self, *args, **kwargs):
+        code, battery_data = self.get_battery_data()
+        for field, bat_field in self.UPDATE_FIELDS:
+            self.content[field].set_label(battery_data.get(bat_field))
+
+        data = self.TIME_TO_MAPPING.get(battery_data.get('state'), {})
+        if self.time_to_header and data.get('header'):
+            self.time_to_header.set_markup('<b>{}</b>'.format(data.get('header', '')))
+        if data.get('filter') in ['time to empty', 'time to full']:
+            content = battery_data.get(data.get('filter'))
+            if content:
+                time_to = content.split()
+                if time_to[1] == 'hours':
+                    content = '{}{}'.format(time_to[0], _(' hours'))
+                else:
+                    content = '{}{}'.format(time_to[0], _(' min'))
+                self.content['time_to'].set_label(content)
+        return True
+
+    def complete_values(self):
+        content = None
+        code, battery_data = self.get_battery_data()
 
         for data in self.FIELDS:
             label_name = data.get('label_name')
@@ -1712,7 +1747,10 @@ class Preferences(Gtk.ApplicationWindow):
         label_version.set_name('version')
 
         desk_config = configparser.ConfigParser()
+        # Try load system version
         desk_config.read('/usr/share/applications/slimbookbattery.desktop')
+        # Overwrite system version with local one (For develop version)
+        desk_config.read(os.path.join(CURRENT_PATH, '../slimbookbattery.desktop'))
         if desk_config.has_option('Desktop Entry', 'Version'):
             version = desk_config.get('Desktop Entry', 'Version')
         else:
@@ -1825,7 +1863,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.show_all()
 
     # CLASS FUNCTIONS ***********************************
-        logger.info('\n')
 
     def manage_events(self, button, *args):
         name = button.get_name()
@@ -1890,7 +1927,7 @@ class Preferences(Gtk.ApplicationWindow):
             else:
                 logger.info('mode not found')
         else:
-            logger.info('Not Gnome desktop {} {}'.format(str(check_desktop[0]), check_desktop[1]))
+            logger.info('Not Gnome desktop "{}"'.format(os.environ.get("XDG_CURRENT_DESKTOP", '')))
 
     def apply_conf(self):
         logger.info('Closing window ...\n')
