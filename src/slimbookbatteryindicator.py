@@ -35,10 +35,11 @@ if CURRENT_PATH not in sys.path:
 import utils
 
 gi.require_version('Gtk', '3.0')
-gi.require_version('AppIndicator3', '0.1')
+gi.require_version('AyatanaAppIndicator3', '0.1')
 gi.require_version('Notify', '0.7')
 
-from gi.repository import Gtk, GdkPixbuf, AppIndicator3, Notify
+from gi.repository import Gtk, GdkPixbuf, Notify
+from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 
 USER_NAME = utils.get_user()
 _ = utils.load_translation('slimbookbattery')
@@ -190,7 +191,9 @@ class Indicator(Gtk.Application):
         subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
 
         tdpcontroller = config.get('TDP', 'tdpcontroller')
-        controller_path = os.path.join('/usr/share/', tdpcontroller, 'src', tdpcontroller, 'indicator.py')
+        indicator = '{}indicator.py'.format(tdpcontroller)
+
+        controller_path = os.path.join('/usr/share/', tdpcontroller, 'src', indicator)
         reboot_process(tdpcontroller, controller_path)
         animations(self.current_mode)
 

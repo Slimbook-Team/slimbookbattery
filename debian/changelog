@@ -1,0 +1,232 @@
+slimbookbattery (4.0.3) focal; urgency=low
+
+  * Added --minimized argument
+  * Small resolutions quick fixes
+  * Added intel_cpufreq governor
+  * Deploy script
+  * Default system view
+  * Code separated in classes
+  * Compatibility with TLP 1.4
+  * Switched to ayatana appindicator
+  * Indicator extension easier to enable for GNOME Desktops
+
+ -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
+
+slimbookbattery (4.0.2) focal; urgency=low
+
+  * Fixed reboot bug
+
+ -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
+
+slimbookbattery (4.0.1) focal; urgency=low
+
+  * New interface
+  * Draggable window
+  * Skipping password asking
+  * Added config values
+  * Added brightness switch
+  * Added TDP sync option
+  * Added user config check
+  * Added splash window
+  * Fixed bugs
+
+ -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
+
+slimbookbattery (4.0.0) focal; urgency=low
+
+  * New interface
+  * Draggable window
+  * Skipping password asking
+  * Added config values
+  * Added brightness switch
+  * Added TDP sync option
+  * Added user config check
+  * Added splash window
+  * Fixed bugs
+
+ -- slimbook <dev@slimbook.es>  Wed, 8 Sep 2021 11:24:04 +0100
+
+slimbookbattery (3.99beta) focal; urgency=low
+
+  * Added config values
+  * Added more languages
+  * Added version 
+
+ -- slimbook <dev@slimbook.es>  Wed, 11 Aug 2021 11:24:04 +0100
+
+slimbookbattery (3.98beta) focal; urgency=low
+
+  * New interface
+
+ -- slimbook <dev@slimbook.es>  Thu, 14 Jul 2021 11:24:04 +0100
+
+slimbookbattery (3.97beta) focal; urgency=low
+
+  * improve default config levels
+
+ -- slimbook <sat@slimbook.es>  Thu, 11 Jul 2020 11:24:04 +0100
+
+slimbookbattery (3.96beta) focal; urgency=low
+
+  * improve AC mode
+
+ -- slimbook <sat@slimbook.es>  Thu, 13 Jun 2020 22:24:04 +0100
+
+slimbookbattery (3.95beta) bionic; urgency=low
+
+  * Fixed TLP new version changes!
+
+ -- slimbook <sat@slimbook.es>  Thu, 6 May 2020 17:54:04 +0100
+
+slimbookbattery (3.10beta) bionic; urgency=low
+
+  * Solved bugs!
+
+ -- slimbook <sat@slimbook.es>  Thu, 2 Jul 2019 09:10:04 +0100
+
+slimbookbattery (3.9beta) bionic; urgency=low
+
+  * Solved more bugs!
+
+ -- slimbook <sat@slimbook.es>  Fri, 7 Jun 2019 18:04:04 +0100
+
+slimbookbattery (3.8beta) bionic; urgency=low
+
+  * Solved some bugs!
+
+ -- slimbook <sat@slimbook.es>  Wed, 6 Jun 2019 18:12:04 +0100
+
+slimbookbattery (3.7beta) bionic; urgency=low
+
+  * Now you brightness is applied at startup if you hace on Slimbook Battery
+
+ -- slimbook <sat@slimbook.es>  Wed, 5 Jun 2019 11:28:04 +0100
+
+slimbookbattery (3.6beta) bionic; urgency=low
+
+  * Solved bugs related with KDE
+
+ -- slimbook <sat@slimbook.es>  Fri, 31 May 2019 18:04:04 +0100
+
+slimbookbattery (3.5beta) bionic; urgency=low
+
+  * Solved icon bugs
+  * You can now disable animations for gnome desktop!
+  * Galician translation available
+  * Solved more bugs!
+
+ -- slimbook <sat@slimbook.es>  Fri, 24 May 2019 18:04:04 +0100
+
+slimbookbattery (3.4beta) bionic; urgency=low
+
+  * Solved icon size problems
+  * Solved bugs
+
+ -- slimbook <sat@slimbook.es>  Thu, 9 May 2019 18:04:04 +0100
+
+slimbookbattery (3.3beta) bionic; urgency=low
+
+  * Added italian and portuguese translations
+  * Better integration with TLP
+  * Better support to safe energy with intel graphics
+  * Solved bugs
+
+ -- slimbook <sat@slimbook.es>  Thu, 11 Abr 2019 18:04:04 +0100
+
+slimbookbattery (3.2beta) bionic; urgency=low
+
+  * Reshaped preferences window to make the most important parameters more visible
+  * Multi language support! Spanish language it's available to use
+  * The license type has been added in the information tab
+  * More options available in maximum performance tab
+  * Some advices added in some options
+  * We changed brightness default value to 30%
+  * Solved bugs
+
+ -- slimbook <sat@slimbook.es>  Mon, 1 Abr 2019 18:04:04 +0100
+
+slimbookbattery (3.1beta) xenial; urgency=low
+
+  * Slimbook Battery has now new version!
+  * Manage your consumption of your battery with three energy modes.
+
+ -- slimbook <sat@slimbook.es>  Thu, 28 Mar 2019 16:41:50 +0100
+
+slimbookbattery (1.5beta) xenial; urgency=low
+
+  * BAT0 and BAT1 fixed
+
+ -- slimbook <sat@slimbook.es>  Thu, 28 Dec 2018 10:20:00 +0200
+
+slimbookbattery (1.4beta) xenial; urgency=low
+
+  * New features and solved bugs
+
+ -- slimbook <sat@slimbook.es>  Thu, 25 May 2017 10:20:00 +0200
+
+slimbookbattery (1.3beta) xenial; urgency=low
+
+  * New features and solved bugs
+
+ -- slimbook <sat@slimbook.es>  Thu, 11 Apr 2017 11:00:00 +0200
+
+slimbookbattery (1.2beta) xenial; urgency=low
+
+  * New features
+
+ -- slimbook <sat@slimbook.es>  Thu, 5 Mar 2017 11:19:00 +0200
+
+slimbookbattery (1.1beta) xenial; urgency=low
+
+  * Solved bugs and new features
+
+ -- slimbook <sat@slimbook.es>  Thu, 5 Mar 2017 11:19:00 +0200
+
+slimbookbattery (1.0beta) xenial; urgency=low
+
+
+slimbookbattery (1.1beta) xenial; urgency=low
+
+  * Solved bugs
+
+ -- slimbook <sat@slimbook.es>  Thu, 4 Mar 2017 13:14:00 +0200
+
+slimbookbattery (1.0beta) xenial; urgency=low
+
+  * New features
+
+ -- slimbook <sat@slimbook.es>  Thu, 4 Mar 2017 10:14:00 +0200
+
+slimbookbattery (0.3.2beta) xenial; urgency=low
+
+  * Solved problem with creation of config directory user home
+
+ -- slimbook <sat@slimbook.es>  Thu, 2 Jun 2016 16:14:00 +0200
+
+slimbookbattery (0.3.1beta) xenial; urgency=low
+
+  * Solved a problem with "Quit" button
+
+ -- slimbook <sat@slimbook.es>  Thu, 2 Jun 2016 16:14:00 +0200
+
+slimbookbattery (0.3.0beta) xenial; urgency=low
+
+  * Changed notifications on Slimbook Battery
+
+ -- slimbook <sat@slimbook.es>  Wed, 1 Jun 2016 16:14:00 +0200
+
+slimbookbattery (0.2.0beta) xenial; urgency=low
+
+  * Bug report button has been removed
+  * Added battery information on the Preferences window
+  * Now Slimbook Battery will notify each 5 minutes because we are solving a bug
+
+ -- slimbook <sat@slimbook.es>  Tue, 31 May 2016 18:42:00 +0200
+
+slimbookbattery (0.1.0beta) xenial; urgency=low
+
+  * Slimbook Battery has been created!
+  * Now you can show two battery states; high and critical
+  * Customize both ranges on the Preferences window
+
+ -- slimbook <sat@slimbook.es>  Fri, 27 May 2016 15:19:00 +0200

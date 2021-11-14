@@ -24,6 +24,8 @@ DEFAULT_CONF = os.path.join(CURRENT_PATH, 'slimbookbattery.conf')
 CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
 
+UPDATES_DIR = os.path.join(CURRENT_PATH, 'updates')
+
 uid, gid = pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
 
 logger = logging.getLogger()
@@ -39,24 +41,28 @@ def main():
     else:
         logger.info('Configuration folder ({}) found!'.format(CONFIG_FOLDER))
 
-    config_folder_stat = os.stat(CONFIG_FOLDER)
-    logger.debug("uid={} file_uid={}".format(uid, config_folder_stat.st_uid))
-    f_uid = config_folder_stat.st_uid
-    f_gid = config_folder_stat.st_gid
-    if not uid == f_uid or not gid == f_gid:
-        logger.info('Setting folder ownership')
+    set_ownership(CONFIG_FOLDER)
+    set_ownership(UPDATES_DIR)
 
-        for dir_path, dir_name, filenames in os.walk(CONFIG_FOLDER):
+    check_config_file()
+    check_tlp_files()
+
+def set_ownership(folder):
+    folder_stat = os.stat(folder)
+    logger.debug("Folder {}\nUser uid={}\nFolder uid={}".format(folder, uid, folder_stat.st_uid))
+    f_uid = folder_stat.st_uid
+    f_gid = folder_stat.st_gid
+
+    if not uid == f_uid or not gid == f_gid:
+        #logger.info('Setting {} ownership').format(folder)
+
+        for dir_path, dir_name, filenames in os.walk(folder):
             logger.debug(dir_path)
             os.chown(dir_path, uid, gid)
             for filename in filenames:
                 file_path = os.path.join(dir_path, filename)
                 logger.debug(file_path)
                 os.chown(file_path, uid, gid)
-
-    check_config_file()
-    check_tlp_files()
-
 
 def check_config_file():
     logger.info('Checking Slimbook Battery Configuration')

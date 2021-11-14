@@ -27,7 +27,6 @@ import shutil
 import subprocess
 import sys
 import time
-from distutils.dir_util import copy_tree
 
 import gi
 
@@ -45,6 +44,7 @@ logger = logging.getLogger()
 USER_NAME = utils.get_user()
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 
+UPDATES_DIR = os.path.join(CURRENT_PATH, 'updates','_updates')
 IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
 CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
@@ -589,7 +589,7 @@ class BatteryGrid(BasePageGrid):
 
 class GeneralGrid(BasePageGrid):
     tab_name = _('General')
-    allow_minimize = False
+    allow_minimize = True
     HEADER = 1
     CONTENT = 3
 
@@ -1635,6 +1635,23 @@ class Preferences(Gtk.ApplicationWindow):
     min_resolution = False
 
     def __init__(self):
+
+        if os.path.isdir(UPDATES_DIR):
+            logging.info('Loading updates ...')
+
+            for file in os.listdir(UPDATES_DIR):
+
+                process = os.path.join(UPDATES_DIR,file)
+                proc = subprocess.Popen('bash {}'.format(process), shell=True)
+
+                # Wait for child process to terminate. Returns returncode attribute.
+                proc.wait()
+                logger.info('\n{} returned exit code {}.'.format(process, proc.returncode))
+
+                if proc.returncode == 0:
+                    os.remove(process)
+
+
         self.__setup_css()
         Gtk.Window.__init__(self, title=(_('Slimbook Battery Preferences')))
 
@@ -1655,8 +1672,9 @@ class Preferences(Gtk.ApplicationWindow):
         self.connect('motion-notify-event', self.on_mouse_moved)
 
         # Center
-        # self.connect('realize', self.on_realize)
+        #self.connect('realize', self.on_realize)  # On Wayland, monitor = None --> ERROR
         splash = os.path.join(CURRENT_PATH, 'splash.py')
+
         self.child_process = subprocess.Popen(splash, stdout=subprocess.PIPE)
 
         self.general_page_grid = None
@@ -1668,6 +1686,8 @@ class Preferences(Gtk.ApplicationWindow):
         except Exception:
             logger.exception('Unexpected error')
             self.child_process.terminate()
+
+
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -1710,7 +1730,7 @@ class Preferences(Gtk.ApplicationWindow):
         )
 
         display_width, display_height = utils.get_display_resolution()
-        if display_width >= 1550 and display_height >= 850:
+        if int(display_width) >= 1550 and int(display_height) >= 850:
             logger.debug(_('Full window is displayed'))
         else:
             self.resize(1100, 650)
@@ -1734,14 +1754,6 @@ class Preferences(Gtk.ApplicationWindow):
         btn_accept.set_name('accept')
         btn_accept.connect("clicked", self.manage_events)
 
-        buttons_box = Gtk.Box()
-        buttons_box.pack_start(btn_cancel, True, True, 0)
-        buttons_box.pack_start(restore_values, True, True, 0)
-        buttons_box.pack_start(btn_accept, True, True, 0)
-        buttons_box.set_halign(Gtk.Align.END)
-
-        if self.min_resolution:
-            buttons_box.set_name('smaller_label')
 
         label_version = Gtk.Label(label='', halign=Gtk.Align.START)
         label_version.set_name('version')
@@ -1757,33 +1769,35 @@ class Preferences(Gtk.ApplicationWindow):
             version = 'Unknown'
         label_version.set_markup('<span font="10">Version: {}</span>'.format(version))
 
-        win_grid.attach(buttons_box, 0, 4, 1, 1)
-        win_grid.attach(label_version, 0, 4, 1, 1)
+        win_grid.attach(label_version, 0, 5, 1, 1)
 
         if not os.path.isfile(os.path.join(CONFIG_FOLDER, 'default/equilibrado')):
             logger.debug('Copy configuration files ...')
             base_folder = '/usr/share/slimbookbattery/'
             if not os.path.isdir(base_folder):
                 base_folder = os.path.normpath(os.path.join(CURRENT_PATH, '..'))
-            copy_tree(os.path.join(base_folder, 'default'), os.path.join(CONFIG_FOLDER, 'default'))
-            copy_tree(os.path.join(base_folder, 'custom'), os.path.join(CONFIG_FOLDER, 'custom'))
+
+            shutil.copytree(os.path.join(base_folder, 'custom'), os.path.join(CONFIG_FOLDER, 'custom'))
+            shutil.copytree(os.path.join(base_folder, 'default'), os.path.join(CONFIG_FOLDER, 'default'))
 
         if self.min_resolution:
-            height = 175
-            width = 775
+            height = 200
+            width = 800
         else:
-            height = 225
-            width = 825
+            height = 210
+            width = 810
 
-        logo = Gtk.Image.new_from_pixbuf(GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'slimbookbattery-header-2.png'),
+        pixbuff = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            filename=os.path.join(IMAGES_PATH, 'slimbookbattery-header-4.png'),
             width=width,
             height=height,
             preserve_aspect_ratio=True
-        ))
-        logo.set_halign(Gtk.Align.START)
-        logo.set_valign(Gtk.Align.START)
-        win_grid.attach(logo, 0, 0, 1, 4)
+        )
+        self.logo = Gtk.Image.new_from_pixbuf(pixbuff)
+
+        self.logo.set_halign(Gtk.Align.START)
+        self.logo.set_valign(Gtk.Align.START)
+        win_grid.attach(self.logo, 0, 0, 4, 2)
 
         close_box = Gtk.HBox(halign=Gtk.Align.END, valign=Gtk.Align.START)
 
@@ -1811,11 +1825,23 @@ class Preferences(Gtk.ApplicationWindow):
 
         check.connect('clicked', self.manage_events)
 
-        close_box.add(check)
-        close_box.add(event_close_box)
-        win_grid.attach(close_box, 0, 0, 1, 4)
+        buttons_box = Gtk.Box()
+        buttons_box.pack_start(check, True, True, 0)
+        buttons_box.pack_start(btn_cancel, True, True, 0)
+        buttons_box.pack_start(restore_values, True, True, 0)
+        buttons_box.pack_start(btn_accept, True, True, 0)
+        buttons_box.set_halign(Gtk.Align.END)
+        win_grid.attach(buttons_box, 2, 5, 3, 1)
 
-        # NOTEBOOK ***************************************************************
+        if self.min_resolution:
+            buttons_box.set_name('smaller_label')
+
+
+        #close_box.add(check)
+        close_box.add(event_close_box)
+        win_grid.attach(close_box, 4, 0, 1, 4)
+
+    # NOTEBOOK ***************************************************************
 
         notebook = Gtk.Notebook.new()
         if self.min_resolution:
@@ -1824,7 +1850,7 @@ class Preferences(Gtk.ApplicationWindow):
             notebook.set_hexpand(False)
 
         notebook.set_tab_pos(Gtk.PositionType.TOP)
-        win_grid.attach(notebook, 0, 3, 1, 1)
+        win_grid.attach(notebook, 0, 1, 5, 4)
 
         logger.debug("{}{} {}{}".format(
             _('Width: '), display_width,
@@ -1868,11 +1894,20 @@ class Preferences(Gtk.ApplicationWindow):
         name = button.get_name()
         if name == 'style':
             value = 'system' if button.get_active() else 'original'
+            logger.info(value)
             config.set('CONFIGURATION', 'style', value)
+
+            with open(CONFIG_FILE, 'w') as configfile:
+                config.write(configfile)
+
+            height = 200
+            width = 800
+
             # To do: restore css provider
             # self.hide()
             # self.__setup_css()
             # self.show_all()
+
         elif name == 'restore':
             os.system('pkexec slimbookbattery-pkexec restore')
             config.read(CONFIG_FILE)
@@ -1883,6 +1918,12 @@ class Preferences(Gtk.ApplicationWindow):
             win.show_all()
         elif name == 'accept':
             self.apply_conf()
+
+            if os.path.isdir(UPDATES_DIR):
+                try:
+                    os.rmdir(UPDATES_DIR)
+                except:
+                    logger.error('Updates folder not empty')
 
         if name in ['accept', 'close_box', 'cancel']:
             Gtk.main_quit()
@@ -1901,7 +1942,7 @@ class Preferences(Gtk.ApplicationWindow):
         provider.load_from_path(provider_file)
         context.add_provider_for_screen(screen, provider,
                                         Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        logger.debug("Loading CSS")
+        logger.debug("Loading CSS - {}".format(style))
 
     def animations(self, mode):
         check_desktop = 'gnome' in os.environ.get("XDG_CURRENT_DESKTOP", '').lower()
@@ -1990,7 +2031,8 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    #formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(lineno)d - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 

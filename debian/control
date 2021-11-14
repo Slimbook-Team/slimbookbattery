@@ -1,0 +1,31 @@
+Source: slimbookbattery
+Section: utils
+Priority: extra
+Maintainer: Slimbook <dev@slimbook.es>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 4.1.4
+Homepage: http://slimbook.es
+
+Package: slimbookbattery
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}, ${dist:Depends}
+	python3,
+	python3-gi,
+	python3-pil,
+	python3-dbus,
+	libgirepository-1.0-1,
+	gir1.2-gtk-3.0,
+	gir1.2-gdkpixbuf-2.0,
+	gir1.2-glib-2.0,
+	gir1.2-notify-0.7,
+	gir1.2-ayatanaappindicator3-0.1,
+	tlp,
+	tlp-rdw,
+	libnotify-bin,
+	cron
+Suggests: gnome-shell-extension-appindicator
+Description: Battery optimization application for portable devices
+ Battery optimization application for portable devices that can increase 
+ the battery life by 50%. For this purpose, the third-party software 
+ (TLP and others) is used to manage and configure the system resources.
+
