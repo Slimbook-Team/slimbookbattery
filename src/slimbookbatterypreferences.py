@@ -37,7 +37,7 @@ if CURRENT_PATH not in sys.path:
 import utils
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GdkPixbuf
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
 logger = logging.getLogger()
 
@@ -49,11 +49,19 @@ IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
 CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
 
+INTEL_ES = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
+INTEL_EN = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
+AMD_ES = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
+AMD_EN = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
+
 _ = utils.load_translation('preferences')
 
 lang = utils.get_languages()[0]
 
 config = configparser.ConfigParser()
+# Add section to prevent configparser.NoSectionError when save
+for section in ['TDP', 'CONFIGURATION', 'SETTINGS']:
+    config.add_section(section)
 
 if not os.path.isfile(CONFIG_FILE):
     try:
@@ -300,7 +308,7 @@ class InfoPageGrid(BasePageGrid):
 
     def setup_contact(self):
         info = Gtk.Label(label='')
-        msg = "<span><b>{}</b> {} {}</span>".format(
+        msg = "<span><b>{}</b> {} {} {}</span>".format(
             _("Info:"),
             _("Contact with us if you find something wrong. "),
             _("\nWe would appreciate that you attach the file that is generated"),
@@ -385,6 +393,29 @@ class BatteryGrid(BasePageGrid):
     HEADER = 1
     CONTENT = 3
 
+    TIME_TO_MAPPING = {
+        'discharging': {
+            'header': _('Time to empty:'),
+            'filter': 'time to empty',
+        },
+        'charging': {
+            'header': _('Time to full:'),
+            'filter': 'time to full',
+        },
+        'fully-charged': {
+            'header': _('Time to full:'),
+            'text': _('Fully charged'),
+        },
+    }
+
+    UPDATE_FIELDS = [
+        ('percentage', 'percentage'),
+        ('voltage', 'voltage'),
+        ('rate', 'energy-rate'),
+        ('state', 'state'),
+        ('updated', 'updated'),
+    ]
+
     FIELDS = [
         {
             'label_name': 'native',
@@ -423,20 +454,7 @@ class BatteryGrid(BasePageGrid):
         },
         {
             'label_name': 'time_to',
-            'mapping': {
-                'discharging': {
-                    'header': _('Time to empty:'),
-                    'filter': 'time to empty',
-                },
-                'charging': {
-                    'header': _('Time to full:'),
-                    'filter': 'time to full',
-                },
-                'fully-charged': {
-                    'header': _('Time to full:'),
-                    'text': _('Fully charged'),
-                },
-            },
+            'mapping': TIME_TO_MAPPING,
         },
         {
             'label_name': 'rechargeable',
@@ -506,9 +524,10 @@ class BatteryGrid(BasePageGrid):
             label.set_halign(Gtk.Align.START)
             self.content[label_name] = label
             self.grid.attach(label, self.CONTENT, line, 2, 1)
+        GLib.timeout_add_seconds(2, self._update_labels)
 
-    def complete_values(self):
-        content = None
+    @staticmethod
+    def get_battery_data():
         code, battery_raw = subprocess.getstatusoutput(
             "upower -i `upower -e | grep 'BAT'`"
         )
@@ -517,6 +536,30 @@ class BatteryGrid(BasePageGrid):
             if ':' in line:
                 key, value = line.split(':', 1)
                 battery_data[key.strip()] = value.strip()
+        return code, battery_data
+
+    def _update_labels(self, *args, **kwargs):
+        code, battery_data = self.get_battery_data()
+        for field, bat_field in self.UPDATE_FIELDS:
+            self.content[field].set_label(battery_data.get(bat_field))
+
+        data = self.TIME_TO_MAPPING.get(battery_data.get('state'), {})
+        if self.time_to_header and data.get('header'):
+            self.time_to_header.set_markup('<b>{}</b>'.format(data.get('header', '')))
+        if data.get('filter') in ['time to empty', 'time to full']:
+            content = battery_data.get(data.get('filter'))
+            if content:
+                time_to = content.split()
+                if time_to[1] == 'hours':
+                    content = '{}{}'.format(time_to[0], _(' hours'))
+                else:
+                    content = '{}{}'.format(time_to[0], _(' min'))
+                self.content['time_to'].set_label(content)
+        return True
+
+    def complete_values(self):
+        content = None
+        code, battery_data = self.get_battery_data()
 
         for data in self.FIELDS:
             label_name = data.get('label_name')
@@ -693,14 +736,14 @@ class GeneralGrid(BasePageGrid):
 
                 if tdp_controller == 'slimbookintelcontroller':
                     if lang == 'es':
-                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/515-slimbook-intel-controller'
+                        link = INTEL_ES
                     else:
-                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimbook-intel-controller'
+                        link = INTEL_EN
                 else:
                     if lang == 'es':
-                        link = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
+                        link = AMD_ES
                     else:
-                        link = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
+                        link = AMD_EN
 
                 if link:
                     row += 1
@@ -1344,13 +1387,13 @@ class SettingsGrid(BasePageGrid):
         usb_autosuspend = bool('USB_AUTOSUSPEND=1' in content)
         button.set_active(usb_autosuspend)
 
-        self.button = self.content['usb_list']
-        self.button.set_sensitive(usb_autosuspend)
+        button = self.content['usb_list']
+        button.set_sensitive(usb_autosuspend)
         usb_blacklist = content[content.find('USB_BLACKLIST'):]
-        usb_blacklist = usb_blacklist[usb_blacklist.find('=')+1:usb_blacklist.find('\n')]
+        usb_blacklist = usb_blacklist[usb_blacklist.find('=') + 1:usb_blacklist.find('\n')]
         usb_blacklist = usb_blacklist.replace('"', '')
 
-        self.button.set_text(usb_blacklist)
+        button.set_text(usb_blacklist)
 
     def manage_events(self, button, *args):
         name = button.get_name()
@@ -1465,11 +1508,12 @@ class SettingsGrid(BasePageGrid):
                 self.custom_file, search, value, code, msg
             ))
 
+        button = self.content['usb_list']
         for key, search in {
             'old_usb_list': 'USB_BLACKLIST',
             'new_usb_list': 'USB_DENYLIST',
         }.items():
-            value = self.button.get_text()
+            value = button.get_text()
             if '{search}={value}'.format(search=search, value=value) not in content:
                 if search in content:
                     cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
@@ -1591,7 +1635,7 @@ class Preferences(Gtk.ApplicationWindow):
     min_resolution = False
 
     def __init__(self):
-        
+
         if os.path.isdir(UPDATES_DIR):
             logging.info('Loading updates ...')
 
@@ -1603,7 +1647,7 @@ class Preferences(Gtk.ApplicationWindow):
                 # Wait for child process to terminate. Returns returncode attribute.
                 proc.wait()
                 logger.info('\n{} returned exit code {}.'.format(process, proc.returncode))
-                
+
                 if proc.returncode == 0:
                     os.remove(process)
 
@@ -1643,7 +1687,7 @@ class Preferences(Gtk.ApplicationWindow):
             logger.exception('Unexpected error')
             self.child_process.terminate()
 
-        
+
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -1710,18 +1754,21 @@ class Preferences(Gtk.ApplicationWindow):
         btn_accept.set_name('accept')
         btn_accept.connect("clicked", self.manage_events)
 
-                
+
         label_version = Gtk.Label(label='', halign=Gtk.Align.START)
         label_version.set_name('version')
 
         desk_config = configparser.ConfigParser()
+        # Try load system version
         desk_config.read('/usr/share/applications/slimbookbattery.desktop')
+        # Overwrite system version with local one (For develop version)
+        desk_config.read(os.path.join(CURRENT_PATH, '../slimbookbattery.desktop'))
         if desk_config.has_option('Desktop Entry', 'Version'):
             version = desk_config.get('Desktop Entry', 'Version')
         else:
             version = 'Unknown'
         label_version.set_markup('<span font="10">Version: {}</span>'.format(version))
-        
+
         win_grid.attach(label_version, 0, 5, 1, 1)
 
         if not os.path.isfile(os.path.join(CONFIG_FOLDER, 'default/equilibrado')):
@@ -1729,7 +1776,7 @@ class Preferences(Gtk.ApplicationWindow):
             base_folder = '/usr/share/slimbookbattery/'
             if not os.path.isdir(base_folder):
                 base_folder = os.path.normpath(os.path.join(CURRENT_PATH, '..'))
-            
+
             shutil.copytree(os.path.join(base_folder, 'custom'), os.path.join(CONFIG_FOLDER, 'custom'))
             shutil.copytree(os.path.join(base_folder, 'default'), os.path.join(CONFIG_FOLDER, 'default'))
 
@@ -1747,7 +1794,7 @@ class Preferences(Gtk.ApplicationWindow):
             preserve_aspect_ratio=True
         )
         self.logo = Gtk.Image.new_from_pixbuf(pixbuff)
-        
+
         self.logo.set_halign(Gtk.Align.START)
         self.logo.set_valign(Gtk.Align.START)
         win_grid.attach(self.logo, 0, 0, 4, 2)
@@ -1842,7 +1889,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.show_all()
 
     # CLASS FUNCTIONS ***********************************
-        logger.info('\n')
 
     def manage_events(self, button, *args):
         name = button.get_name()
@@ -1861,7 +1907,7 @@ class Preferences(Gtk.ApplicationWindow):
             # self.hide()
             # self.__setup_css()
             # self.show_all()
-    
+
         elif name == 'restore':
             os.system('pkexec slimbookbattery-pkexec restore')
             config.read(CONFIG_FILE)
@@ -1922,8 +1968,7 @@ class Preferences(Gtk.ApplicationWindow):
             else:
                 logger.info('mode not found')
         else:
-
-            logger.info('Not Gnome desktop')
+            logger.info('Not Gnome desktop "{}"'.format(os.environ.get("XDG_CURRENT_DESKTOP", '')))
 
     def apply_conf(self):
         logger.info('Closing window ...\n')
@@ -1935,7 +1980,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.mid_page_grid.save_selection()
         self.high_page_grid.save_selection()
 
-        with open(os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf'), 'w') as configfile:
+        with open(CONFIG_FILE, 'w') as configfile:
             config.write(configfile)
 
         self.animations(config.get('CONFIGURATION', 'modo_actual'))

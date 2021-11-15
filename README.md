@@ -22,23 +22,34 @@ Run command:
   `sudo apt install ./slimbookbattery_4.0.0_all.deb`
 
 # Install 
-## From debian based distros
-You can download Slimbook Battery from our application download center for Linux with our repositories in Launchpad. You can do it too if you introduce this in a Terminal (Ctrl+Alt+T):
+* ## For debian based distros
+	You can download Slimbook Battery from our application download center for Linux with our repositories in Launchpad. You can do it too if you introduce this in a Terminal (Ctrl+Alt+T):
 
-    sudo add-apt-repository ppa:slimbook/slimbook
-    sudo apt update
+		sudo add-apt-repository ppa:slimbook/slimbook
+		sudo apt update
 
-By doing this we will have added the Slimbook repositories. Now we will execute the next command to install the application:
+	By doing this we will have added the Slimbook repositories. Now we will execute the next command to install the application:
 
-    sudo apt install slimbookbattery
-## From non-debian distro   
-Donwload entire repo. Navigate to it in a terminal. And run deploy.sh script:
-  
-	./deploy.sh
+		sudo apt install slimbookbattery
+<br />
 
-It will deploy SlimbookBattery in your system, check and install Python dependencies prepare all.  
+* ## Install from our Open Build Service Repository:
+	[Slimbook Battery Open Build Service Repository](https://software.opensuse.org//download.html?project=home%3ASlimbook%3ASlimbookBattery&package=slimbookbattery)
+<br />
+
+
+* ## From this repository-source   
+	Donwload entire repo. Navigate to it in a terminal. And run deploy.sh script:
+
+		./deploy.sh
+
+	It will deploy SlimbookBattery in your system, check and install Python dependencies prepare all.
+<br />
+
 # Collaborate
 You can help us by taking a look at our [**To do list**](https://github.com/slimbook/slimbookbattery/projects/1)
+
+<br />
 
 # Tips and frequent questions 
 
@@ -63,13 +74,14 @@ You can help us by taking a look at our [**To do list**](https://github.com/slim
 
   If this is the case, you simply have to start Slimbook Battery Preferences, enable this option again and restart Slimbook Battery.
   
-  > If you are using Elementary OS, then you might need to install [wingpanel-indicator-ayatana](https://github.com/Lafydev/wingpanel-indicator-ayatana)
+  > If you are using Elementary OS, then you need to install [wingpanel-indicator-ayatana](https://github.com/Lafydev/wingpanel-indicator-ayatana), follow the instructions to install it.
 
-  In case it still does not appear, check that you have installed gnome-shell-extension-appindicator. If you do not have it installed, it would be advisable that you do it:
+  In case it still does not appear, check that you have installed gnome-shell-extension-appindicator. If you don't have it installed, do it:
 
       sudo apt-get install gnome-shell-extension-appindicator
 
-  Then, to apply the extension you will have to reload the desktop with Alt + F2, enter r in the window that appears and finally press the Enter key. Finally, to activate the operation of the extension you will have to go to Tweaks and in the extension tab you can enable the indicators and should appear.
+  Once it has been installed, restart your session, and open the preferences window, the indicator should now appear if you click the accept button. 
+  
 
   ![imagen](https://user-images.githubusercontent.com/18195266/134377358-76eeb997-71c3-49bd-a108-4db8588544f0.png)
 

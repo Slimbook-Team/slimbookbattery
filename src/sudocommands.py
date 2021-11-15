@@ -595,7 +595,7 @@ def brightness_settings(mode):
 def update_config(filepath, variable, value):
     try:
         call = subprocess.getoutput('cat ' + filepath)
-        patron = re.compile(variable + '\=(.*)')
+        patron = re.compile(r'{}=(.*)'.format(variable))
         last_value = patron.search(call)[1]
     except Exception:
         last_value = ''
