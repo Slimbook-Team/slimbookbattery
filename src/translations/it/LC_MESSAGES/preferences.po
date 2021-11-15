@@ -3,13 +3,12 @@
 # This file is distributed under the same license as the SLIMBOOK BATTERY package.
 # SLIMBOOK <dev@slimbook.es>, 2019.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: SLIMBOOK BATTERY 3.2beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-05-09 14:08+0200\n"
-"PO-Revision-Date: 2019-05-12 23:59+0200\n"
+"PO-Revision-Date: 2019-11-14 14:59+0100\n"
 "Last-Translator: Albano Battistella<>\n"
 "Language-Team: Italian <LL@li.org>\n"
 "Language: Italian\n"
@@ -378,7 +377,7 @@ msgstr "Condividere:"
 
 #: preferences.py:2058
 msgid " --copy and redistribute the material in any medium or format"
-msgstr "- Copiare e ridistribuire il materiale in qualsiasi supporto o formato"
+msgstr "--copiare e ridistribuire il materiale in qualsiasi supporto o formato"
 
 #: preferences.py:2058
 msgid "Slimbook Copyright - License Creative Commons BY-NC-ND"
@@ -395,7 +394,7 @@ msgstr "Sconosciuto"
 
 #: preferences.py:2136 preferences.py:2143
 msgid " hours"
-msgstr " ore"
+msgstr "ore"
 
 #: preferences.py:2147
 msgid "Fully charged"
@@ -407,7 +406,7 @@ msgstr "Report File generato"
 
 #: preferences.py:2224
 msgid "Report file canceled, wrong password"
-msgstr  "File report cancellato, password errata"
+msgstr "File report cancellato, password errata"
 
 #: preferences.py:2226
 msgid "Report file canceled"
@@ -439,7 +438,7 @@ msgstr "Avvio automatico:"
 
 #: preferences.py:3288
 msgid "OnOff: "
-msgstr "Acceso spento:"
+msgstr "Acceso/Spento:"
 
 #: preferences.py:3379
 msgid "The changes have been applied, but it is necessary to restart so that some of them may take effect. "
