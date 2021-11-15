@@ -3,13 +3,12 @@
 # This file is distributed under the same license as the SLIMBOOK BATTERY package.
 # SLIMBOOK <dev@slimbook.es>, 2019.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: SLIMBOOK BATTERY 3.2beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-05-09 14:08+0200\n"
-"PO-Revision-Date: 2019-05-13 20:30+0100\n"
+"PO-Revision-Date: 2021-11-14 20:30+0100\n"
 "Last-Translator: Albano Battistella <>\n"
 "Language-Team: Italian <LL@li.org>\n"
 "Language: Italian\n"
@@ -128,7 +127,7 @@ msgstr " Tempo fino al prossimo avvertimento "
 
 #: slimbookbattery.py:351 slimbookbattery.py:359
 msgid " seconds"
-msgstr "secondi"
+msgstr " secondi"
 
 #: slimbookbattery.py:391
 msgid "High battery. Disconnect your power supply."
