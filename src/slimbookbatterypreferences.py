@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import gi
 import configparser
 import logging
 import math
@@ -28,7 +29,6 @@ import subprocess
 import sys
 import time
 
-import gi
 
 # We want load first current location
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -1605,7 +1605,10 @@ class Preferences(Gtk.ApplicationWindow):
                 logger.info('\n{} returned exit code {}.'.format(process, proc.returncode))
                 
                 if proc.returncode == 0:
-                    os.remove(process)
+                    try:
+                        os.remove(process)
+                    except:
+                        logger.error('Could not remove update after completion.')
 
 
         self.__setup_css()

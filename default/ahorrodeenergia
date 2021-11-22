@@ -165,7 +165,7 @@ NMI_WATCHDOG=0
 # Note: DISK parameters below are effective only when this option is configured.
 # Default: "nvme0n1 sda"
 
-DISK_DEVICES="nvme0n1 sda"
+# DISK_DEVICES="nvme0n1 sda"
 #slimbook
 
 # Disk advanced power management level: 1..254, 255 (max saving, min, off).
@@ -174,8 +174,8 @@ DISK_DEVICES="nvme0n1 sda"
 # to keep the hardware default for the particular disk.
 # Default: 254 (AC), 128 (BAT)
 
-DISK_APM_LEVEL_ON_AC="254 254"
-DISK_APM_LEVEL_ON_BAT="128 128"
+# DISK_APM_LEVEL_ON_AC="254 254"
+# DISK_APM_LEVEL_ON_BAT="128 128"
 #slimbook (2 lines)
 
 # Hard disk spin down timeout:
@@ -215,8 +215,8 @@ DISK_APM_LEVEL_ON_BAT="128 128"
 #  - "med_power_with_dipm max_performance" (AC)
 #  - "med_power_with_dipm min_power" (BAT)
 
-SATA_LINKPWR_ON_AC="med_power_with_dipm max_performance"
-SATA_LINKPWR_ON_BAT="med_power_with_dipm min_power"
+# SATA_LINKPWR_ON_AC="med_power_with_dipm max_performance"
+# SATA_LINKPWR_ON_BAT="med_power_with_dipm min_power"
 #slimbook (2 lines)
 
 # Exclude host devices from AHCI link power management.
@@ -237,7 +237,7 @@ SATA_LINKPWR_ON_BAT="med_power_with_dipm min_power"
 # Note: effective only when AHCI_RUNTIME_PM_ON_AC/BAT is activated.
 # Default: 15
 
-AHCI_RUNTIME_PM_TIMEOUT=15
+# AHCI_RUNTIME_PM_TIMEOUT=15
 #slimbook
 
 # PCI Express Active State Power Management (PCIe ASPM):
@@ -265,7 +265,7 @@ INTEL_GPU_BOOST_FREQ_ON_BAT=900
 # auto = mid on BAT, high on AC.
 # Default: default
 
-RADEON_POWER_PROFILE_ON_AC=mid
+RADEON_POWER_PROFILE_ON_AC=default
 RADEON_POWER_PROFILE_ON_BAT=mid
 #slimbook (2 lines)
 
@@ -302,14 +302,14 @@ WOL_DISABLE=Y
 # Default: 0 (AC), 1 (BAT)
 
 SOUND_POWER_SAVE_ON_AC=0
-SOUND_POWER_SAVE_ON_BAT=1
+SOUND_POWER_SAVE_ON_BAT=0
 #slimbook (2 lines)
 
 # Disable controller too (HDA only): Y/N.
 # Note: effective only when SOUND_POWER_SAVE_ON_AC/BAT is activated.
 # Default: Y
 
-SOUND_POWER_SAVE_CONTROLLER=Y
+SOUND_POWER_SAVE_CONTROLLER=N
 #slimbook
 
 # Power off optical drive in UltraBay/MediaBay: 0=disable, 1=enable.
@@ -355,7 +355,7 @@ RUNTIME_PM_DRIVER_BLACKLIST="nouveau nvidia"
 # Set to 0 to disable, 1 to enable USB autosuspend feature.
 # Default: 1
 
-USB_AUTOSUSPEND=1
+USB_AUTOSUSPEND=0
 #slimbook
 
 # Exclude listed devices from USB autosuspend (separate with spaces).
