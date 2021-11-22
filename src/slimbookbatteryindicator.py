@@ -101,86 +101,63 @@ class Indicator(Gtk.Application):
 
     def build_menu(self):
         menu = Gtk.Menu()
-
-        # Creación de los separadores
-        item_separador1 = Gtk.SeparatorMenuItem()
-        item_separador2 = Gtk.SeparatorMenuItem()
-        item_separador3 = Gtk.SeparatorMenuItem()
-
-        # Imagenes a utilizar para los iconos del menú
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'normal.png'),
-            width=25,
-            height=25,
-            preserve_aspect_ratio=True)
-        icon_ahorro = Gtk.Image.new_from_pixbuf(pixbuf)
-
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'balanced_normal.png'),
-            width=25,
-            height=25,
-            preserve_aspect_ratio=True)
-        icon_equilibrado = Gtk.Image.new_from_pixbuf(pixbuf)
-
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'performance_normal.png'),
-            width=25,
-            height=25,
-            preserve_aspect_ratio=True)
-        icon_max_rendimiento = Gtk.Image.new_from_pixbuf(pixbuf)
-
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'disabled_normal.png'),
-            width=25,
-            height=25,
-            preserve_aspect_ratio=True)
-        icon_apagado = Gtk.Image.new_from_pixbuf(pixbuf)
-        icon_apagado.set_pixel_size(24)
-
-        # Creación de cada ImageMenuItem
-        item_modo1 = Gtk.ImageMenuItem()
-        item_modo1.set_label(_('Energy Saving'))
-        item_modo1.connect('activate', self.modo_ahorro)
-        item_modo1.set_image(icon_ahorro)
-        item_modo1.set_always_show_image(True)
-
-        item_modo2 = Gtk.ImageMenuItem()
-        item_modo2.set_label(_('Balanced'))
-        item_modo2.connect('activate', self.modo_equilibrado)
-        item_modo2.set_image(icon_equilibrado)
-        item_modo2.set_always_show_image(True)
-
-        item_modo3 = Gtk.ImageMenuItem()
-        item_modo3.set_label(_('Maximum Performance'))
-        item_modo3.connect('activate', self.modo_max_rendimiento)
-        item_modo3.set_image(icon_max_rendimiento)
-        item_modo3.set_always_show_image(True)
-
-        item_apagar = Gtk.ImageMenuItem()
-        item_apagar.set_label(_('Off'))
-        item_apagar.connect('activate', self.modo_apagado)
-        item_apagar.set_image(icon_apagado)
-        item_apagar.set_always_show_image(True)
-
-        item_avanzado = Gtk.MenuItem()
-        item_avanzado.set_label(_('Advanced mode'))
-        item_avanzado.connect('activate', self.modo_avanzado)
-
-        item_salir = Gtk.MenuItem()
-        item_salir.set_label(_('Exit'))
-        item_salir.connect('activate', self.salir)
-
-        # Se añaden los items al menú en orden
-        menu.append(item_modo1)
-        menu.append(item_modo2)
-        menu.append(item_modo3)
-        menu.append(item_separador1)
-        menu.append(item_apagar)
-        menu.append(item_separador2)
-        menu.append(item_avanzado)
-        menu.append(item_separador3)
-        menu.append(item_salir)
-
+        ITEMS = [
+        {
+            'label_name': _('Low'),    
+            'pixbuf': 'normal.png',
+            'function': self.modo_ahorro
+        },
+        {
+            'label_name': _('Medium'),
+            'pixbuf': 'balanced_normal.png',
+            'function': self.modo_equilibrado
+        },
+        {
+            'label_name': _('High'),
+            'pixbuf': 'performance_normal.png',
+            'function': self.modo_max_rendimiento
+        },
+        {
+            'label_name': _('Off'),
+            'pixbuf': 'disabled_normal.png',
+            'function': self.modo_apagado
+        },
+        {
+            'label_name': _('Advanced mode'),
+            'function': self.modo_avanzado
+        },
+        {
+            'label_name': _('Exit'),
+            'function': self.salir
+        }]
+        
+        for line, data in enumerate(ITEMS, start=1):
+            # Se añaden los items al menú en orden
+            if line > 3:
+                separator = Gtk.SeparatorMenuItem()
+                menu.append(separator) 
+                
+            if 'pixbuf' in data:
+                item = Gtk.ImageMenuItem()
+                
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                    filename=os.path.join(IMAGES_PATH, data.get('pixbuf')),
+                    width=25,
+                    height=25,
+                    preserve_aspect_ratio=True)
+                
+                icon = Gtk.Image.new_from_pixbuf(pixbuf)
+                icon.set_pixel_size(20)        
+                item.set_image(icon)
+                item.set_always_show_image(True)
+                
+            else:
+                item = Gtk.MenuItem()
+                
+            item.set_label(data.get('label_name'))
+            item.connect('activate', data.get('function'))  
+            menu.append(item)
+        
         menu.show_all()
 
         return menu
@@ -190,11 +167,6 @@ class Indicator(Gtk.Application):
         update_config('CONFIGURATION', 'modo_actual', self.current_mode)
         subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
 
-        tdpcontroller = config.get('TDP', 'tdpcontroller')
-        indicator = '{}indicator.py'.format(tdpcontroller)
-
-        controller_path = os.path.join('/usr/share/', tdpcontroller, 'src', indicator)
-        reboot_process(tdpcontroller, controller_path)
         animations(self.current_mode)
 
     def modo_ahorro(self, item):
@@ -224,7 +196,6 @@ class Indicator(Gtk.Application):
         logger.debug('Off')
         update_config('CONFIGURATION', 'application_on', '0')
         subprocess.Popen('pkexec slimbookbattery-pkexec apply'.split(' '))
-
         animations('0')
 
     def salir(self, item):
@@ -270,7 +241,6 @@ def check_plug():
         # This step is done at the end of function
         with open(os.path.join(HOMEDIR, '.config/slimbookbattery/slimbookbattery.conf'), 'w') as configfile:
             config.write(configfile)
-
 
 def animations(mode):
     code, stdout = subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')
@@ -321,57 +291,6 @@ def animations(mode):
             logger.error('mode not found')
     else:
         logger.error('Not Gnome desktop {} {}'.format(code, stdout))
-
-
-def reboot_process(process_name, path):
-    logger.debug('Rebooting {} ...'.format(process_name))
-
-    process = subprocess.getoutput('pgrep -f {}'.format(process_name))
-
-    # If it find a process, kills it
-    if len(process.split('\n')) > 1:
-        proc_list = process.split('\n')
-
-        for i in range(len(proc_list) - 1):
-            code, stdout = subprocess.getstatusoutput('kill -9 {}'.format(proc_list[i]))
-            logger.debug('Killing process {} Exit: {}'.format(proc_list[i], code))
-            if code == 1:
-                logger.error(stdout)
-
-        logger.debug('Launching process...')
-        if os.system('python3 {} &'.format(path)) == 0:
-            logger.debug('Done')
-        else:
-            logger.debug("Couldn't launch process")
-
-
-def rebootNvidia():
-    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-        filename=os.path.join(IMAGES_PATH, 'normal.png'),
-        width=90,
-        height=90,
-        preserve_aspect_ratio=True)
-    icon_MsgDialog = Gtk.Image.new_from_pixbuf(pixbuf)
-    icon_MsgDialog.show()
-
-    dialog = Gtk.MessageDialog(type=Gtk.MessageType.QUESTION,
-                               buttons=Gtk.ButtonsType.YES_NO,
-                               message_format=(_('Slimbook Battery')))
-    dialog.set_image(icon_MsgDialog)
-    dialog.format_secondary_text(
-        _('The changes have been applied, but it is necessary to restart so that some of them may take effect.'
-          ' Do you want to restart?'))
-    response = dialog.run()
-    if response == Gtk.ResponseType.YES:
-        os.system('reboot')
-    elif response == Gtk.ResponseType.NO:
-        logger.info(_('System will not restart'))
-
-    dialog.destroy()
-
-    # Cada minuto va actualizando la información del porcentaje de carga que se verá al lado del icono del indicator
-    # GLib.timeout_add(60000, change_label, indicator)
-
 
 def update_config(section, variable, value):
     # We change our variable: config.set(section, variable, value)
