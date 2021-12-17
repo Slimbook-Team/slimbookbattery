@@ -38,40 +38,44 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('AyatanaAppIndicator3', '0.1')
 gi.require_version('Notify', '0.7')
 
-from gi.repository import Gtk, GdkPixbuf, Notify
+from gi.repository import Gtk, GdkPixbuf
 from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 
-USER_NAME = utils.get_user()
 _ = utils.load_translation('slimbookbattery')
 
-IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '../images'))
-
-subprocess.getstatusoutput('echo $(date) @' + USER_NAME + '>> /tmp/slimbookbattery.user')
-
+USER_NAME = utils.get_user()
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 
-config_file = os.path.join(HOMEDIR, '.config/slimbookbattery/slimbookbattery.conf')
+config_file = os.path.join(HOMEDIR,'.config','slimbookbattery','slimbookbattery.conf')
 config = configparser.ConfigParser()
 config.read(config_file)
 
-ENERGY_SAVING = os.path.join(IMAGES_PATH, 'indicator/normal.png')
-BALANCED = os.path.join(IMAGES_PATH, 'indicator/balanced_normal.png')
-MAX_PERFORMANCE = os.path.join(IMAGES_PATH, 'indicator/performance_normal.png')
-
-DISABLED = os.path.join(IMAGES_PATH, 'indicator/disabled_normal.png')
+ICONS= {
+    "1": "normal",
+    "2": "balanced_normal",
+    "3": "performance_normal",
+    "0": "disabled_normal",
+}
 
 APP_INDICATOR_ID = 'Slimbook Battery Indicator'
 
-IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
+ICONS_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images', 'indicator'))
 
-logger = logging.getLogger()
+indicator = AppIndicator3.Indicator.new(APP_INDICATOR_ID, 
+                                        'Slimbook Battery',
+                                        AppIndicator3.IndicatorCategory.SYSTEM_SERVICES)
+indicator.set_attention_icon_full('Slimbook Battery', 'Monitor battery status and manage energy!')
+indicator.set_title('Slimbook Battery')
+indicator.set_icon_theme_path(ICONS_PATH)
 
-
+logger = logging.getLogger()   
+    
 class Indicator(Gtk.Application):
+    
     current_mode = config.get('CONFIGURATION', 'modo_actual')
-
+    
     def __init__(self):
-
+        
         if config.getboolean('CONFIGURATION', 'plug_warn'):
             check_plug()
 
@@ -80,26 +84,20 @@ class Indicator(Gtk.Application):
         else:
             indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
 
-        indicator.set_menu(self.build_menu())
-        Notify.init(APP_INDICATOR_ID)
-
         if config.getboolean('CONFIGURATION', 'application_on'):
 
             if os.system("pkexec slimbookbattery-pkexec autostart") == 0:
                 logger.debug('Brightness set')
 
-            current_mode = config.getint('CONFIGURATION', 'modo_actual')
-            if current_mode == 1:
-                indicator.set_icon_full(ENERGY_SAVING, 'Icon energy saving')
-            elif current_mode == 2:
-                indicator.set_icon_full(BALANCED, 'Icon balanced')
-            elif current_mode == 3:
-                indicator.set_icon_full(MAX_PERFORMANCE, 'Icon max performance')
-
+            mode = config.getint('CONFIGURATION', 'modo_actual')
+            indicator.set_icon_full(ICONS.get(str(mode)), 'Mode Icon')
         else:
-            indicator.set_icon_full(DISABLED, 'Icon energy saving')
+            indicator.set_icon_full(ICONS.get(str('0')), 'Icon disabled')
+            
+        indicator.set_menu(self.get_menu())
 
-    def build_menu(self):
+
+    def get_menu(self):
         menu = Gtk.Menu()
         ITEMS = [
         {
@@ -141,7 +139,7 @@ class Indicator(Gtk.Application):
                 item = Gtk.ImageMenuItem()
                 
                 pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                    filename=os.path.join(IMAGES_PATH, data.get('pixbuf')),
+                    filename=os.path.join(ICONS_PATH, data.get('pixbuf')),
                     width=25,
                     height=25,
                     preserve_aspect_ratio=True)
@@ -162,41 +160,44 @@ class Indicator(Gtk.Application):
 
         return menu
 
-    def update_update_mode(self):
-        update_config('CONFIGURATION', 'application_on', '1')
-        update_config('CONFIGURATION', 'modo_actual', self.current_mode)
+    def update_mode(self):
+        
+        if self.current_mode != '0':
+            update_config('CONFIGURATION', 'application_on', '1')
+            update_config('CONFIGURATION', 'modo_actual', self.current_mode)
+        else:
+            update_config('CONFIGURATION', 'application_on', '0')
+            
         subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
-
+        indicator.set_icon_full(ICONS.get(str(self.current_mode)), 'Slimbook Battery Icon')
         animations(self.current_mode)
 
+
     def modo_ahorro(self, item):
-        indicator.set_icon_full(ENERGY_SAVING, 'Icon energy saving')
-        logger.debug('Battery Saving Mode')
         self.current_mode = '1'
-        self.update_update_mode()
+        self.update_mode()
+        logger.debug('Energy Saving Mode')
 
     def modo_equilibrado(self, item):
-        indicator.set_icon_full(BALANCED, 'Icon balanced')
-        logger.debug('Normal power mode')
         self.current_mode = '2'
-        self.update_update_mode()
+        self.update_mode()
+        logger.debug('Balanced Power Mode')
 
     def modo_max_rendimiento(self, item):
-        indicator.set_icon_full(MAX_PERFORMANCE, 'Icon max performance')
-        logger.debug('Full Power Mode')
         self.current_mode = '3'
-        self.update_update_mode()
+        self.update_mode()
+        logger.debug('Full Power Mode')
 
     def modo_avanzado(self, item):
         logger.debug('preferencias')
         os.system(os.path.join(CURRENT_PATH, 'slimbookbatterypreferences.py'))
 
     def modo_apagado(self, item):
-        indicator.set_icon_full(DISABLED, 'Icon disabled')
-        logger.debug('Off')
+        self.current_mode = '0'
         update_config('CONFIGURATION', 'application_on', '0')
-        subprocess.Popen('pkexec slimbookbattery-pkexec apply'.split(' '))
-        animations('0')
+        self.update_mode()
+        logger.debug('Off')
+
 
     def salir(self, item):
         os.system('pkexec slimbookbattery-pkexec service stop')
@@ -243,54 +244,37 @@ def check_plug():
             config.write(configfile)
 
 def animations(mode):
-    code, stdout = subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')
+    exitcode, stdout = subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')
 
-    if code == 0:
+    if exitcode == 0:
         logger.info('Setting mode {} animations'.format(mode))
-        if mode == '0':  # Application off
+        
+        MODES = {
+            "0": True,
+            "1": config.getboolean('SETTINGS', 'ahorro_animations'),
+            "2": config.getboolean('SETTINGS', 'equilibrado_animations'),
+            "3": config.getboolean('SETTINGS', 'equilibrado_animations')
+        }
+        try:
+            animations = MODES.get(str(mode))
+        except:
+            logger.error('Mode not found')
+            animations = True
+        
+        if animations:
             logger.debug('Animations Active')
             os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
             os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
             os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
-        elif mode == '1':
-            if config.getboolean('SETTINGS', 'ahorro_animations'):
-                logger.debug('Animations Inactive')
-                os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch false')
-            else:
-                logger.debug('Animations Active')
-                os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
-
-        elif mode == '2':
-            if config.getboolean('SETTINGS', 'equilibrado_animations'):
-                logger.debug('Animations Inactive')
-                os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch false')
-            else:
-                logger.debug('Animations Active')
-                os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
-
-        elif mode == '3':
-            if config.getboolean('SETTINGS', 'maxrendimiento_animations'):
-                logger.debug('Animations Inactive')
-                os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch false')
-            else:
-                logger.debug('Animations Active')
-                os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch true')
-                os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch true')
         else:
-            logger.error('mode not found')
+            logger.debug('Animations Inactive')
+            os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
+            os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
+            os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch false')
+            
+       
     else:
-        logger.error('Not Gnome desktop {} {}'.format(code, stdout))
+        logger.error('Not Gnome desktop {} {}'.format(exitcode, stdout))
 
 def update_config(section, variable, value):
     # We change our variable: config.set(section, variable, value)
@@ -318,10 +302,6 @@ if __name__ == '__main__':
 
         logger.debug('Opening notification service')
         os.system('pkexec slimbookbattery-pkexec service restart')
-
-    indicator = AppIndicator3.Indicator.new(APP_INDICATOR_ID, 'Slimbook Battery',
-                                            AppIndicator3.IndicatorCategory.SYSTEM_SERVICES)
-    indicator.set_icon_full(DISABLED, 'Icon disabled')
 
     Indicator()
 

@@ -1,3 +1,8 @@
+slimbookbattery (4.0.4) focal; urgency=low
+
+  * Fixed indicator size in Ubuntu Budgie
+  * Default sound saving changed
+
 slimbookbattery (4.0.3) focal; urgency=low
 
   * Added --minimized argument

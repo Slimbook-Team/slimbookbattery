@@ -264,7 +264,7 @@ INTEL_GPU_BOOST_FREQ_ON_BAT=900
 # auto = mid on BAT, high on AC.
 # Default: default
 
-RADEON_POWER_PROFILE_ON_AC=mid
+RADEON_POWER_PROFILE_ON_AC=default
 RADEON_POWER_PROFILE_ON_BAT=mid
 #slimbook (2 lines)
 
@@ -301,14 +301,14 @@ WOL_DISABLE=N
 # Default: 0 (AC), 1 (BAT)
 
 SOUND_POWER_SAVE_ON_AC=0
-SOUND_POWER_SAVE_ON_BAT=1
+SOUND_POWER_SAVE_ON_BAT=0
 #slimbook
 
 # Disable controller too (HDA only): Y/N.
 # Note: effective only when SOUND_POWER_SAVE_ON_AC/BAT is activated.
 # Default: Y
 
-SOUND_POWER_SAVE_CONTROLLER=Y
+SOUND_POWER_SAVE_CONTROLLER=N
 #slimbook
 
 # Power off optical drive in UltraBay/MediaBay: 0=disable, 1=enable.
@@ -354,7 +354,7 @@ RUNTIME_PM_DRIVER_BLACKLIST="mei_me nouveau nvidia"
 # Set to 0 to disable, 1 to enable USB autosuspend feature.
 # Default: 1
 
-USB_AUTOSUSPEND=1
+USB_AUTOSUSPEND=0
 #slimbook
 
 # Exclude listed devices from USB autosuspend (separate with spaces).
@@ -419,7 +419,7 @@ RESTORE_DEVICE_STATE_ON_STARTUP=0
 # Separate multiple devices with spaces.
 # Default: <none>
 
-DEVICES_TO_DISABLE_ON_STARTUP="bluetooth"
+DEVICES_TO_DISABLE_ON_STARTUP=""
 #slimbook
 
 # Radio devices to enable on startup: bluetooth, wifi, wwan.
@@ -496,14 +496,14 @@ DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE="bluetooth"
 
 # Radio devices to disable on connect.
 
-DEVICES_TO_DISABLE_ON_LAN_CONNECT="wifi"
+DEVICES_TO_DISABLE_ON_LAN_CONNECT=""
 #slimbook
 #DEVICES_TO_DISABLE_ON_WIFI_CONNECT="wwan"
 #DEVICES_TO_DISABLE_ON_WWAN_CONNECT="wifi"
 
 # Radio devices to enable on disconnect.
 
-DEVICES_TO_ENABLE_ON_LAN_DISCONNECT="wifi"
+DEVICES_TO_ENABLE_ON_LAN_DISCONNECT=""
 #slimbook
 #DEVICES_TO_ENABLE_ON_WIFI_DISCONNECT=""
 #DEVICES_TO_ENABLE_ON_WWAN_DISCONNECT=""
