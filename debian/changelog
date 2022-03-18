@@ -1,7 +1,15 @@
+slimbookbattery (4.0.5beta) focal; urgency=low
+
+  * 
+
+ -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2022 11:24:04 +0100
+
 slimbookbattery (4.0.4) focal; urgency=low
 
   * Fixed indicator size in Ubuntu Budgie
   * Default sound saving changed
+
+ -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2021 11:24:04 +0100
 
 slimbookbattery (4.0.3) focal; urgency=low
 

@@ -4,7 +4,6 @@ import os
 import subprocess
 import locale
 
-
 def get_user(from_file=None):
     try:
         user_name = getpass.getuser()
@@ -24,7 +23,6 @@ def get_user(from_file=None):
 
     return user_name
 
-
 def get_languages():
     languages = ['en']
     try:
@@ -36,7 +34,6 @@ def get_languages():
     except Exception:
         pass
     return languages
-
 
 def load_translation(filename):
     current_path = os.path.dirname(os.path.realpath(__file__))

@@ -25,14 +25,7 @@ import signal
 import subprocess
 import sys
 from datetime import date
-
 import gi
-
-# We want load first current location
-CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
-if CURRENT_PATH not in sys.path:
-    sys.path = [CURRENT_PATH] + sys.path
-import utils
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('AyatanaAppIndicator3', '0.1')
@@ -41,14 +34,23 @@ gi.require_version('Notify', '0.7')
 from gi.repository import Gtk, GdkPixbuf
 from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 
+# We want load first current location
+CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+if CURRENT_PATH not in sys.path:
+    sys.path = [CURRENT_PATH] + sys.path
+import utils
+
+srcpath = '/usr/share/slimbookbattery/src'
+sys.path.insert(1, srcpath)
+
 _ = utils.load_translation('slimbookbattery')
 
 USER_NAME = utils.get_user()
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 
-config_file = os.path.join(HOMEDIR,'.config','slimbookbattery','slimbookbattery.conf')
+CONFIG_FILE = os.path.join(HOMEDIR,'.config','slimbookbattery','slimbookbattery.conf')
 config = configparser.ConfigParser()
-config.read(config_file)
+config.read(CONFIG_FILE)
 
 ICONS= {
     "1": "normal",
@@ -60,29 +62,36 @@ ICONS= {
 APP_INDICATOR_ID = 'Slimbook Battery Indicator'
 
 ICONS_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images', 'indicator'))
-
-indicator = AppIndicator3.Indicator.new(APP_INDICATOR_ID, 
-                                        'Slimbook Battery',
-                                        AppIndicator3.IndicatorCategory.SYSTEM_SERVICES)
-indicator.set_attention_icon_full('Slimbook Battery', 'Monitor battery status and manage energy!')
-indicator.set_title('Slimbook Battery')
-indicator.set_icon_theme_path(ICONS_PATH)
-
+                                        
 logger = logging.getLogger()   
     
+tdpcontroller = config['TDP']['tdpcontroller']    
+
 class Indicator(Gtk.Application):
     
     current_mode = config.get('CONFIGURATION', 'modo_actual')
     
     def __init__(self):
         
+        self.app = 'show_proc'
+
+        self.indicator = AppIndicator3.Indicator.new('show_proc', ICONS_PATH+"/normal.png", AppIndicator3.IndicatorCategory.OTHER)
+        			                                 
+        self.indicator.set_icon_theme_path(os.path.join(CURRENT_PATH, '..', 'images', 'indicator'))
+
+        self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
+
+        self.indicator.set_title('Slimbook Battery')
+
+        self.indicator.set_menu(self.get_menu())
+        
         if config.getboolean('CONFIGURATION', 'plug_warn'):
             check_plug()
 
         if config.getboolean('CONFIGURATION', 'icono'):
-            indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
+            self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
         else:
-            indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
+            self.indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
 
         if config.getboolean('CONFIGURATION', 'application_on'):
 
@@ -90,28 +99,25 @@ class Indicator(Gtk.Application):
                 logger.debug('Brightness set')
 
             mode = config.getint('CONFIGURATION', 'modo_actual')
-            indicator.set_icon_full(ICONS.get(str(mode)), 'Mode Icon')
+            self.indicator.set_icon_full(ICONS.get(str(mode)), 'Mode')
         else:
-            indicator.set_icon_full(ICONS.get(str('0')), 'Icon disabled')
-            
-        indicator.set_menu(self.get_menu())
-
+            self.indicator.set_icon_full(ICONS.get(str('0')), 'Icon disabled')
 
     def get_menu(self):
         menu = Gtk.Menu()
         ITEMS = [
         {
-            'label_name': _('Low'),    
+            'label_name': _('Energy Saving'),    
             'pixbuf': 'normal.png',
             'function': self.modo_ahorro
         },
         {
-            'label_name': _('Medium'),
+            'label_name': _('Balanced'),
             'pixbuf': 'balanced_normal.png',
             'function': self.modo_equilibrado
         },
         {
-            'label_name': _('High'),
+            'label_name': _('Maximum Performance'),
             'pixbuf': 'performance_normal.png',
             'function': self.modo_max_rendimiento
         },
@@ -136,8 +142,6 @@ class Indicator(Gtk.Application):
                 menu.append(separator) 
                 
             if 'pixbuf' in data:
-                item = Gtk.ImageMenuItem()
-                
                 pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                     filename=os.path.join(ICONS_PATH, data.get('pixbuf')),
                     width=25,
@@ -145,8 +149,7 @@ class Indicator(Gtk.Application):
                     preserve_aspect_ratio=True)
                 
                 icon = Gtk.Image.new_from_pixbuf(pixbuf)
-                icon.set_pixel_size(20)        
-                item.set_image(icon)
+                item = Gtk.ImageMenuItem(label=_('Medium performance'), image=icon)     
                 item.set_always_show_image(True)
                 
             else:
@@ -169,9 +172,13 @@ class Indicator(Gtk.Application):
             update_config('CONFIGURATION', 'application_on', '0')
             
         subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
-        indicator.set_icon_full(ICONS.get(str(self.current_mode)), 'Slimbook Battery Icon')
+        icon = ICONS.get(str(self.current_mode))
+        self.indicator.set_icon_full(icon, 'Mode')
+        
+        controller_path = os.path.join('/usr/share/', tdpcontroller, 'src', tdpcontroller+'indicator.py')
+        reboot_process(tdpcontroller, controller_path)
+        
         animations(self.current_mode)
-
 
     def modo_ahorro(self, item):
         self.current_mode = '1'
@@ -198,11 +205,30 @@ class Indicator(Gtk.Application):
         self.update_mode()
         logger.debug('Off')
 
-
     def salir(self, item):
         os.system('pkexec slimbookbattery-pkexec service stop')
         Gtk.main_quit()
 
+def reboot_process(process_name, path):
+    print('Rebooting ' + process_name + ' ...')
+
+    process = subprocess.getoutput('pgrep -f ' + process_name)
+
+    # If it find a process, kills it
+    if len(process.split('\n')) > 1:
+        proc_list = process.split('\n')
+
+        for i in range(len(proc_list) - 1):
+            exit = subprocess.getstatusoutput('kill -9 ' + proc_list[i])
+            print('Killing process ' + proc_list[i] + ' Exit: ' + str(exit[0]))
+            if exit[0] == 1:
+                print(exit[1])
+
+        print('Launching process...')
+        if os.system('python3 ' + path + '  &') == 0:
+            print('Done')
+        else:
+            print("Couldn't launch process")
 
 def check_plug():
     last = config.get('CONFIGURATION', 'plugged')
@@ -231,7 +257,7 @@ def check_plug():
             else:
                 logger.debug('Resetting last unplugged date')
                 config.set('CONFIGURATION', 'plugged', str(date.today()))
-                with open(config_file, 'w') as configfile:
+                with open(CONFIG_FILE, 'w') as configfile:
                     config.write(configfile)
 
         logger.info('Time since last time disconnection: {} days'.format(last_plug))
@@ -281,11 +307,10 @@ def update_config(section, variable, value):
     config.set(section, variable, str(value))
 
     # Writing our configuration file
-    with open(config_file, 'w') as configfile:
+    with open(CONFIG_FILE, 'w') as configfile:
         config.write(configfile)
 
     logger.info("- Variable |{}| updated in .conf, current value: {}".format(variable, value))
-
 
 if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)

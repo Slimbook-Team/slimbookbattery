@@ -29,7 +29,6 @@ import subprocess
 import sys
 import time
 
-
 # We want load first current location
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 if CURRENT_PATH not in sys.path:
@@ -512,8 +511,10 @@ class BatteryGrid(BasePageGrid):
             if 'header' not in data and not set_time_to_header:
                 logger.error('Mapping not found for {}: {}'.format(content, data))
                 continue
+            
             header.set_markup('<b>{}</b>'.format(data.get('header', '')))
             header.set_halign(Gtk.Align.START)
+            
             if set_time_to_header:
                 set_time_to_header = False
                 self.time_to_header = header
@@ -827,66 +828,69 @@ class GeneralGrid(BasePageGrid):
 
     def manage_events(self, button, *args):
         name = button.get_name()
+        
         if name in ['saving_tdpsync']:
             config.set('TDP', name, '1' if button.get_active() else '0')
+            
         elif name in ['application_on', 'icono', 'plug_warn']:
             config.set('CONFIGURATION', name, '1' if button.get_active() else '0')
+            
         elif name == 'autostart':
             self.autostart_initial = button.get_active()
+            
         else:
             if args:
                 config.set('CONFIGURATION', 'modo_actual', args[0])
 
     def save_selection(self):
+        
+        # Default working mode
         button = self.content.get('working_failure')
         active = button.get_active_iter()
+        
         if active is not None:
             model = button.get_model()
             work_mode = model[active][1]
+            
             if work_mode and work_mode != self.work_mode:
                 logger.info('Setting workmode {} ...'.format(work_mode))
                 self.work_mode = work_mode
+                
                 code, msg = subprocess.getstatusoutput(
                     'pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE {}'.format(work_mode)
                 )
                 if code != 0:
                     logger.error(msg)
 
+        # Enables autostart
         if self.autostart_initial:
             destination = os.path.join(
                 HOMEDIR, '.config/autostart'
             )
+            
             if not os.path.isdir(destination):
                 os.mkdir(destination)
+                
             source = os.path.join(
-                CURRENT_PATH, 'slimbookbattery-autostart.desktop'
+                CURRENT_PATH, 'configuration', 'slimbookbattery-autostart.desktop'
             )
+            
             if not os.path.isfile(os.path.join(destination, 'slimbookbattery-autostart.desktop')):
                 logger.info('Enabling autostart ...')
                 shutil.copy(source, destination)
                 config.set('CONFIGURATION', 'autostart', '1')
+        
+        # Disables autostart
         else:
             logger.info('Disabling autostart ...')
             autostart_path = os.path.join(HOMEDIR, '.config/autostart/slimbookbattery-autostart.desktop')
+            
             if os.path.isfile(autostart_path):
                 os.remove(autostart_path)
+                
             config.set('CONFIGURATION', 'autostart', '0')
 
-        reboot_process(
-            'slimbookbatteryindicator.py',
-            os.path.join(CURRENT_PATH, 'slimbookbatteryindicator.py'),
-            config.getboolean('CONFIGURATION', 'icono')
-        )
-
-        tdp_controller = config.get('TDP', 'tdpcontroller')
-        if config.getboolean('TDP', 'saving_tdpsync'):
-            indicator = '{}indicator.py'.format(tdp_controller)
-            indicator_full_path = os.path.join('/usr/share/', tdp_controller, 'src', indicator)
-            reboot_process(indicator, indicator_full_path, True)
-        else:
-            logger.info('Mode not setting TDP')
-
-
+        
 class SettingsGrid(BasePageGrid):
     GRID_KWARGS = {
         'column_homogeneous': True,
@@ -1138,10 +1142,12 @@ class SettingsGrid(BasePageGrid):
             'for i in /sys/devices/system/cpu/cpu*/cpufreq/scaling_driver; do cat $i; done'
         ).split('\n')
         governor_driver = None
+        
         for governor_driver in governors:
             if governor_driver not in ['intel_pstate', 'acpi-cpufreq', 'intel_cpufreq']:
                 governor_driver = None
                 break
+            
         return governor_driver
 
     @staticmethod
@@ -1164,6 +1170,7 @@ class SettingsGrid(BasePageGrid):
         self.button_col = 3
         self.label_col2 = 4
         self.button_col2 = 8
+        
         if parent.min_resolution:
             self.button_col = 5
             self.label_col2 = 0
@@ -1236,9 +1243,11 @@ class SettingsGrid(BasePageGrid):
                 button = Gtk.Entry(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
                 col_correction = 1
                 top = 2
+                
             elif button_type == 'switch':
                 button = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
                 button.connect('notify::active', self.manage_events)
+                
             elif button_type == 'scale':
                 button = Gtk.Scale()
                 button.set_adjustment(Gtk.Adjustment.new(0, 0, 100, 5, 5, 0))
@@ -1636,6 +1645,7 @@ class Preferences(Gtk.ApplicationWindow):
 
     def __init__(self):
 
+        # Load updates if exist
         if os.path.isdir(UPDATES_DIR):
             logging.info('Loading updates ...')
 
@@ -1654,6 +1664,7 @@ class Preferences(Gtk.ApplicationWindow):
                     except:
                         logger.error('Could not remove update after completion.')
 
+        self.check_linux_tools()
 
         self.__setup_css()
         Gtk.Window.__init__(self, title=(_('Slimbook Battery Preferences')))
@@ -1689,8 +1700,6 @@ class Preferences(Gtk.ApplicationWindow):
         except Exception:
             logger.exception('Unexpected error')
             self.child_process.terminate()
-
-
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -1919,9 +1928,11 @@ class Preferences(Gtk.ApplicationWindow):
             win = Preferences()
             win.connect("destroy", Gtk.main_quit)
             win.show_all()
+            
         elif name == 'accept':
             self.apply_conf()
 
+            # Remove updates dir
             if os.path.isdir(UPDATES_DIR):
                 try:
                     os.rmdir(UPDATES_DIR)
@@ -1987,54 +1998,151 @@ class Preferences(Gtk.ApplicationWindow):
             config.write(configfile)
 
         self.animations(config.get('CONFIGURATION', 'modo_actual'))
-
+        
+        reboot_indicators()
+        
         # Settings application
         # command = 'pkexec slimbookbattery-pkexec apply'
         # print(subprocess.getoutput(command.split(' ')))
-        os.system('pkexec slimbookbattery-pkexec apply')
+        #subprocess.Popen('pkexec slimbookbattery-pkexec apply'.split(' '))
+        
+    def check_linux_tools(self):
+        cmd = "apt --install | grep linux-tools$(uname -r)"
+        code, output = subprocess.getstatusoutput(cmd)
+        show_bool = config.get_bool('CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True
+                
+        def show_alert(parent=None, title=None):
+            dialog = PreferencesDialog()
+            dialog.connect("destroy", self.close_dialog)
+            dialog.show_all()
 
-
-def reboot_process(process_name, path, start):
-    logger.info('Rebooting ' + process_name + ' ...')
-    # logger.info(path)
-    process = subprocess.getoutput('pgrep -f ' + process_name)
-    # logger.info(process)
-
-    # If it find a process, kills it
-    if len(process.split('\n')) > 1:
-        proc_list = process.split('\n')
-
-        for i in range(len(proc_list) - 1):
-            exit = subprocess.getstatusoutput('kill -9 ' + proc_list[i])
-            logger.info('Killing process ' + proc_list[i] + ' Exit: ' + str(exit[0]))
-            if exit[0] == 1:
-                logger.info(exit[1])
-
-        logger.info('Launching process...')
-        if os.path.isfile(path):
-            os.system('python3 {} &'.format(path))
-            logger.info('Done')
+        if code != 0 and show_bool:
+            show_alert()
         else:
-            logger.info("Couldn't launch process")
+            pass
+                       
+    def close_dialog(self, dialog):
+        dialog.close()
+        self.active = True
+       
+class PreferencesDialog(Gtk.Dialog):
+	
+    def __init__(self):
+		
+        Gtk.Dialog.__init__(self,
+			title='',
+            parent=None,
+            flags=0)
 
-    else:
-        logger.info(process_name + ' was not running')
+        ICON = (CURRENT_PATH+'/images/slimbookamdcontroller.svg')
+        
+        try: 
+            self.set_icon_from_file(ICON)
+        except:
+            print("Not found")
 
-        if start:
+        self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)     
+        self.get_style_context().add_class("bg-color")
+        self.set_default_size(900, 0)     
+        self.set_decorated(False)
+
+        vbox = Gtk.VBox(spacing=5)
+        vbox.set_border_width(5)
+
+        self.get_content_area().add(vbox)
+
+        label = Gtk.Label(label="We reccomend you to install linux-tools for your kernel version")
+
+        vbox.pack_start(label, True, True, 0)
+
+        hbox = Gtk.HBox(spacing=5)
+        hbox.set_border_width(5)
+        
+        button_show = Gtk.CheckButton(label=_("Dont show again"))
+        button_show.connect("clicked", self.not_show)
+        hbox.pack_start(button_show, True, True, 0)
+         
+        button_close = Gtk.Button(label=_("Close"))
+        button_close.connect("button-press-event", self.on_button_close)
+        hbox.pack_start(button_close, True, True, 0)
+        
+        vbox.pack_start(hbox, True, True, 0)
+        
+        self.active = True
+        
+    def on_button_close(self, button, state):
+        self.close()
+        self.hide()
+        self.destroy()
+        Gtk.main_quit
+    
+    def not_show(self, button):
+        show_bool = config.get_bool('CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else False     
+        if show_bool:
+            config.set('CONFIGURATION', 'linux-tools-alert', False)
+        
+def reboot_indicators():
+    
+    def reboot_process(process_name, path, start):
+        logger.info('Rebooting ' + process_name + ' ...')
+        process = subprocess.getoutput('pgrep -f ' + process_name)
+        logger.info(process)
+
+        # If it find a process, kills it
+        if len(process.split('\n')) > 1:
+            proc_list = process.split('\n')
+
+            for i in range(len(proc_list) - 1):
+                exit = subprocess.getstatusoutput('kill -9 ' + proc_list[i])
+                logger.info('Killing process ' + proc_list[i] + ' Exit: ' + str(exit[0]))
+                if exit[0] == 1:
+                    logger.info(exit[1])
+
             logger.info('Launching process...')
             if os.path.isfile(path):
                 os.system('python3 {} &'.format(path))
-                logger.info('Done\n')
+                logger.info('Done')
             else:
-                logger.info("Couldn't launch process\n")
-    logger.info('\n')
+                logger.info("Couldn't launch process")
 
+        else:
+            logger.info(process_name + ' was not running')
 
+            if start:
+                logger.info('Launching process...')
+                if os.path.isfile(path):
+                    os.system('python3 {} &'.format(path))
+                    print('python3 {} &'.format(path))
+                    logger.info('Done\n')
+                else:
+                    logger.info("Couldn't launch process\n")
+        logger.info('\n')
+    
+    # Reboots battery indicator
+    reboot_process(
+        'slimbookbatteryindicator.py', # program to kill 
+        os.path.join(CURRENT_PATH, 'slimbookbatteryindicator.py'), # Path to start indicator
+        config.getboolean('CONFIGURATION', 'icono') # If icon show = true, starts indicator.
+    )
+    
+    # If sync active, reboot tdp indicator
+    if config.getboolean('TDP', 'saving_tdpsync'):
+        tdp_controller = config.get('TDP', 'tdpcontroller')
+        indicator = '{}indicator.py'.format(tdp_controller)
+        indicator_full_path = os.path.join('/usr/share/', tdp_controller, 'src', indicator)
+        reboot_process(
+            indicator, 
+            indicator_full_path, 
+            True
+        )
+    else:
+        logger.info('Mode not setting TDP')
+      
+   
 if __name__ == "__main__":
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.ERROR)
     handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.DEBUG)
-    #formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    handler.setLevel(logging.ERROR)
     formatter = logging.Formatter('%(asctime)s - %(lineno)d - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
