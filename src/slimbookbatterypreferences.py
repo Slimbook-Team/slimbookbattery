@@ -2009,7 +2009,7 @@ class Preferences(Gtk.ApplicationWindow):
     def check_linux_tools(self):
         cmd = "apt --install | grep linux-tools$(uname -r)"
         code, output = subprocess.getstatusoutput(cmd)
-        show_bool = config.get_bool('CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True
+        show_bool = config.getboolean('CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True
                 
         def show_alert(parent=None, title=None):
             dialog = PreferencesDialog()
@@ -2051,7 +2051,7 @@ class PreferencesDialog(Gtk.Dialog):
 
         self.get_content_area().add(vbox)
 
-        label = Gtk.Label(label="We reccomend you to install linux-tools for your kernel version")
+        label = Gtk.Label(label="We recommend you to install linux-tools for your kernel version")
 
         vbox.pack_start(label, True, True, 0)
 
@@ -2077,11 +2077,13 @@ class PreferencesDialog(Gtk.Dialog):
         Gtk.main_quit
     
     def not_show(self, button):
-        show_bool = config.get_bool('CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else False     
-        if show_bool:
-            config.set('CONFIGURATION', 'linux-tools-alert', False)
-        
-def reboot_indicators():
+        show_bool = button.get_active()
+        config.set('CONFIGURATION', 'linux-tools-alert', str(show_bool))
+
+        with open(CONFIG_FILE, 'w') as configfile:
+            config.write(configfile)
+
+def reboot_indicators(mode=None):
     
     def reboot_process(process_name, path, start):
         logger.info('Rebooting ' + process_name + ' ...')
@@ -2125,18 +2127,18 @@ def reboot_indicators():
         config.getboolean('CONFIGURATION', 'icono') # If icon show = true, starts indicator.
     )
     
-    # If sync active, reboot tdp indicator
-    if config.getboolean('TDP', 'saving_tdpsync'):
-        tdp_controller = config.get('TDP', 'tdpcontroller')
-        indicator = '{}indicator.py'.format(tdp_controller)
-        indicator_full_path = os.path.join('/usr/share/', tdp_controller, 'src', indicator)
-        reboot_process(
-            indicator, 
-            indicator_full_path, 
-            True
-        )
-    else:
-        logger.info('Mode not setting TDP')
+    # If sync active, config & reboot tdp indicator
+    # if config.getboolean('TDP', 'saving_tdpsync'):
+    #     tdp_controller = config.get('TDP', 'tdpcontroller')
+        # indicator = '{}indicator.py'.format(tdp_controller)
+        # indicator_full_path = os.path.join('/usr/share/', tdp_controller, 'src', indicator)
+        # reboot_process(
+        #     indicator, 
+        #     indicator_full_path, 
+        #     True
+        # )
+    # else:
+    #     logger.info('Mode not setting TDP')
       
    
 if __name__ == "__main__":

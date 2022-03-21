@@ -141,7 +141,7 @@ def main(args):  # Args will be like --> command_name value
             brightness_settings(battery_mode)  # Executed by indicator
             set_tdp(battery_mode)
 
-            logger.info("\n{}[COPY TDP CUSTOM SETTINGS]{}".format(Colors.GREEN, Colors.ENDC))
+            logger.info("\n{}[COPY TLP CUSTOM SETTINGS]{}".format(Colors.GREEN, Colors.ENDC))
             custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/custom/", mode_name)
             exit_code, msg = subprocess.getstatusoutput("sudo cp {} /etc/tlp.conf".format(custom_file))
             if exit_code == 0:
@@ -203,6 +203,7 @@ def main(args):  # Args will be like --> command_name value
         if args[1] == "autostart":  # Sets brightness and enables tdp
             battery_mode = config.get('CONFIGURATION', 'modo_actual')
             brightness_settings(battery_mode)
+            set_tdp(battery_mode)
 
         if args[1] == "report":
             os.system(
