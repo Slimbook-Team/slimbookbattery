@@ -1998,8 +1998,8 @@ class Preferences(Gtk.ApplicationWindow):
         reboot_indicators()
         
         # Settings application
-        # command = 'pkexec slimbookbattery-pkexec apply'
-        # print(subprocess.getoutput(command.split(' ')))
+        command = 'pkexec slimbookbattery-pkexec apply'
+        print(subprocess.getoutput(command))
         #subprocess.Popen('pkexec slimbookbattery-pkexec apply'.split(' '))
         
     def check_linux_tools(self):
