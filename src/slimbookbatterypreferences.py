@@ -36,7 +36,7 @@ if CURRENT_PATH not in sys.path:
 import utils
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, Pango
 
 logger = logging.getLogger()
 
@@ -271,7 +271,7 @@ class InfoPageGrid(BasePageGrid):
         link.set_halign(Gtk.Align.CENTER)
         box.add(link)
 
-        link = Gtk.LinkButton(uri="https://github.com/slimbook/slimbookbattery/tree/main/src/locale",
+        link = Gtk.LinkButton(uri="https://github.com/slimbook/slimbookbattery/tree/main/src/translations",
                               label=(_('Help us with translations!')))
         link.set_name('link')
         link.set_halign(Gtk.Align.CENTER)
@@ -309,7 +309,7 @@ class InfoPageGrid(BasePageGrid):
         info = Gtk.Label(label='')
         msg = "<span><b>{}</b> {} {} {}</span>".format(
             _("Info:"),
-            _("Contact with us if you find something wrong. "),
+            _("Contact with us if you find something wrong. "), ('(dev@slimbook.es)'),
             _("\nWe would appreciate that you attach the file that is generated"),
             _("by clicking the button below")
         )
@@ -1099,12 +1099,10 @@ class SettingsGrid(BasePageGrid):
             'CPU_MAX_PERF_ON_BAT': 33,
             'CPU_BOOST_ON_AC': 1,
             'CPU_BOOST_ON_BAT': 0,
-            'CPU_HWP_ON_AC': 'balance_performance',
-            'CPU_HWP_ON_BAT': 'power',
-            'ENERGY_PERF_POLICY_ON_AC': 'balance-performance',
-            'ENERGY_PERF_POLICY_ON_BAT': 'power',
+            'CPU_ENERGY_PERF_POLICY_ON_AC': 'balance_performance',
+            'CPU_ENERGY_PERF_POLICY_ON_BAT': 'power',
             'SCHED_POWERSAVE_ON_AC': 0,
-            'SCHED_POWERSAVE_ON_BAT': 1,
+            'SCHED_POWERSAVE_ON_BAT': 0,
         },
         2: {
             'CPU_MIN_PERF_ON_AC': 0,
@@ -1113,12 +1111,10 @@ class SettingsGrid(BasePageGrid):
             'CPU_MAX_PERF_ON_BAT': 80,
             'CPU_BOOST_ON_AC': 1,
             'CPU_BOOST_ON_BAT': 0,
-            'CPU_HWP_ON_AC': 'balance_performance',
-            'CPU_HWP_ON_BAT': 'power',
-            'ENERGY_PERF_POLICY_ON_AC': 'balance-performance',
-            'ENERGY_PERF_POLICY_ON_BAT': 'power',
+            'CPU_ENERGY_PERF_POLICY_ON_AC': 'balance_performance',
+            'CPU_ENERGY_PERF_POLICY_ON_BAT': 'power',
             'SCHED_POWERSAVE_ON_AC': 0,
-            'SCHED_POWERSAVE_ON_BAT': 1,
+            'SCHED_POWERSAVE_ON_BAT': 0,
         },
         3: {
             'CPU_MIN_PERF_ON_AC': 0,
@@ -1127,12 +1123,10 @@ class SettingsGrid(BasePageGrid):
             'CPU_MAX_PERF_ON_BAT': 100,
             'CPU_BOOST_ON_AC': 1,
             'CPU_BOOST_ON_BAT': 1,
-            'CPU_HWP_ON_AC': 'performance',
-            'CPU_HWP_ON_BAT': 'power',
-            'ENERGY_PERF_POLICY_ON_AC': 'balance-performance',
-            'ENERGY_PERF_POLICY_ON_BAT': 'balance-performance',
+            'CPU_ENERGY_PERF_POLICY_ON_AC': 'balance_performance',
+            'CPU_ENERGY_PERF_POLICY_ON_BAT': 'balance_performance',
             'SCHED_POWERSAVE_ON_AC': 0,
-            'SCHED_POWERSAVE_ON_BAT': 1,
+            'SCHED_POWERSAVE_ON_BAT': 0,
         },
     }
 
@@ -1664,7 +1658,7 @@ class Preferences(Gtk.ApplicationWindow):
                     except:
                         logger.error('Could not remove update after completion.')
 
-        self.check_linux_tools()
+        
 
         self.__setup_css()
         Gtk.Window.__init__(self, title=(_('Slimbook Battery Preferences')))
@@ -1700,6 +1694,8 @@ class Preferences(Gtk.ApplicationWindow):
         except Exception:
             logger.exception('Unexpected error')
             self.child_process.terminate()
+
+        self.check_linux_tools()
 
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -2007,12 +2003,12 @@ class Preferences(Gtk.ApplicationWindow):
         #subprocess.Popen('pkexec slimbookbattery-pkexec apply'.split(' '))
         
     def check_linux_tools(self):
-        cmd = "apt --install | grep linux-tools$(uname -r)"
+        cmd = "apt show linux-tools-$(uname -r) | grep linux-tools-$(uname -r)"
         code, output = subprocess.getstatusoutput(cmd)
         show_bool = config.getboolean('CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True
                 
         def show_alert(parent=None, title=None):
-            dialog = PreferencesDialog()
+            dialog = PreferencesDialog(self)
             dialog.connect("destroy", self.close_dialog)
             dialog.show_all()
 
@@ -2025,14 +2021,125 @@ class Preferences(Gtk.ApplicationWindow):
         dialog.close()
         self.active = True
        
+class TerminalWin(Gtk.Window):
+
+    def __init__(self):
+        
+        gi.require_version('Vte', '2.91')
+        from gi.repository import GLib, Vte
+        
+        Gtk.Window.__init__(self, title=_("Linux-tools installation"))
+        self.set_default_size(600, 300) 
+        
+        self.set_decorated(False)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        
+        self.set_name('terminal')
+        
+        self.button_close = Gtk.Button(label="Close")
+        self.button_close.set_halign(Gtk.Align.END)
+        self.button_close.connect("clicked", self.close_win)
+        
+        #To get the command to automatically run
+        #a newline(\n) character is used at the end of the
+        #command string.
+        self.command = "sudo apt install linux-tools-$(uname -r)\n"
+        command = Gtk.Label(label=_("Installing linux-tools for your kernel version, make sure that you have internet connection.\n"))
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        box.pack_start(command, False, True, 0)
+        
+        self.terminal = Vte.Terminal()
+        self.terminal.spawn_sync(
+            Vte.PtyFlags.DEFAULT, #PtyFlags
+            os.environ['HOME'], #Dir
+            ["/bin/bash"], 
+            [], 
+            GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+            None, #at least None is required
+            None,
+        )
+        
+        scroller = Gtk.ScrolledWindow()
+        scroller.set_hexpand(True)
+        scroller.set_vexpand(True)
+        scroller.add(self.terminal)
+        box.pack_start(scroller, False, True, 2)
+        box.pack_start(self.button_close, False, True, 0)
+        self.add(box)
+        
+        self.InputToTerm()
+
+    def InputToTerm(self):
+        def versionCompare(v1, v2):
+            # This will split both the versions by '.'
+            arr1 = v1.split(".")
+            arr2 = v2.split(".")
+            
+            arr1 = [''.join(i.split('-')) for i in arr1]
+            arr2 = [''.join(i.split('-')) for i in arr2]
+            
+            print(arr1, '\n', arr2)
+            
+            n = len(arr1)
+            m = len(arr2)
+            
+            # converts to integer from string
+            arr1 = [int(i) for i in arr1]
+            arr2 = [int(i) for i in arr2]
+        
+            if n>m:
+                for i in range(m, n):
+                    arr2.append(0)
+            elif m>n:
+                for i in range(n, m):
+                    arr1.append(0)
+            
+            # returns 1 if version 1 is bigger and -1 if
+            # version 2 is bigger and 0 if equal
+            for i in range(len(arr1)):
+                if arr1[i]>arr2[i]:
+                    return 1
+                elif arr2[i]>arr1[i]:
+                    return -1
+            return 0
+        
+        exit, str = subprocess.getstatusoutput('apt show gir1.2-vte-2.91 | grep Version')
+
+        if exit == 0:
+            str = str.split('Version: ')[1]               
+            def first_letter(s):
+                print(s) 
+                m = re.search(r'[a-z]', s, re.I)
+                if m is not None:
+                    return m.start()                  
+                return -1
+            
+            version = str[0:first_letter(str)] 
+            
+            if versionCompare('0.60.3-0', version)==1:
+                length = len(self.command)
+                self.terminal.feed_child(self.command, length)
+            else:
+                self.terminal.feed_child(self.command.encode("utf-8"))
+        else:
+            print(exit, str)
+
+    def close_win(self, button=None): 
+        self.close()
+        self.destroy()
+
 class PreferencesDialog(Gtk.Dialog):
 	
-    def __init__(self):
+    def __init__(self, parent):
 		
         Gtk.Dialog.__init__(self,
 			title='',
             parent=None,
             flags=0)
+
+        # self.set_modal(True)  
+        self.set_transient_for(parent) 
 
         ICON = (CURRENT_PATH+'/images/slimbookamdcontroller.svg')
         
@@ -2043,45 +2150,73 @@ class PreferencesDialog(Gtk.Dialog):
 
         self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)     
         self.get_style_context().add_class("bg-color")
-        self.set_default_size(900, 0)     
+        self.set_default_size(500, 0)     
         self.set_decorated(False)
+        self.set_name('warn')
 
-        vbox = Gtk.VBox(spacing=5)
+        self.show_bool = True
+
+        vbox = Gtk.VBox(homogeneous=False, spacing=5)
         vbox.set_border_width(5)
 
         self.get_content_area().add(vbox)
 
-        label = Gtk.Label(label="We recommend you to install linux-tools for your kernel version")
-
-        vbox.pack_start(label, True, True, 0)
+        self.textview = Gtk.TextView()
+        self.textbuffer = self.textview.get_buffer()
+        self.textbuffer.set_text(
+            _("You have not installed linux-tools for your kernel version, which is recommended.\nIf you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same.")
+        )
+        self.textview.set_wrap_mode(Gtk.WrapMode(2))
+        self.textview.set_pixels_inside_wrap(5)
+        self.textview.set_pixels_above_lines(6)
+        self.textview.set_editable(False)
+        self.textview.set_cursor_visible(False)
+        # self.textbuffer.get_style_context().add_class("text")
+        vbox.pack_start(self.textview, True, True, 0)
 
         hbox = Gtk.HBox(spacing=5)
         hbox.set_border_width(5)
+        hbox.set_margin_top(10)
         
         button_show = Gtk.CheckButton(label=_("Dont show again"))
         button_show.connect("clicked", self.not_show)
         hbox.pack_start(button_show, True, True, 0)
+        
+        button_install = Gtk.Button(label=_("Install"))
+        button_install.connect("clicked", self.show_terminal)
+        hbox.pack_start(button_install, True, True, 0)
          
-        button_close = Gtk.Button(label=_("Close"))
+        button_close = Gtk.Button(label=_("Cancel"))
         button_close.connect("button-press-event", self.on_button_close)
         hbox.pack_start(button_close, True, True, 0)
-        
-        vbox.pack_start(hbox, True, True, 0)
+
+        vbox.pack_start(hbox, True, True, 0)   
         
         self.active = True
         
     def on_button_close(self, button, state):
+        
+        print('Setting value to', self.show_bool)
+        config.set('CONFIGURATION', 'linux-tools-alert', str(self.show_bool))
+
+        with open(CONFIG_FILE, 'w') as configfile:
+            config.write(configfile)
+        
         self.close()
         self.hide()
         self.destroy()
         Gtk.main_quit
     
     def not_show(self, button):
-        show_bool = button.get_active()
-        config.set('CONFIGURATION', 'linux-tools-alert', str(show_bool))
+        if button.get_active():
+            self.show_bool = False
+        else:
+            self.show_bool = True
 
-        with open(CONFIG_FILE, 'w') as configfile:
-            config.write(configfile)
+    def show_terminal(self, button=None):        
+        win = TerminalWin()
+        win.connect("delete-event", Gtk.main_quit)
+        win.show_all()
 
 def reboot_indicators(mode=None):
     
@@ -2127,18 +2262,18 @@ def reboot_indicators(mode=None):
         config.getboolean('CONFIGURATION', 'icono') # If icon show = true, starts indicator.
     )
     
-    # If sync active, config & reboot tdp indicator
-    # if config.getboolean('TDP', 'saving_tdpsync'):
-    #     tdp_controller = config.get('TDP', 'tdpcontroller')
-        # indicator = '{}indicator.py'.format(tdp_controller)
-        # indicator_full_path = os.path.join('/usr/share/', tdp_controller, 'src', indicator)
-        # reboot_process(
-        #     indicator, 
-        #     indicator_full_path, 
-        #     True
-        # )
-    # else:
-    #     logger.info('Mode not setting TDP')
+    #If sync active, reboot tdp indicator
+    if config.getboolean('TDP', 'saving_tdpsync'):
+        tdp_controller = config.get('TDP', 'tdpcontroller')
+        indicator = '{}indicator.py'.format(tdp_controller)
+        indicator_full_path = os.path.join('/usr/share/', tdp_controller, 'src', indicator)
+        reboot_process(
+            indicator, 
+            indicator_full_path, 
+            True
+        )
+    else:
+        logger.info('Mode not setting TDP')
       
    
 if __name__ == "__main__":
