@@ -20,7 +20,7 @@ USER_NAME = utils.get_user()
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
-DEFAULT_CONF = os.path.join(CURRENT_PATH, 'slimbookbattery.conf')
+DEFAULT_CONF = os.path.join(CURRENT_PATH,'configuration', 'slimbookbattery.conf')
 CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
 

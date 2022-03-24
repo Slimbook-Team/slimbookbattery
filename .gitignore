@@ -1,5 +1,6 @@
 # Tests
 .test
+src/configuration/default/tlp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

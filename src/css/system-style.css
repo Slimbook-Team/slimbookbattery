@@ -28,3 +28,26 @@ window notebook{
 #smaller_label label {
     font-size: small;
 }
+
+#terminal {
+    padding: 20px;
+}
+
+#terminal label{
+    color: black;
+}
+#terminal {
+    background-color: white;
+}
+
+#terminal box, #warn>box{
+    padding: 10px;
+}
+
+vte-terminal {
+    padding: 10px;
+}
+
+#warn>box *{
+    background-color: transparent;
+}

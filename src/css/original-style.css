@@ -167,3 +167,22 @@ header > tabs > tab:hover, header > tabs > tab:checked {
     border: none;
     background-color: transparent;
 }
+
+#terminal label{
+    color: black;
+}
+#terminal {
+    background-color: white;
+}
+
+#terminal box, #warn>box, 
+#terminal scrolledwindow{
+    padding: 10px;
+}
+
+#terminal scrolledwindow {
+    background-color: black;
+}
+#warn>box *{
+    background-color: transparent;
+}

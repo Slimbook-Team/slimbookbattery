@@ -193,7 +193,7 @@ def main(args):  # Args will be like --> command_name value
             # Slimbook Battery Configuration
             logger.info("Resetting Slimbook Battery's conf")
             custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/slimbookbattery.conf")
-            default_file = os.path.join(CURRENT_PATH, "slimbookbattery.conf")
+            default_file = os.path.join(CURRENT_PATH, "configuration", "slimbookbattery.conf")
             logger.info(default_file)
 
             os.remove(custom_file)

@@ -18,6 +18,7 @@ Depends: ${misc:Depends}, ${python:Depends}, ${dist:Depends}
 	gir1.2-gdkpixbuf-2.0,
 	gir1.2-glib-2.0,
 	gir1.2-notify-0.7,
+	gir1.2-vte-2.91,
 	gir1.2-ayatanaappindicator3-0.1,
 	tlp,
 	tlp-rdw,

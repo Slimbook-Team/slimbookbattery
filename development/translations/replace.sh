@@ -1,7 +1,7 @@
 #!/bin/bash
 # This file must be executed from out of src
 # This file replaces the english msgid in all files which contain it, 
-# by the english msgstr (Useful when you have declarated a string like 'strname' everywhere)
+# by the english msgstr (Useful when you have declared a string like 'strname' everywhere)
 oldvalue=''
 newvalue=''
 
@@ -93,8 +93,8 @@ egrep 'msgid|msgstr' $(pwd)/tranlations/en/LC_MESSAGES/$file.po | while read -r 
             }
 
           done
-      # else
-        #echo "\033[0;31mCheck special chars $oldvalue \033[0m"
+        # else
+        # echo "\033[0;31mCheck special chars $oldvalue \033[0m"
         
       fi
     fi
