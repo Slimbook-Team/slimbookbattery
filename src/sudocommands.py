@@ -63,6 +63,9 @@ HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
+TLP_CONF = utils.get_tlp_conf_file()
+print('Using ', TLP_CONF)
+
 logger.debug("Username: {} - Homedir: {}".format(USER_NAME, HOMEDIR))
 
 config_file = os.path.join(HOMEDIR, '.config/slimbookbattery/slimbookbattery.conf')
@@ -131,38 +134,8 @@ def main(args):  # Args will be like --> command_name value
         battery_mode = config.get('CONFIGURATION', 'modo_actual')
 
         if args[1] == "apply":  # Applies selected mode conf and turns on/off tlp
-            mode_name = ''
-            # Copies selected custom mode conf to /etc/tlp.conf
-            # print('Passing Custom Configuration '+battery_mode+' to tlp.conf')
-            if battery_mode in MAPPING_MODES:
-                logger.info(MAPPING_MODES[battery_mode]['full_text'])
-                mode_name = MAPPING_MODES[battery_mode]['mode_name']
-
-            brightness_settings(battery_mode)  # Executed by indicator
-            set_tdp(battery_mode)
-
-            logger.info("\n{}[COPY TLP CUSTOM SETTINGS]{}".format(Colors.GREEN, Colors.ENDC))
-            custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/custom/", mode_name)
-            exit_code, msg = subprocess.getstatusoutput("sudo cp {} /etc/tlp.conf".format(custom_file))
-            if exit_code == 0:
-                logger.info('File copied succesfully!')
-            else:
-                logger.error('Execution failed {}'.format(msg))
-
-            # Sets mode changes and enables/disables TLP according to conf
-            if config.getboolean('CONFIGURATION', 'application_on'):
-                # Extra configuration
-                if update_config('/etc/tlp.conf', 'TLP_ENABLE', '1') == 0:
-                    logger.info('TLP is enabled')
-
-            else:  # Disablig TLP in conf
-                if update_config('/etc/tlp.conf', 'TLP_ENABLE', '0') == 0:
-                    logger.info('TLP is disabled')
-
-            # Restarting TLP
-            subprocess.getoutput("sudo tlp start")
-
             required_reboot = mode_settings(battery_mode)
+            
             if required_reboot == 1:
                 logger.info('Sudo notify')
                 notify(msg_graphics)
@@ -308,7 +281,7 @@ def set_tdp(mode):
 
 def change_config(args):  # For general page options
     logger.info('\n{}[CHANGE CONFIGURATION]{}'.format(Colors.GREEN, Colors.ENDC))
-    files = ['/etc/tlp.conf',
+    files = [TLP_CONF,
              os.path.join(HOMEDIR, '.config/slimbookbattery/custom/ahorrodeenergia'),
              os.path.join(HOMEDIR, '.config/slimbookbattery/custom/equilibrado'),
              os.path.join(HOMEDIR, '.config/slimbookbattery/custom/maximorendimiento')]
@@ -331,51 +304,8 @@ def mode_settings(mode):
         graficaNvidia = True
         graphics_before = stout
 
-    # If nvidia driver is installed and works WE SET IT MANUALLY
-    if graficaNvidia:
-        logger.info('Detected nvidia graphics profile: {}'.format(graphics_before))
-        logger.info('Setting new profile ...')
-        if mode == '1':
-
-            if config.getboolean('SETTINGS', 'graphics_ahorro') and graphics_before != 'intel':
-                if not graphics_before == 'intel':
-                    os.system('prime-select intel')
-
-            elif not config.getboolean('SETTINGS', 'graphics_ahorro') and graphics_before != 'on-demand':
-                if not graphics_before == 'on-demand':
-                    os.system('prime-select intel')
-                    # avocado
-                    os.system('prime-select on-demand')
-
-        elif mode == '2':
-
-            if config.getboolean('SETTINGS', 'graphics_equilibrado') and graphics_before != 'on-demand':
-                if not graphics_before == 'on-demand':
-                    os.system('prime-select intel')
-                    os.system('prime-select on-demand')
-
-            elif not config.getboolean('SETTINGS', 'graphics_equilibrado') and graphics_before != 'nvidia':
-                if not graphics_before == 'nvidia':
-                    os.system('prime-select nvidia')
-
-        elif mode == '3':  # need to check
-            if config.getboolean('SETTINGS', 'graphics_maxrendimiento') and graphics_before != 'on-demand':
-                if not graphics_before == 'on-demand':
-                    os.system('prime-select intel')
-                    os.system('prime-select on-demand')
-
-            elif not config.getboolean('SETTINGS', 'graphics_maxrendimiento') and graphics_before != 'nvidia':
-                if not graphics_before == 'nvidia':
-                    os.system('prime-select nvidia')
-
-        graphics_after = subprocess.getoutput('prime-select query')
-        logger.debug('Graphics before --> {} // Graphics after --> {}'.format(graphics_before, graphics_after))
-        if not graphics_before == graphics_after:
-            logger.info('Required reboot changes to 1')
-            required_reboot = 1
-
     # If nvidia driver is not installed or does not work, we use TLP
-    elif not graficaNvidia:
+    if not graficaNvidia:
         logger.info('Setting graphics frequency ...')
 
         if mode in MAPPING_MODES:
@@ -512,6 +442,81 @@ def mode_settings(mode):
                 os.system('sed -i "/INTEL_GPU_BOOST_FREQ_ON_AC=/ c#INTEL_GPU_BOOST_FREQ_ON_AC=0" ' + filepath)
         else:
             logger.error('Graphics 404')
+    
+    mode_name = ''
+    # Copies selected custom mode conf to TLP_CONF
+    # print('Passing Custom Configuration '+battery_mode+' to tlp.conf')
+    if mode in MAPPING_MODES:
+        logger.info(MAPPING_MODES[mode]['full_text'])
+        mode_name = MAPPING_MODES[mode]['mode_name']
+
+    brightness_settings(mode)  # Executed by indicator
+    set_tdp(mode)
+
+    logger.info("\n{}[COPY TLP CUSTOM SETTINGS]{}".format(Colors.GREEN, Colors.ENDC))
+    custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/custom/", mode_name)
+    exit_code, msg = subprocess.getstatusoutput("sudo cp {} {}".format(custom_file, TLP_CONF))
+    if exit_code == 0:
+        logger.info('File copied succesfully!')
+    else:
+        logger.error('Execution failed {}'.format(msg))
+
+    # Sets mode changes and enables/disables TLP according to conf
+    if config.getboolean('CONFIGURATION', 'application_on'):
+        application_on = '1'
+    else:  # Disablig TLP in conf
+        application_on = '0'
+    if update_config(TLP_CONF, 'TLP_ENABLE', application_on) == 0:
+        logger.info('\nTLP Status = {}'.format(application_on))
+
+    # Restarting TLP
+    subprocess.getoutput("sudo tlp start")
+    
+    
+    # If nvidia driver is installed and works WE SET IT MANUALLY
+            
+    if graficaNvidia:
+        logger.info('Detected nvidia graphics profile: {}'.format(graphics_before))
+        logger.info('Setting new profile ...')
+        if mode == '1':
+
+            if config.getboolean('SETTINGS', 'graphics_ahorro') and graphics_before != 'intel':
+                if not graphics_before == 'intel':
+                    os.system('prime-select intel')
+
+            elif not config.getboolean('SETTINGS', 'graphics_ahorro') and graphics_before != 'on-demand':
+                if not graphics_before == 'on-demand':
+                    os.system('prime-select intel')
+                    # avocado
+                    os.system('prime-select on-demand')
+
+        elif mode == '2':
+
+            if config.getboolean('SETTINGS', 'graphics_equilibrado') and graphics_before != 'on-demand':
+                if not graphics_before == 'on-demand':
+                    os.system('prime-select intel')
+                    os.system('prime-select on-demand')
+
+            elif not config.getboolean('SETTINGS', 'graphics_equilibrado') and graphics_before != 'nvidia':
+                if not graphics_before == 'nvidia':
+                    os.system('prime-select nvidia')
+
+        elif mode == '3':  # need to check
+            if config.getboolean('SETTINGS', 'graphics_maxrendimiento') and graphics_before != 'on-demand':
+                if not graphics_before == 'on-demand':
+                    os.system('prime-select intel')
+                    os.system('prime-select on-demand')
+
+            elif not config.getboolean('SETTINGS', 'graphics_maxrendimiento') and graphics_before != 'nvidia':
+                if not graphics_before == 'nvidia':
+                    os.system('prime-select nvidia')
+
+        graphics_after = subprocess.getoutput('prime-select query')
+        logger.debug('Graphics before --> {} // Graphics after --> {}'.format(graphics_before, graphics_after))
+        if not graphics_before == graphics_after:
+            logger.info('Required reboot changes to 1')
+            required_reboot = 1
+            
     return required_reboot
 
 

@@ -4,6 +4,8 @@ import os
 import subprocess
 import locale
 
+from pkg_resources import parse_version as parse_version
+
 def get_user(from_file=None):
     try:
         user_name = getpass.getuser()
@@ -34,6 +36,25 @@ def get_languages():
     except Exception:
         pass
     return languages
+
+def get_tlp_conf_file():
+    
+    code, res = subprocess.getstatusoutput('tlp-stat --config | grep "TLP "')
+    if code==0:
+        res = res[res.find('TLP'):-1]
+        version=res.split(' ')[1]
+    else :
+        version='1.3' # Most common    
+
+    try:
+        if parse_version(version)>= parse_version('1.3'):
+            file='/etc/tlp.conf'
+        else:
+            file='/etc/default/tlp'
+    except Exception as ex:
+        print(str(ex)+'\nTLP version not found, using TLP 1.3 config file.')
+        file='/etc/tlp.conf'
+    return file
 
 def load_translation(filename):
     current_path = os.path.dirname(os.path.realpath(__file__))

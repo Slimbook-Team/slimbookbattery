@@ -53,6 +53,8 @@ INTEL_EN = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimb
 AMD_ES = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
 AMD_EN = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
 
+TLP_CONF = utils.get_tlp_conf_file()
+
 _ = utils.load_translation('preferences')
 
 lang = utils.get_languages()[0]
@@ -811,7 +813,7 @@ class GeneralGrid(BasePageGrid):
         button = self.content['autostart']
         button.set_active(self.autostart_initial)
 
-        with open('/etc/tlp.conf') as f:
+        with open(TLP_CONF) as f:
             content = f.read()
         if 'TLP_DEFAULT_MODE=AC' in content:
             self.content['working_failure'].set_active(0)
@@ -1014,7 +1016,7 @@ class SettingsGrid(BasePageGrid):
             'name': 'wifi_profile',
             'label': _('Wi-Fi power saving profile:'),
             'type': 'switch',
-            'help': _('Note: power save can cause an unstable wifi connection.'),
+            'help': _('Note: power save can cause an unstable wifi connection.')+' '+_('Disabled in tlp version <1.3.'),
         },
         {
             'name': 'bluetooth_disabled',
@@ -1325,14 +1327,24 @@ class SettingsGrid(BasePageGrid):
         for key, search in {
             'sound': 'SOUND_POWER_SAVE_ON_BAT=1',
             'wifi_profile': 'WIFI_PWR_ON_BAT=on',
-            'bluetooth_blacklist': 'USB_BLACKLIST_BTUSB=1',
-            'printer_blacklist': 'USB_BLACKLIST_PRINTER=1',
-            'ethernet_blacklist': 'USB_BLACKLIST_WWAN=1',
+            'bluetooth_blacklist': 'USB_BLACKLIST_BTUSB=1 & USB_DENYLIST_BTUSB=1',
+            'printer_blacklist': 'USB_BLACKLIST_PRINTER=1 & USB_DENYLIST_PRINTER=1',
+            'ethernet_blacklist': 'USB_BLACKLIST_WWAN=1 & USB_DENYLIST_WWAN=1',
             'usb_shutdown': 'USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1',
         }.items():
+            
             button = self.content[key]
-            button.set_active(search in content)
-
+            
+            if len(search.split(' & ')) > 1:
+                search = search.split(' & ')
+                active=True
+                for variable in search:
+                    if variable not in content:
+                        active = False
+                button.set_active(active)
+            else:
+                button.set_active(search in content)
+                
         for key, search in {
             'disabled': 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE',
             'os': 'DEVICES_TO_DISABLE_ON_STARTUP',
@@ -1459,9 +1471,9 @@ class SettingsGrid(BasePageGrid):
 
         for key, search_items in {
             'sound': 'SOUND_POWER_SAVE_ON_BAT',
-            'bluetooth_blacklist': 'USB_BLACKLIST_BTUSB USB_EXCLUDE_BTUSB',
-            'printer_blacklist': 'USB_BLACKLIST_PRINTER USB_EXCLUDE_PRINTER',
-            'ethernet_blacklist': 'USB_BLACKLIST_WWAN USB_EXCLUDE_WWAN',
+            'bluetooth_blacklist': 'USB_BLACKLIST_BTUSB USB_DENYLIST_BTUSB',
+            'printer_blacklist': 'USB_BLACKLIST_PRINTER USB_DENYLIST_PRINTER',
+            'ethernet_blacklist': 'USB_BLACKLIST_WWAN USB_DENYLIST_WWAN',
             'usb_shutdown': 'USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN',
             'wifi_profile': 'WIFI_PWR_ON_BAT',
             'usb': 'USB_AUTOSUSPEND',
@@ -1469,7 +1481,7 @@ class SettingsGrid(BasePageGrid):
 
             button = self.content[key]
             if search_items == 'WIFI_PWR_ON_BAT':
-                value = 'on' if button.get_active() else 'off'
+                value = 'on' if button.get_active() and TLP_CONF!='/etc/default/tlp' else 'off'
             else:
                 value = '1' if button.get_active() else '0'
 
@@ -1696,7 +1708,29 @@ class Preferences(Gtk.ApplicationWindow):
             self.child_process.terminate()
 
         self.check_linux_tools()
+        
+        self.check_tlp_version()
+        
+    def check_tlp_version(self):
+        info = _('We reccommend you to add TLP repository, to get the last version of TLP ;)')
+        def show_alert(parent=None, title=None):
+            command_lbl = Gtk.Label(label=_("Addind linrunnert/TLP launchpad repository.\n"))
+            command_lbl.set_line_wrap(True)
+            command = "sudo add-apt-repository ppa:linrunner/tlp\nsudo apt-get update\nsudo apt-get upgrade\n"   
+        
+            arguments = {
+                'info': _('We reccommend you to add TLP repository, to get the last version of TLP ;)'), 
+                'bt_label': _('Install'),
+                'function': self.show_terminal(command_lbl,command)
+            }
+        
+            dialog = PreferencesDialog(self, arguments)
+            dialog.connect("destroy", self.close_dialog)
+            dialog.show_all()
+            
+        show_alert()
 
+            
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
         scale = monitor.get_scale_factor()
@@ -2006,16 +2040,32 @@ class Preferences(Gtk.ApplicationWindow):
         cmd = "apt show linux-tools-$(uname -r) | grep linux-tools-$(uname -r)"
         code, output = subprocess.getstatusoutput(cmd)
         show_bool = config.getboolean('CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True
-                
+        
+        
+        command_lbl = Gtk.Label(label=_("Installing linux-tools for your kernel version, make sure that you have internet connection.\n"))
+        command_lbl.set_line_wrap(True)
+        command = "sudo apt install linux-tools-$(uname -r)\n"
+        arguments = {
+            'info':  _("You have not installed linux-tools for your kernel version, which is recommended.\nIf you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same."),
+            'btn_label' :_('Install'),
+            'function': self.show_terminal(command_lbl,command)
+        }
+        
         def show_alert(parent=None, title=None):
-            dialog = PreferencesDialog(self)
+            
+            dialog = PreferencesDialog(self, arguments)
             dialog.connect("destroy", self.close_dialog)
             dialog.show_all()
 
-        if code != 0 and show_bool:
+        if code != 1 and show_bool:
             show_alert()
         else:
             pass
+          
+    def show_terminal(self, command_lbl=None, command=None):     
+        win = TerminalWin(command_lbl, command)
+        win.connect("delete-event", Gtk.main_quit)
+        win.show_all()      
                        
     def close_dialog(self, dialog):
         dialog.close()
@@ -2023,7 +2073,10 @@ class Preferences(Gtk.ApplicationWindow):
        
 class TerminalWin(Gtk.Window):
 
-    def __init__(self):
+    def __init__(self, command_lbl, command):
+        
+        print(command_lbl, command)
+        
         
         gi.require_version('Vte', '2.91')
         from gi.repository import GLib, Vte
@@ -2039,15 +2092,9 @@ class TerminalWin(Gtk.Window):
         self.button_close = Gtk.Button(label="Close")
         self.button_close.set_halign(Gtk.Align.END)
         self.button_close.connect("clicked", self.close_win)
-        
-        #To get the command to automatically run
-        #a newline(\n) character is used at the end of the
-        #command string.
-        self.command = "sudo apt install linux-tools-$(uname -r)\n"
-        command = Gtk.Label(label=_("Installing linux-tools for your kernel version, make sure that you have internet connection.\n"))
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        box.pack_start(command, False, True, 0)
+        box.pack_start(command_lbl, False, True, 0)
         
         self.terminal = Vte.Terminal()
         self.terminal.spawn_sync(
@@ -2059,7 +2106,7 @@ class TerminalWin(Gtk.Window):
             None, #at least None is required
             None,
         )
-        
+
         scroller = Gtk.ScrolledWindow()
         scroller.set_hexpand(True)
         scroller.set_vexpand(True)
@@ -2068,9 +2115,9 @@ class TerminalWin(Gtk.Window):
         box.pack_start(self.button_close, False, True, 0)
         self.add(box)
         
-        self.InputToTerm()
+        self.InputToTerm(command)
 
-    def InputToTerm(self):
+    def InputToTerm(self, command):
         def versionCompare(v1, v2):
             # This will split both the versions by '.'
             arr1 = v1.split(".")
@@ -2118,10 +2165,10 @@ class TerminalWin(Gtk.Window):
             version = str[0:first_letter(str)] 
             
             if versionCompare('0.60.3-0', version)==1:
-                length = len(self.command)
-                self.terminal.feed_child(self.command, length)
+                length = len(command)
+                self.terminal.feed_child(command, length)
             else:
-                self.terminal.feed_child(self.command.encode("utf-8"))
+                self.terminal.feed_child(command.encode("utf-8"))
         else:
             print(exit, str)
 
@@ -2131,7 +2178,7 @@ class TerminalWin(Gtk.Window):
 
 class PreferencesDialog(Gtk.Dialog):
 	
-    def __init__(self, parent):
+    def __init__(self, parent, arguments):
 		
         Gtk.Dialog.__init__(self,
 			title='',
@@ -2140,13 +2187,6 @@ class PreferencesDialog(Gtk.Dialog):
 
         # self.set_modal(True)  
         self.set_transient_for(parent) 
-
-        ICON = (CURRENT_PATH+'/images/slimbookamdcontroller.svg')
-        
-        try: 
-            self.set_icon_from_file(ICON)
-        except:
-            print("Not found")
 
         self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)     
         self.get_style_context().add_class("bg-color")
@@ -2164,7 +2204,7 @@ class PreferencesDialog(Gtk.Dialog):
         self.textview = Gtk.TextView()
         self.textbuffer = self.textview.get_buffer()
         self.textbuffer.set_text(
-            _("You have not installed linux-tools for your kernel version, which is recommended.\nIf you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same.")
+            arguments.get('info')
         )
         self.textview.set_wrap_mode(Gtk.WrapMode(2))
         self.textview.set_pixels_inside_wrap(5)
@@ -2182,8 +2222,8 @@ class PreferencesDialog(Gtk.Dialog):
         button_show.connect("clicked", self.not_show)
         hbox.pack_start(button_show, True, True, 0)
         
-        button_install = Gtk.Button(label=_("Install"))
-        button_install.connect("clicked", self.show_terminal)
+        button_install = Gtk.Button(label=arguments.get('btn_label'))
+        button_install.connect("clicked", self.on_button_ok, arguments)
         hbox.pack_start(button_install, True, True, 0)
          
         button_close = Gtk.Button(label=_("Cancel"))
@@ -2207,16 +2247,14 @@ class PreferencesDialog(Gtk.Dialog):
         self.destroy()
         Gtk.main_quit
     
+    def on_button_ok(self, button, arguments):
+        arguments.get('function')
+    
     def not_show(self, button):
         if button.get_active():
             self.show_bool = False
         else:
             self.show_bool = True
-
-    def show_terminal(self, button=None):        
-        win = TerminalWin()
-        win.connect("delete-event", Gtk.main_quit)
-        win.show_all()
 
 def reboot_indicators(mode=None):
     
