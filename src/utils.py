@@ -54,7 +54,10 @@ def get_tlp_conf_file():
     except Exception as ex:
         print(str(ex)+'\nTLP version not found, using TLP 1.3 config file.')
         file='/etc/tlp.conf'
-    return file
+    return file, version
+
+def get_version(v):
+    return parse_version(v)
 
 def load_translation(filename):
     current_path = os.path.dirname(os.path.realpath(__file__))

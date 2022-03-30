@@ -53,7 +53,7 @@ INTEL_EN = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/514-en-slimb
 AMD_ES = 'https://slimbook.es/es/tutoriales/aplicaciones-slimbook/493-slimbook-amd-controller'
 AMD_EN = 'https://slimbook.es/en/tutoriales/aplicaciones-slimbook/494-slimbook-amd-controller-en'
 
-TLP_CONF = utils.get_tlp_conf_file()
+TLP_CONF, TLP_VERSION = utils.get_tlp_conf_file()
 
 _ = utils.load_translation('preferences')
 
@@ -1712,24 +1712,26 @@ class Preferences(Gtk.ApplicationWindow):
         self.check_tlp_version()
         
     def check_tlp_version(self):
-        info = _('We reccommend you to add TLP repository, to get the last version of TLP ;)')
         def show_alert(parent=None, title=None):
-            command_lbl = Gtk.Label(label=_("Addind linrunnert/TLP launchpad repository.\n"))
-            command_lbl.set_line_wrap(True)
-            command = "sudo add-apt-repository ppa:linrunner/tlp\nsudo apt-get update\nsudo apt-get upgrade\n"   
         
-            arguments = {
-                'info': _('We reccommend you to add TLP repository, to get the last version of TLP ;)'), 
-                'bt_label': _('Install'),
-                'function': self.show_terminal(command_lbl,command)
+            data = {
+                'title': _('Get last TLP version'),
+                'info':  _('We recommend you to add TLP repository, to get the last version of TLP ;)'),
+                'btn_label' :_('Add repository'),
+                'command_lbl': _("Adding linrunner/TLP oficial repository.\nMake sure you have internet connection.\n"),
+                'command': "sudo add-apt-repository ppa:linrunner/tlp && sudo apt-get update && sudo apt-get upgrade\n",
+                'show_var': 'add-tlp-repository-alert'  
             }
         
-            dialog = PreferencesDialog(self, arguments)
+            dialog = PreferencesDialog(self, data)
             dialog.connect("destroy", self.close_dialog)
             dialog.show_all()
             
-        show_alert()
-
+            
+        cmd = 'cat /etc/apt/sources.lis.d/* | grep "tlp"' 
+        code, str = subprocess.getstatusoutput(cmd)   
+        if not utils.get_version(TLP_VERSION)>= utils.get_version('1.5') and config.getboolean('CONFIGURATION','add-tlp-repository-alert') and not code == 0:             
+            show_alert()
             
     def on_realize(self, widget):
         monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -2037,51 +2039,43 @@ class Preferences(Gtk.ApplicationWindow):
         #subprocess.Popen('pkexec slimbookbattery-pkexec apply'.split(' '))
         
     def check_linux_tools(self):
-        cmd = "apt show linux-tools-$(uname -r) | grep linux-tools-$(uname -r)"
+        cmd = "apt list --installed linux-tools-$(uname -r) | grep linux-tools-$(uname -r)"
         code, output = subprocess.getstatusoutput(cmd)
         show_bool = config.getboolean('CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True
         
-        
-        command_lbl = Gtk.Label(label=_("Installing linux-tools for your kernel version, make sure that you have internet connection.\n"))
-        command_lbl.set_line_wrap(True)
-        command = "sudo apt install linux-tools-$(uname -r)\n"
-        arguments = {
+        data = {
+            'title': _('Linux-tools installation'),
             'info':  _("You have not installed linux-tools for your kernel version, which is recommended.\nIf you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same."),
             'btn_label' :_('Install'),
-            'function': self.show_terminal(command_lbl,command)
+            'command_lbl': _("Installing linux-tools for your kernel version, make sure that you have internet connection.\n"),
+            'command': "sudo apt install linux-tools-$(uname -r)\n", 
+            'show_var': 'linux-tools-alert'
         }
         
         def show_alert(parent=None, title=None):
-            
-            dialog = PreferencesDialog(self, arguments)
+            dialog = PreferencesDialog(self, data)
             dialog.connect("destroy", self.close_dialog)
             dialog.show_all()
 
-        if code != 1 and show_bool:
+        if code != 0 and show_bool:
             show_alert()
         else:
             pass
-          
-    def show_terminal(self, command_lbl=None, command=None):     
-        win = TerminalWin(command_lbl, command)
-        win.connect("delete-event", Gtk.main_quit)
-        win.show_all()      
-                       
     def close_dialog(self, dialog):
         dialog.close()
         self.active = True
        
 class TerminalWin(Gtk.Window):
 
-    def __init__(self, command_lbl, command):
-        
-        print(command_lbl, command)
-        
+    def __init__(self, parent, data):
+        mytitle = data.get('title')
+        command_lbl = Gtk.Label(label = data.get('command_lbl'))
+        command = data.get('command')
         
         gi.require_version('Vte', '2.91')
         from gi.repository import GLib, Vte
         
-        Gtk.Window.__init__(self, title=_("Linux-tools installation"))
+        Gtk.Window.__init__(self, title=mytitle)
         self.set_default_size(600, 300) 
         
         self.set_decorated(False)
@@ -2115,62 +2109,34 @@ class TerminalWin(Gtk.Window):
         box.pack_start(self.button_close, False, True, 0)
         self.add(box)
         
+        self.terminal.show()
         self.InputToTerm(command)
 
-    def InputToTerm(self, command):
-        def versionCompare(v1, v2):
-            # This will split both the versions by '.'
-            arr1 = v1.split(".")
-            arr2 = v2.split(".")
-            
-            arr1 = [''.join(i.split('-')) for i in arr1]
-            arr2 = [''.join(i.split('-')) for i in arr2]
-            
-            print(arr1, '\n', arr2)
-            
-            n = len(arr1)
-            m = len(arr2)
-            
-            # converts to integer from string
-            arr1 = [int(i) for i in arr1]
-            arr2 = [int(i) for i in arr2]
-        
-            if n>m:
-                for i in range(m, n):
-                    arr2.append(0)
-            elif m>n:
-                for i in range(n, m):
-                    arr1.append(0)
-            
-            # returns 1 if version 1 is bigger and -1 if
-            # version 2 is bigger and 0 if equal
-            for i in range(len(arr1)):
-                if arr1[i]>arr2[i]:
-                    return 1
-                elif arr2[i]>arr1[i]:
-                    return -1
-            return 0
-        
-        exit, str = subprocess.getstatusoutput('apt show gir1.2-vte-2.91 | grep Version')
+    def feed(self, command, version, wait_until_done=True):
+        command += '\n'
+        print(command)
+        if utils.get_version('0.60') > utils.get_version(version):
+            length = len(command)
+            self.terminal.feed_child(command+'\n', length)
+        else:
+            self.terminal.feed_child(command+'\n'.encode("utf-8"))
 
-        if exit == 0:
-            str = str.split('Version: ')[1]               
-            def first_letter(s):
-                print(s) 
+    def InputToTerm(self, command):
+        def first_letter(s):
                 m = re.search(r'[a-z]', s, re.I)
                 if m is not None:
                     return m.start()                  
                 return -1
-            
-            version = str[0:first_letter(str)] 
-            
-            if versionCompare('0.60.3-0', version)==1:
-                length = len(command)
-                self.terminal.feed_child(command, length)
-            else:
-                self.terminal.feed_child(command.encode("utf-8"))
+        exit, str = subprocess.getstatusoutput('apt show gir1.2-vte-2.91 | grep Version')
+
+        version = str.split('Version: ')[1]
+        version = version[0:first_letter(version)]  
+        # Check vte version
+        
+        if exit == 0:
+                self.feed(command, version)
         else:
-            print(exit, str)
+            print('Failed to get current Vte version:', exit, str)
 
     def close_win(self, button=None): 
         self.close()
@@ -2178,11 +2144,16 @@ class TerminalWin(Gtk.Window):
 
 class PreferencesDialog(Gtk.Dialog):
 	
-    def __init__(self, parent, arguments):
-		
+    def __init__(self, parent, data):
+
+        info = data.get('info')
+        btn_label = data.get('btn_label')
+        self.show_var = data.get('show_var')
+        self.show_bool = True
+
         Gtk.Dialog.__init__(self,
 			title='',
-            parent=None,
+            parent=parent,
             flags=0)
 
         # self.set_modal(True)  
@@ -2194,8 +2165,6 @@ class PreferencesDialog(Gtk.Dialog):
         self.set_decorated(False)
         self.set_name('warn')
 
-        self.show_bool = True
-
         vbox = Gtk.VBox(homogeneous=False, spacing=5)
         vbox.set_border_width(5)
 
@@ -2203,9 +2172,7 @@ class PreferencesDialog(Gtk.Dialog):
 
         self.textview = Gtk.TextView()
         self.textbuffer = self.textview.get_buffer()
-        self.textbuffer.set_text(
-            arguments.get('info')
-        )
+        self.textbuffer.set_text( info )
         self.textview.set_wrap_mode(Gtk.WrapMode(2))
         self.textview.set_pixels_inside_wrap(5)
         self.textview.set_pixels_above_lines(6)
@@ -2218,12 +2185,12 @@ class PreferencesDialog(Gtk.Dialog):
         hbox.set_border_width(5)
         hbox.set_margin_top(10)
         
-        button_show = Gtk.CheckButton(label=_("Dont show again"))
+        button_show = Gtk.CheckButton(label=_("Don't show again"))
         button_show.connect("clicked", self.not_show)
         hbox.pack_start(button_show, True, True, 0)
         
-        button_install = Gtk.Button(label=arguments.get('btn_label'))
-        button_install.connect("clicked", self.on_button_ok, arguments)
+        button_install = Gtk.Button(label=btn_label)
+        button_install.connect("clicked", self.on_button_ok, data)
         hbox.pack_start(button_install, True, True, 0)
          
         button_close = Gtk.Button(label=_("Cancel"))
@@ -2233,22 +2200,15 @@ class PreferencesDialog(Gtk.Dialog):
         vbox.pack_start(hbox, True, True, 0)   
         
         self.active = True
-        
-    def on_button_close(self, button, state):
-        
-        print('Setting value to', self.show_bool)
-        config.set('CONFIGURATION', 'linux-tools-alert', str(self.show_bool))
-
-        with open(CONFIG_FILE, 'w') as configfile:
-            config.write(configfile)
-        
-        self.close()
-        self.hide()
-        self.destroy()
-        Gtk.main_quit
     
-    def on_button_ok(self, button, arguments):
-        arguments.get('function')
+    def on_button_ok(self, button, data):
+
+        def show_terminal(data):     
+            win = TerminalWin(self, data)
+            win.connect("delete-event", Gtk.main_quit)
+            win.show_all()
+
+        show_terminal(data)
     
     def not_show(self, button):
         if button.get_active():
@@ -2256,6 +2216,15 @@ class PreferencesDialog(Gtk.Dialog):
         else:
             self.show_bool = True
 
+    def on_button_close(self, button, event=None):
+        print('Setting', self.show_var, 'to', self.show_bool)
+        
+        if not self.show_bool:
+            config.set('CONFIGURATION', self.show_var, str(self.show_bool))
+            with open(CONFIG_FILE, 'w') as configfile:
+                config.write(configfile)   
+        self.destroy()
+        
 def reboot_indicators(mode=None):
     
     def reboot_process(process_name, path, start):

@@ -63,7 +63,7 @@ HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
-TLP_CONF = utils.get_tlp_conf_file()
+TLP_CONF = utils.get_tlp_conf_file()[0]
 print('Using ', TLP_CONF)
 
 logger.debug("Username: {} - Homedir: {}".format(USER_NAME, HOMEDIR))
@@ -599,12 +599,15 @@ def brightness_settings(mode):
 
 
 def update_config(filepath, variable, value):
+    print(variable, value)
     try:
         call = subprocess.getoutput('cat ' + filepath)
         patron = re.compile(r'{}=(.*)'.format(variable))
         last_value = patron.search(call)[1]
     except Exception:
         last_value = ''
+
+    print(last_value, filepath)
 
     if last_value != value:
         command = "sudo sed -i '/" + variable + "/ c" + variable + "=" + value + "' " + filepath
