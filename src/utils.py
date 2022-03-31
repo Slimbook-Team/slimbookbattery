@@ -76,3 +76,20 @@ def get_display_resolution():
     dimensions = dimensions.split('x')
 
     return dimensions
+
+def reboot_process(process_name, path):
+    process = subprocess.getoutput('pgrep -f ' + process_name)
+
+    # If it find a process, kills it
+    if len(process.split('\n')) > 1:
+        proc_list = process.split('\n')
+        for i in range(len(proc_list) - 1):
+            exit = subprocess.getstatusoutput('kill -9 ' + proc_list[i])
+            
+    if os.path.isfile(path):
+        if os.system('python3 {} &'.format(path)) == 0:
+            return (0, 'Process killed & launched')
+    else:
+        return (1, 'Process launch path does not exist')
+   
+

@@ -176,7 +176,6 @@ def main(args):  # Args will be like --> command_name value
         if args[1] == "autostart":  # Sets brightness and enables tdp
             battery_mode = config.get('CONFIGURATION', 'modo_actual')
             brightness_settings(battery_mode)
-            set_tdp(battery_mode)
 
         if args[1] == "report":
             os.system(
@@ -217,66 +216,6 @@ def notify(msg):
                 uid=$(id -u $user)
                 sudo -u $user DISPLAY=$display DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$uid/bus notify-send "Slimbook Battery" "''' + msg + '''"
                 ''')
-
-
-def set_tdp(mode):
-    # This function enables tdpcontroller autostart an changes it's mode if battery application,
-    # battery autostart and sync tdp switch of the selected mode is on.
-    tdpcontroller = config.get('TDP', 'tdpcontroller')
-    tdp_config_file = os.path.join(HOMEDIR, '.config', tdpcontroller, '{}.conf'.format(tdpcontroller))
-
-    config_tdp = ConfigParser()
-    config_tdp.read(tdp_config_file)
-
-    logger.info('\n{}[TDP SETTINGS]{}'.format(Colors.GREEN, Colors.ENDC))
-    logger.info('Battery Mode: {}'.format(mode))
-
-    # Mode settings
-    if config.getboolean('CONFIGURATION', 'application_on'):
-
-        tdp_mode = ''
-        tdp_switch = 'saving_tdpsync'
-
-        if mode in MAPPING_MODES:
-            tdp_mode = MAPPING_MODES[mode]['tdp_mode']
-
-        try:
-            if config.getboolean('TDP', tdp_switch):
-                logger.info('Updating TDP mode ...')
-                config_tdp.set('CONFIGURATION', 'mode', tdp_mode)
-                logger.info('  TDP changed to {}'.format(config_tdp.get('CONFIGURATION', 'mode')))
-
-                # Autostart settings
-                logger.info('\nUpdating TDP autostart ...')
-                if config.getboolean('CONFIGURATION', 'autostart'):
-                    config_tdp.set('CONFIGURATION', 'autostart', 'on')
-
-                    tdp_autostart = os.path.join('/usr/share/', tdpcontroller, 'src',
-                                                 '{}-autostart.desktop'.format(tdpcontroller))
-
-                    shutil.copy(tdp_autostart, os.path.join(HOMEDIR, '.config/autostart'))
-
-                    logger.info('TDP Autostart enabled')
-
-                    if config_tdp.getboolean('CONFIGURATION', 'show-icon'):
-                        logger.debug('TDP Icon will be shown')
-                    else:
-                        logger.debug("TDP Icon won't be shown")
-
-                configfile = open(tdp_config_file, 'w')
-                config_tdp.write(configfile)
-                configfile.close()
-
-                logger.info('Actual TDP Mode: {}'.format(config_tdp.get('CONFIGURATION', 'mode')))
-
-            else:
-                logger.error('TDP Sync not active')
-
-        except Exception:
-            logger.exception('Could not sync TDP')
-
-    else:
-        logger.info('Not changing {} mode configuration.'.format(tdpcontroller))
 
 
 def change_config(args):  # For general page options
@@ -451,7 +390,6 @@ def mode_settings(mode):
         mode_name = MAPPING_MODES[mode]['mode_name']
 
     brightness_settings(mode)  # Executed by indicator
-    set_tdp(mode)
 
     logger.info("\n{}[COPY TLP CUSTOM SETTINGS]{}".format(Colors.GREEN, Colors.ENDC))
     custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/custom/", mode_name)
@@ -471,7 +409,6 @@ def mode_settings(mode):
 
     # Restarting TLP
     subprocess.getoutput("sudo tlp start")
-    
     
     # If nvidia driver is installed and works WE SET IT MANUALLY
             

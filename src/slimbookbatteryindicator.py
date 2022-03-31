@@ -38,7 +38,7 @@ from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 if CURRENT_PATH not in sys.path:
     sys.path = [CURRENT_PATH] + sys.path
-import utils
+import utils, tdp_utils
 
 srcpath = '/usr/share/slimbookbattery/src'
 sys.path.insert(1, srcpath)
@@ -64,8 +64,6 @@ APP_INDICATOR_ID = 'Slimbook Battery Indicator'
 ICONS_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images', 'indicator'))
                                         
 logger = logging.getLogger()   
-    
-tdpcontroller = config['TDP']['tdpcontroller']    
 
 class Indicator(Gtk.Application):
     
@@ -175,8 +173,9 @@ class Indicator(Gtk.Application):
         icon = ICONS.get(str(self.current_mode))
         self.indicator.set_icon_full(icon, 'Mode')
         
-        controller_path = os.path.join('/usr/share/', tdpcontroller, 'src', tdpcontroller+'indicator.py')
-        reboot_process(tdpcontroller, controller_path)
+        tdp_utils.set_mode(self.current_mode)
+        exit, msg = tdp_utils.reboot_indicator()
+        if exit != 0: logger.error(msg)          
         
         animations(self.current_mode)
 
@@ -208,27 +207,6 @@ class Indicator(Gtk.Application):
     def salir(self, item):
         os.system('pkexec slimbookbattery-pkexec service stop')
         Gtk.main_quit()
-
-def reboot_process(process_name, path):
-    print('Rebooting ' + process_name + ' ...')
-
-    process = subprocess.getoutput('pgrep -f ' + process_name)
-
-    # If it find a process, kills it
-    if len(process.split('\n')) > 1:
-        proc_list = process.split('\n')
-
-        for i in range(len(proc_list) - 1):
-            exit = subprocess.getstatusoutput('kill -9 ' + proc_list[i])
-            print('Killing process ' + proc_list[i] + ' Exit: ' + str(exit[0]))
-            if exit[0] == 1:
-                print(exit[1])
-
-        print('Launching process...')
-        if os.system('python3 ' + path + '  &') == 0:
-            print('Done')
-        else:
-            print("Couldn't launch process")
 
 def check_plug():
     last = config.get('CONFIGURATION', 'plugged')

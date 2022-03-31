@@ -1,6 +1,12 @@
 slimbookbattery (4.0.5beta) focal; urgency=low
 
-  * 
+  * Added warning window to add tlp repository and linux-tools
+  * Modified governor setting on AC.
+  * Improved compatibility with TLP 1.1
+  * Fixed indicator reboot issues
+  * Fixed indicator image not showing in Xfce Desktop
+  * Updated TLP cofiguration
+  * Fixed TDP controller sync
 
  -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2022 11:24:04 +0100
 
