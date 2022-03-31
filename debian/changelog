@@ -7,6 +7,7 @@ slimbookbattery (4.0.5beta) focal; urgency=low
   * Fixed indicator image not showing in Xfce Desktop
   * Updated TLP cofiguration
   * Fixed TDP controller sync
+  * Avoid waiting for graphics setting to close the app 
 
  -- slimbook <dev@slimbook.es>  Tue, 5 Oct 2022 11:24:04 +0100
 
