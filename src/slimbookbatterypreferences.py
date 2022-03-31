@@ -2022,7 +2022,7 @@ class Preferences(Gtk.ApplicationWindow):
         
         # Settings application
         command = 'pkexec slimbookbattery-pkexec apply'
-        print(subprocess.getoutput(command))
+        subprocess.Popen(command, shell=True, stdin=None, stdout=None, close_fds=True)
         
     def check_linux_tools(self):
         cmd = "apt list --installed linux-tools-$(uname -r) | grep linux-tools-$(uname -r)"

@@ -29,7 +29,7 @@ def get_tdp_controller():
 tdp_controller = get_tdp_controller()
 
 TDP_CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/{}'.format(tdp_controller))
-TDP_CONFIG_FILE = os.path.join(TDP_CONFIG_FOLDER, 'slimbookbattery.conf')
+TDP_CONFIG_FILE = os.path.join(TDP_CONFIG_FOLDER, '{}.conf'.format(tdp_controller))
 tdp_conf = ConfigParser()
 tdp_conf.read(TDP_CONFIG_FILE)
 
@@ -59,8 +59,8 @@ def set_mode(mode):
         configfile.close()
 
         print('Actual TDP Mode: {}'.format(tdp_conf.get('CONFIGURATION', 'mode')))
-    except Exception:
-        print('Could not sync TDP')
+    except Exception as e:
+        print('Could not sync TDP', e)
 
 def reboot_indicator():
     indicator = '{}indicator.py'.format(tdp_controller)
