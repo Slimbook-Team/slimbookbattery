@@ -1705,7 +1705,7 @@ class Preferences(Gtk.ApplicationWindow):
                 'info':  _('We recommend you to add TLP repository, to get the last version of TLP ;)'),
                 'btn_label' :_('Add repository'),
                 'command_lbl': _("Adding linrunner/TLP oficial repository.\nMake sure you have internet connection.\n"),
-                'command': "sudo add-apt-repository ppa:linrunner/tlp && sudo apt-get update && sudo apt-get upgrade tlp\n",
+                'command': "sudo add-apt-repository ppa:linrunner/tlp && sudo apt-get update && sudo apt-get install tlp\n",
                 'show_var': 'add-tlp-repository-alert'  
             }
         
