@@ -566,5 +566,6 @@ msgid ""
 "Adding linrunner/TLP oficial repository.\n"
 "Make sure you have internet connection.\n"
 msgstr ""
+
 "Añadiendo el repositorio oficial de linrunner/TLP.\n"
 "Asegúrate de estar conectado a Internet.\n"
