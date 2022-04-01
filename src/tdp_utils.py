@@ -9,7 +9,7 @@ battery_conf = ConfigParser()
 battery_conf.read(BATT_CONFIG_FILE)
 
 def get_tdp_controller():
-    if battery_conf.has_option('TDP', 'tdpcontroller'):
+    if battery_conf.has_option('TDP', 'tdpcontroller') and battery_conf.get('TDP', 'tdpcontroller')!='':
         tdp_controller = battery_conf.get('TDP', 'tdpcontroller')
     else:
         tdp_controller = ''
