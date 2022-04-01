@@ -41,6 +41,11 @@ def main():
     else:
         logger.info('Configuration folder ({}) found!'.format(CONFIG_FOLDER))
 
+    tlp_conf = utils.get_tlp_conf_file()[0]
+    if not os.path.exists(tlp_conf):
+        shutil.copyfile(os.path.join(CURRENT_PATH, 'configuration', 'default', 'equilibrado'), tlp_conf)
+
+
     set_ownership(CONFIG_FOLDER)
     set_ownership(UPDATES_DIR)
 
@@ -106,6 +111,9 @@ def check_config_file():
 # Checks if the user's default config files exist an if they are like the app version's default files.
 # If files or directories don't exist they are created.
 def check_tlp_files():
+    
+    
+    
     logger.info("Checking Slimbook Battery's TLP Configuration")
 
     incidences = False

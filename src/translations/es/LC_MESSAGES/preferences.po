@@ -530,7 +530,7 @@ msgstr ""
 "Si quieres instalarlo, haz click en el botón 'Instalar', si no, puedes cerrar esta ventana."
 
 #: slimbookbatterypreferences.py:2183
-msgid "Dont show again"
+msgid "Don't show again"
 msgstr "No volver a mostrar"
 
 #: slimbookbatterypreferences.py:2187
@@ -547,4 +547,24 @@ msgid ""
 "We would appreciate that you attach the file that is generated"
 msgstr ""
 "\n"
-"Será de ayuda adjuntar el fichero "
+"Será de ayuda adjuntar el fichero generado"
+
+#: slimbookbatterypreferences.py:1719
+msgid "Get last TLP version"
+msgstr "Obtener la última versión de TLP"
+
+#: slimbookbatterypreferences.py:1720
+msgid "We recommend you to add TLP repository, to get the last version of TLP ;)"
+msgstr "Te recomendamos añadir el repositorio de TLP, para obtener la última versión de TLP"
+
+#: slimbookbatterypreferences.py:1721
+msgid "Add repository"
+msgstr "Añadir repositorio"
+
+#: slimbookbatterypreferences.py:1722
+msgid ""
+"Adding linrunner/TLP oficial repository.\n"
+"Make sure you have internet connection.\n"
+msgstr ""
+"Añadiendo el repositorio oficial de linrunner/TLP."
+"Asegúrate de estar conectado a Internet."

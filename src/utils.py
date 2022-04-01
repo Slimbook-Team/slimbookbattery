@@ -4,6 +4,8 @@ import os
 import subprocess
 import locale
 
+from pkg_resources import parse_version as parse_version
+
 def get_user(from_file=None):
     try:
         user_name = getpass.getuser()
@@ -35,6 +37,28 @@ def get_languages():
         pass
     return languages
 
+def get_tlp_conf_file():
+    
+    code, res = subprocess.getstatusoutput('tlp-stat --config | grep "TLP "')
+    if code==0:
+        res = res[res.find('TLP'):-1]
+        version=res.split(' ')[1]
+    else :
+        version='1.3' # Most common    
+
+    try:
+        if parse_version(version)>= parse_version('1.3'):
+            file='/etc/tlp.conf'
+        else:
+            file='/etc/default/tlp'
+    except Exception as ex:
+        print(str(ex)+'\nTLP version not found, using TLP 1.3 config file.')
+        file='/etc/tlp.conf'
+    return file, version
+
+def get_version(v):
+    return parse_version(v)
+
 def load_translation(filename):
     current_path = os.path.dirname(os.path.realpath(__file__))
     languages = get_languages()
@@ -52,3 +76,20 @@ def get_display_resolution():
     dimensions = dimensions.split('x')
 
     return dimensions
+
+def reboot_process(process_name, path):
+    process = subprocess.getoutput('pgrep -f ' + process_name)
+
+    # If it find a process, kills it
+    if len(process.split('\n')) > 1:
+        proc_list = process.split('\n')
+        for i in range(len(proc_list) - 1):
+            exit = subprocess.getstatusoutput('kill -9 ' + proc_list[i])
+            
+    if os.path.isfile(path):
+        if os.system('python3 {} &'.format(path)) == 0:
+            return (0, 'Process killed & launched')
+    else:
+        return (1, 'Process launch path does not exist')
+   
+
