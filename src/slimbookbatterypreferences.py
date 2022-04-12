@@ -36,12 +36,15 @@ if CURRENT_PATH not in sys.path:
 import utils, tdp_utils
 
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GdkPixbuf, GLib, Pango
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
 logger = logging.getLogger()
 
 USER_NAME = utils.get_user()
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
+SESSION_TYPE = os.environ.get('XDG_SESSION_TYPE')
+
+VTE_VERSION = subprocess.getstatusoutput('apt show gir1.2-vte-2.91 | grep Version')
 
 UPDATES_DIR = os.path.join(CURRENT_PATH, 'updates','_updates')
 IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
@@ -662,9 +665,14 @@ class GeneralGrid(BasePageGrid):
         self.autostart_initial = None
         self.work_mode = None
         super(GeneralGrid, self).__init__(parent, *args, **kwargs)
-        self.grid.set_halign(Gtk.Align.CENTER)
+        self.set_name('general')
         if self.parent.min_resolution:
             self.grid.set_name('smaller_label')
+        else:    
+            self.grid.set_name('normal_label')
+            self.grid.set_vexpand(True)
+            self.grid.set_valign(Gtk.Align.CENTER)
+            
         self.attach(self.grid, 0, 0, 1, 1)
 
     def setup(self):
@@ -1215,9 +1223,9 @@ class SettingsGrid(BasePageGrid):
                                   ypadding=5,
                                   xoptions=Gtk.AttachOptions.SHRINK,
                                   yoptions=Gtk.AttachOptions.SHRINK)
-                self.grid.attach(table_icon, label_col, row - row_correction, 3, 1)
+                self.grid.attach(table_icon, label_col, row - row_correction, 4, 1)
             else:
-                self.grid.attach(label, label_col, row - row_correction, 3, 1)
+                self.grid.attach(label, label_col, row - row_correction, 4, 1)
 
             button = None
             top = 1
@@ -1608,7 +1616,6 @@ class CyclesGrid(BasePageGrid):
             value = str(int(button.get_value()))
         config.set('CONFIGURATION', name, value)
 
-
 class Preferences(Gtk.ApplicationWindow):
     CONFIG_TABS = [
         {
@@ -1656,8 +1663,6 @@ class Preferences(Gtk.ApplicationWindow):
                     except:
                         logger.error('Could not remove update after completion.')
 
-        
-
         self.__setup_css()
         Gtk.Window.__init__(self, title=(_('Slimbook Battery Preferences')))
 
@@ -1666,19 +1671,15 @@ class Preferences(Gtk.ApplicationWindow):
 
         self.set_size_request(0, 0)
 
-        self.set_decorated(False)
-        self.set_resizable(True)
+        if SESSION_TYPE and SESSION_TYPE == 'x11':
+            self.set_decorated(False)
+            self.set_draggable()
+            self.set_name('decorated')
+        else:
+            self.set_decorated(True)
+            
+        self.set_resizable(False)
 
-        # Movement
-        self.is_in_drag = False
-        self.x_in_drag = 0
-        self.y_in_drag = 0
-        self.connect('button-press-event', self.on_mouse_button_pressed)
-        self.connect('button-release-event', self.on_mouse_button_released)
-        self.connect('motion-notify-event', self.on_mouse_moved)
-
-        # Center
-        #self.connect('realize', self.on_realize)  # On Wayland, monitor = None --> ERROR
         splash = os.path.join(CURRENT_PATH, 'splash.py')
 
         self.child_process = subprocess.Popen(splash, stdout=subprocess.PIPE)
@@ -1716,41 +1717,52 @@ class Preferences(Gtk.ApplicationWindow):
             
         cmd = 'cat /etc/apt/sources.lis.d/* | grep "tlp"' 
         code, str = subprocess.getstatusoutput(cmd)   
-        if not utils.get_version(TLP_VERSION)>= utils.get_version('1.5') and config.getboolean('CONFIGURATION','add-tlp-repository-alert') and not code == 0:             
+        if not utils.get_version(TLP_VERSION)>= utils.get_version('1.5') and config.getboolean('CONFIGURATION','add-tlp-repository-alert') and not code == 0 and VTE_VERSION[0]==0:           
             show_alert()
             
-    def on_realize(self, widget):
-        monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
-        scale = monitor.get_scale_factor()
-        monitor_width = monitor.get_geometry().width / scale
-        monitor_height = monitor.get_geometry().height / scale
-        width = self.get_preferred_width()[0]
-        height = self.get_preferred_height()[0]
-        self.move((monitor_width - width) / 2, (monitor_height - height) / 2)
+    def set_draggable(self):
+        def on_realize(widget):
+            monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
+            scale = monitor.get_scale_factor()
+            monitor_width = monitor.get_geometry().width / scale
+            monitor_height = monitor.get_geometry().height / scale
+            width = self.get_preferred_width()[0]
+            height = self.get_preferred_height()[0]
+            self.move((monitor_width - width) / 2, (monitor_height - height) / 2)
 
-    def on_mouse_moved(self, widget, event):
-        if self.is_in_drag:
-            xi, yi = self.get_position()
-            xf = int(xi + event.x_root - self.x_in_drag)
-            yf = int(yi + event.y_root - self.y_in_drag)
-            if math.sqrt(math.pow(xf - xi, 2) + math.pow(yf - yi, 2)) > 10:
+        def on_mouse_moved(widget, event):
+            if self.is_in_drag:
+                xi, yi = self.get_position()
+                xf = int(xi + event.x_root - self.x_in_drag)
+                yf = int(yi + event.y_root - self.y_in_drag)
+                if math.sqrt(math.pow(xf - xi, 2) + math.pow(yf - yi, 2)) > 10:
+                    self.x_in_drag = event.x_root
+                    self.y_in_drag = event.y_root
+                    self.move(xf, yf)
+
+        def on_mouse_button_released(widget, event):
+            if event.button == 1:
+                self.is_in_drag = False
                 self.x_in_drag = event.x_root
                 self.y_in_drag = event.y_root
-                self.move(xf, yf)
 
-    def on_mouse_button_released(self, widget, event):
-        if event.button == 1:
-            self.is_in_drag = False
-            self.x_in_drag = event.x_root
-            self.y_in_drag = event.y_root
+        def on_mouse_button_pressed(widget, event):
+            if event.button == 1:
+                self.is_in_drag = True
+                self.x_in_drag, self.y_in_drag = self.get_position()
+                self.x_in_drag = event.x_root
+                self.y_in_drag = event.y_root
 
-    def on_mouse_button_pressed(self, widget, event):
-        if event.button == 1:
-            self.is_in_drag = True
-            self.x_in_drag, self.y_in_drag = self.get_position()
-            self.x_in_drag = event.x_root
-            self.y_in_drag = event.y_root
-
+        # Movement
+        self.is_in_drag = False
+        self.x_in_drag = 0
+        self.y_in_drag = 0
+        self.connect('button-press-event', on_mouse_button_pressed)
+        self.connect('button-release-event', on_mouse_button_released)
+        self.connect('motion-notify-event', on_mouse_moved)
+        # Center
+        self.connect('realize', on_realize)  # On Wayland, monitor = None --> ERROR
+    
     def set_ui(self):
         self.set_default_icon(GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename=os.path.join(IMAGES_PATH, 'normal.png'),
@@ -1768,7 +1780,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         win_grid = Gtk.Grid(column_homogeneous=True,
                             column_spacing=0,
-                            row_spacing=20)
+                            row_spacing=10)
 
         self.add(win_grid)
 
@@ -1817,34 +1829,39 @@ class Preferences(Gtk.ApplicationWindow):
             height = 210
             width = 810
 
-        pixbuff = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'slimbookbattery-header-4.png'),
-            width=width,
-            height=height,
-            preserve_aspect_ratio=True
-        )
-        self.logo = Gtk.Image.new_from_pixbuf(pixbuff)
+        if SESSION_TYPE and SESSION_TYPE == 'x11':
+            pixbuff = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                filename=os.path.join(IMAGES_PATH, 'slimbookbattery-header-4.png'),
+                width=width,
+                height=height,
+                preserve_aspect_ratio=True
+            )
+            self.logo = Gtk.Image.new_from_pixbuf(pixbuff)
 
-        self.logo.set_halign(Gtk.Align.START)
-        self.logo.set_valign(Gtk.Align.START)
-        win_grid.attach(self.logo, 0, 0, 4, 2)
+            self.logo.set_halign(Gtk.Align.START)
+            self.logo.set_valign(Gtk.Align.START)
+            win_grid.attach(self.logo, 0, 0, 4, 2)
 
-        close_box = Gtk.HBox(halign=Gtk.Align.END, valign=Gtk.Align.START)
+            close_box = Gtk.HBox(halign=Gtk.Align.END, valign=Gtk.Align.START)
 
-        close = Gtk.Image.new_from_pixbuf(GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'cross.png'),
-            width=20,
-            height=20,
-            preserve_aspect_ratio=True
-        ))
-        close.set_name('close_button')
+            close = Gtk.Image.new_from_pixbuf(GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                filename=os.path.join(IMAGES_PATH, 'cross.png'),
+                width=20,
+                height=20,
+                preserve_aspect_ratio=True
+            ))
+            close.set_name('close_button')
 
-        event_close_box = Gtk.EventBox()
-        event_close_box.set_name('close_box')
-        event_close_box.add(close)
-        event_close_box.set_halign(Gtk.Align.END)
-        event_close_box.set_valign(Gtk.Align.START)
-        event_close_box.connect('button-press-event', self.manage_events)
+            event_close_box = Gtk.EventBox()
+            event_close_box.set_name('close_box')
+            event_close_box.add(close)
+            event_close_box.set_halign(Gtk.Align.END)
+            event_close_box.set_valign(Gtk.Align.START)
+            event_close_box.connect('button-press-event', self.manage_events)
+            
+            #close_box.add(check)
+            close_box.add(event_close_box)
+            win_grid.attach(close_box, 4, 0, 1, 4)
 
         check = Gtk.CheckButton.new_with_label(label=_('System style'))
         check.set_name('style')
@@ -1867,9 +1884,7 @@ class Preferences(Gtk.ApplicationWindow):
             buttons_box.set_name('smaller_label')
 
 
-        #close_box.add(check)
-        close_box.add(event_close_box)
-        win_grid.attach(close_box, 4, 0, 1, 4)
+        
 
     # NOTEBOOK ***************************************************************
 
@@ -1889,6 +1904,7 @@ class Preferences(Gtk.ApplicationWindow):
 
         # CREATE TABS
         self.general_page_grid = GeneralGrid(self)
+        self.general_page_grid.set_hexpand(True)
         notebook.append_page(self.general_page_grid.get_page(),
                              Gtk.Label.new(self.general_page_grid.tab_name))
 
@@ -2043,7 +2059,7 @@ class Preferences(Gtk.ApplicationWindow):
             dialog.connect("destroy", self.close_dialog)
             dialog.show_all()
 
-        if code != 0 and show_bool:
+        if code != 0 and show_bool and VTE_VERSION[0]==0:
             show_alert()
         else:
             pass
@@ -2113,14 +2129,12 @@ class TerminalWin(Gtk.Window):
                 if m is not None:
                     return m.start()                  
                 return -1
-        exit, str = subprocess.getstatusoutput('apt show gir1.2-vte-2.91 | grep Version')
 
-        version = str.split('Version: ')[1]
-        version = version[0:first_letter(version)-1]  
         # Check vte version
-        
-        if exit == 0:
-                self.feed(command, version)
+        if VTE_VERSION[0]==0:
+            version = str.split('Version: ')[1]
+            version = version[0:first_letter(version)-1]
+            self.feed(command, version)
         else:
             print('Failed to get current Vte version:', exit, str)
 
