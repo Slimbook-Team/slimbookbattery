@@ -28,12 +28,16 @@ from datetime import date
 import gi
 
 gi.require_version('Gtk', '3.0')
-gi.require_version('AyatanaAppIndicator3', '0.1')
 gi.require_version('Notify', '0.7')
 
 from gi.repository import Gtk, GdkPixbuf
-from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 
+try:
+    gi.require_version('AyatanaAppIndicator3', '0.1')
+    from gi.repository import AyatanaAppIndicator3 as AppIndicator3
+except:
+    gi.require_version('AppIndicator3', '0.1')
+    from gi.repository import AppIndicator3 as AppIndicator3
 # We want load first current location
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 if CURRENT_PATH not in sys.path:
@@ -176,7 +180,7 @@ class Indicator(Gtk.Application):
         if config.getboolean('TDP', 'saving_tdpsync'):    
             tdp_utils.set_mode(self.current_mode)
             exit, msg = tdp_utils.reboot_indicator()
-            if exit != 0: logger.error(msg)           
+            if exit != 0: logger.error(msg)         
         
         animations(self.current_mode)
 
