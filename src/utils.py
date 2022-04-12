@@ -91,5 +91,3 @@ def reboot_process(process_name, path):
             return (0, 'Process killed & launched')
     else:
         return (1, 'Process launch path does not exist')
-   
-
