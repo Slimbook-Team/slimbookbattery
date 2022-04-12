@@ -903,6 +903,7 @@ class SettingsGrid(BasePageGrid):
     SECTION_MAPPING = {
         'ahorrodeenergia': {
             'limit_cpu': 'limit_cpu_ahorro',
+            'cpu_boost': 'cpu_boost_ahorro',
             'governor': '',
             'graphic': 'graphics_ahorro',
             'sound': '',
@@ -924,6 +925,7 @@ class SettingsGrid(BasePageGrid):
         },
         'equilibrado': {
             'limit_cpu': 'limit_cpu_equilibrado',
+            'cpu_boost': 'cpu_boost_equilibrado',
             'governor': '',
             'graphic': 'graphics_equilibrado',
             'sound': '',
@@ -945,6 +947,7 @@ class SettingsGrid(BasePageGrid):
         },
         'maximorendimiento': {
             'limit_cpu': 'limit_cpu_maximorendimiento',
+            'cpu_boost': 'cpu_boost_maximorendimiento',
             'governor': '',
             'graphic': 'graphics_maxrendimiento',
             'sound': '',
@@ -978,6 +981,13 @@ class SettingsGrid(BasePageGrid):
                 (2, _('medium')),
                 (3, _('none')),
             ],
+        },
+        {
+            'name': 'cpu_boost',
+            'label': _('Allow cpu boost:'),
+            'type': 'switch',
+            'icon': 'warning.png',
+            'help': _('Note: this setting affects to performance'),
         },
         {
             'name': 'governor',
@@ -2116,7 +2126,7 @@ class TerminalWin(Gtk.Window):
         exit, str = subprocess.getstatusoutput('apt show gir1.2-vte-2.91 | grep Version')
 
         version = str.split('Version: ')[1]
-        version = version[0:first_letter(version)]  
+        version = version[0:first_letter(version)-1]  
         # Check vte version
         
         if exit == 0:
