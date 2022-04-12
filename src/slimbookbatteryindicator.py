@@ -172,10 +172,11 @@ class Indicator(Gtk.Application):
         subprocess.Popen(('pkexec slimbookbattery-pkexec apply').split(' '))
         icon = ICONS.get(str(self.current_mode))
         self.indicator.set_icon_full(icon, 'Mode')
-        
-        tdp_utils.set_mode(self.current_mode)
-        exit, msg = tdp_utils.reboot_indicator()
-        if exit != 0: logger.error(msg)          
+
+        if config.getboolean('TDP', 'saving_tdpsync'):    
+            tdp_utils.set_mode(self.current_mode)
+            exit, msg = tdp_utils.reboot_indicator()
+            if exit != 0: logger.error(msg)           
         
         animations(self.current_mode)
 
