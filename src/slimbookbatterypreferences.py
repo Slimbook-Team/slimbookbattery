@@ -907,6 +907,13 @@ class SettingsGrid(BasePageGrid):
         (4, 'performance'),
         (5, 'conservative'),
     ]
+    AMD_PSTATE_GOV = [
+        (1, 'ondemand'),
+        (2, 'schedutil'),
+        (3, 'powersave'),
+        (4, 'performance'),
+        (5, 'conservative')
+    ]
 
     SECTION_MAPPING = {
         'ahorrodeenergia': {
@@ -994,6 +1001,7 @@ class SettingsGrid(BasePageGrid):
             'intel_pstate': INTEL_GOV,
             'acpi-cpufreq': CPUFREQ_GOV,
             'intel_cpufreq': CPUFREQ_GOV,
+            'amd-pstate': AMD_PSTATE_GOV
         },
         {
             'name': 'graphic',
@@ -1134,10 +1142,10 @@ class SettingsGrid(BasePageGrid):
         governor_driver = None
         
         for governor_driver in governors:
-            if governor_driver not in ['intel_pstate', 'acpi-cpufreq', 'intel_cpufreq']:
+            if governor_driver not in ['intel_pstate', 'acpi-cpufreq', 'intel_cpufreq', 'amd-pstate']:
                 governor_driver = None
                 break
-            
+        
         return governor_driver
 
     @staticmethod
@@ -1368,6 +1376,16 @@ class SettingsGrid(BasePageGrid):
                     active_mode = values.index('performance')
         elif governor in ['acpi-cpufreq', 'intel_cpufreq']:
             values = list(dict(self.CPUFREQ_GOV).values())
+            if gov_mode in values:
+                active_mode = values.index(gov_mode)
+            else:
+                # Setting default mode
+                if self.custom_file == 'ahorrodeenergia':
+                    active_mode = values.index('powersave')
+                else:
+                    active_mode = values.index('ondemand')
+        elif governor == 'amd-pstate':
+            values = list(dict(self.AMD_PSTATE_GOV).values())
             if gov_mode in values:
                 active_mode = values.index(gov_mode)
             else:
