@@ -37,12 +37,12 @@ try:
     from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 except:
     gi.require_version('AppIndicator3', '0.1')
-    from gi.repository import AppIndicator3 as AppIndicator3
+    from gi.repository import AppIndicator3 as AppIndicator3 
 # We want load first current location
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 if CURRENT_PATH not in sys.path:
     sys.path = [CURRENT_PATH] + sys.path
-import utils, tdp_utils
+import utils, tdp_utils # NOQA
 
 srcpath = '/usr/share/slimbookbattery/src'
 sys.path.insert(1, srcpath)

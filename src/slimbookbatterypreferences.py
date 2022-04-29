@@ -33,7 +33,8 @@ import time
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 if CURRENT_PATH not in sys.path:
     sys.path = [CURRENT_PATH] + sys.path
-import utils, tdp_utils
+import utils
+import tdp_utils
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
@@ -46,7 +47,7 @@ SESSION_TYPE = os.environ.get('XDG_SESSION_TYPE')
 
 VTE_VERSION = subprocess.getstatusoutput('apt show gir1.2-vte-2.91 | grep Version')
 
-UPDATES_DIR = os.path.join(CURRENT_PATH, 'updates','_updates')
+UPDATES_DIR = os.path.join(CURRENT_PATH, 'updates', '_updates')
 IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images'))
 CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
@@ -518,10 +519,10 @@ class BatteryGrid(BasePageGrid):
             if 'header' not in data and not set_time_to_header:
                 logger.error('Mapping not found for {}: {}'.format(content, data))
                 continue
-            
+
             header.set_markup('<b>{}</b>'.format(data.get('header', '')))
             header.set_halign(Gtk.Align.START)
-            
+
             if set_time_to_header:
                 set_time_to_header = False
                 self.time_to_header = header
@@ -668,11 +669,11 @@ class GeneralGrid(BasePageGrid):
         self.set_name('general')
         if self.parent.min_resolution:
             self.grid.set_name('smaller_label')
-        else:    
+        else:
             self.grid.set_name('normal_label')
             self.grid.set_vexpand(True)
             self.grid.set_valign(Gtk.Align.CENTER)
-            
+
         self.attach(self.grid, 0, 0, 1, 1)
 
     def setup(self):
@@ -710,10 +711,11 @@ class GeneralGrid(BasePageGrid):
             self.content[data.get('label_name')] = button
 
             self.grid.attach(button, self.CONTENT, row, 1, 1)
-            
+
         if tdp_controller:
             row += 1
-            if not config.has_option('TDP', 'tdpcontroller'): config.set('TDP', 'tdpcontroller', tdp_controller)
+            if not config.has_option('TDP', 'tdpcontroller'):
+                config.set('TDP', 'tdpcontroller', tdp_controller)
 
             label = Gtk.Label(label=_('Synchronice battery mode with CPU TDP mode:'))
             label.set_halign(Gtk.Align.START)
@@ -824,34 +826,34 @@ class GeneralGrid(BasePageGrid):
 
     def manage_events(self, button, *args):
         name = button.get_name()
-        
+
         if name in ['saving_tdpsync']:
             config.set('TDP', name, '1' if button.get_active() else '0')
-            
+
         elif name in ['application_on', 'icono', 'plug_warn']:
             config.set('CONFIGURATION', name, '1' if button.get_active() else '0')
-            
+
         elif name == 'autostart':
             self.autostart_initial = button.get_active()
-            
+
         else:
             if args:
                 config.set('CONFIGURATION', 'modo_actual', args[0])
 
     def save_selection(self):
-        
+
         # Default working mode
         button = self.content.get('working_failure')
         active = button.get_active_iter()
-        
+
         if active is not None:
             model = button.get_model()
             work_mode = model[active][1]
-            
+
             if work_mode and work_mode != self.work_mode:
                 logger.info('Setting workmode {} ...'.format(work_mode))
                 self.work_mode = work_mode
-                
+
                 code, msg = subprocess.getstatusoutput(
                     'pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE {}'.format(work_mode)
                 )
@@ -863,30 +865,30 @@ class GeneralGrid(BasePageGrid):
             destination = os.path.join(
                 HOMEDIR, '.config/autostart'
             )
-            
+
             if not os.path.isdir(destination):
                 os.mkdir(destination)
-                
+
             source = os.path.join(
                 CURRENT_PATH, 'configuration', 'slimbookbattery-autostart.desktop'
             )
-            
+
             if not os.path.isfile(os.path.join(destination, 'slimbookbattery-autostart.desktop')):
                 logger.info('Enabling autostart ...')
                 shutil.copy(source, destination)
                 config.set('CONFIGURATION', 'autostart', '1')
-        
+
         # Disables autostart
         else:
             logger.info('Disabling autostart ...')
             autostart_path = os.path.join(HOMEDIR, '.config/autostart/slimbookbattery-autostart.desktop')
-            
+
             if os.path.isfile(autostart_path):
                 os.remove(autostart_path)
-                
+
             config.set('CONFIGURATION', 'autostart', '0')
 
-        
+
 class SettingsGrid(BasePageGrid):
     GRID_KWARGS = {
         'column_homogeneous': True,
@@ -1010,7 +1012,7 @@ class SettingsGrid(BasePageGrid):
             'name': 'wifi_profile',
             'label': _('Wi-Fi power saving profile:'),
             'type': 'switch',
-            'help': _('Note: power save can cause an unstable wifi connection.')+' '+_('Disabled in tlp version <1.3.'),
+            'help': _('Note: power save can cause an unstable wifi connection.') + ' ' + _('Disabled in tlp version <1.3.'),
         },
         {
             'name': 'bluetooth_disabled',
@@ -1132,12 +1134,12 @@ class SettingsGrid(BasePageGrid):
             'for i in /sys/devices/system/cpu/cpu*/cpufreq/scaling_driver; do cat $i; done'
         ).split('\n')
         governor_driver = None
-        
+
         for governor_driver in governors:
             if governor_driver not in ['intel_pstate', 'acpi-cpufreq', 'intel_cpufreq']:
                 governor_driver = None
                 break
-            
+
         return governor_driver
 
     @staticmethod
@@ -1160,7 +1162,7 @@ class SettingsGrid(BasePageGrid):
         self.button_col = 3
         self.label_col2 = 4
         self.button_col2 = 8
-        
+
         if parent.min_resolution:
             self.button_col = 5
             self.label_col2 = 0
@@ -1233,11 +1235,11 @@ class SettingsGrid(BasePageGrid):
                 button = Gtk.Entry(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
                 col_correction = 1
                 top = 2
-                
+
             elif button_type == 'switch':
                 button = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.CENTER)
                 button.connect('notify::active', self.manage_events)
-                
+
             elif button_type == 'scale':
                 button = Gtk.Scale()
                 button.set_adjustment(Gtk.Adjustment.new(0, 0, 100, 5, 5, 0))
@@ -1326,19 +1328,19 @@ class SettingsGrid(BasePageGrid):
             'ethernet_blacklist': 'USB_BLACKLIST_WWAN=1 & USB_DENYLIST_WWAN=1',
             'usb_shutdown': 'USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN=1',
         }.items():
-            
+
             button = self.content[key]
-            
+
             if len(search.split(' & ')) > 1:
                 search = search.split(' & ')
-                active=True
+                active = True
                 for variable in search:
                     if variable not in content:
                         active = False
                 button.set_active(active)
             else:
                 button.set_active(search in content)
-                
+
         for key, search in {
             'disabled': 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE',
             'os': 'DEVICES_TO_DISABLE_ON_STARTUP',
@@ -1475,7 +1477,7 @@ class SettingsGrid(BasePageGrid):
 
             button = self.content[key]
             if search_items == 'WIFI_PWR_ON_BAT':
-                value = 'on' if button.get_active() and TLP_CONF!='/etc/default/tlp' else 'off'
+                value = 'on' if button.get_active() and TLP_CONF != '/etc/default/tlp' else 'off'
             else:
                 value = '1' if button.get_active() else '0'
 
@@ -1616,6 +1618,7 @@ class CyclesGrid(BasePageGrid):
             value = str(int(button.get_value()))
         config.set('CONFIGURATION', name, value)
 
+
 class Preferences(Gtk.ApplicationWindow):
     CONFIG_TABS = [
         {
@@ -1650,7 +1653,7 @@ class Preferences(Gtk.ApplicationWindow):
 
             for file in os.listdir(UPDATES_DIR):
 
-                process = os.path.join(UPDATES_DIR,file)
+                process = os.path.join(UPDATES_DIR, file)
                 proc = subprocess.Popen('bash {}'.format(process), shell=True)
 
                 # Wait for child process to terminate. Returns returncode attribute.
@@ -1677,7 +1680,7 @@ class Preferences(Gtk.ApplicationWindow):
             self.set_name('decorated')
         else:
             self.set_decorated(True)
-            
+
         self.set_resizable(False)
 
         splash = os.path.join(CURRENT_PATH, 'splash.py')
@@ -1695,31 +1698,30 @@ class Preferences(Gtk.ApplicationWindow):
             self.child_process.terminate()
 
         self.check_linux_tools()
-        
+
         self.check_tlp_version()
-        
+
     def check_tlp_version(self):
         def show_alert(parent=None, title=None):
-        
+
             data = {
                 'title': _('Get last TLP version'),
-                'info':  _('We recommend you to add TLP repository, to get the last version of TLP ;)'),
-                'btn_label' :_('Add repository'),
+                'info': _('We recommend you to add TLP repository, to get the last version of TLP ;)'),
+                'btn_label': _('Add repository'),
                 'command_lbl': _("Adding linrunner/TLP oficial repository.\nMake sure you have internet connection.\n"),
                 'command': "sudo add-apt-repository ppa:linrunner/tlp && sudo apt-get update && sudo apt-get install tlp\n",
-                'show_var': 'add-tlp-repository-alert'  
+                'show_var': 'add-tlp-repository-alert'
             }
-        
+
             dialog = PreferencesDialog(self, data)
             dialog.connect("destroy", self.close_dialog)
             dialog.show_all()
-            
-            
-        cmd = 'cat /etc/apt/sources.lis.d/* | grep "tlp"' 
-        code, str = subprocess.getstatusoutput(cmd)   
-        if not utils.get_version(TLP_VERSION)>= utils.get_version('1.5') and config.getboolean('CONFIGURATION','add-tlp-repository-alert') and not code == 0 and VTE_VERSION[0]==0:           
+
+        cmd = 'cat /etc/apt/sources.lis.d/* | grep "tlp"'
+        code, str = subprocess.getstatusoutput(cmd)
+        if not utils.get_version(TLP_VERSION) >= utils.get_version('1.5') and config.getboolean('CONFIGURATION', 'add-tlp-repository-alert') and not code == 0 and VTE_VERSION[0] == 0:
             show_alert()
-            
+
     def set_draggable(self):
         def on_realize(widget):
             monitor = Gdk.Display.get_primary_monitor(Gdk.Display.get_default())
@@ -1762,7 +1764,7 @@ class Preferences(Gtk.ApplicationWindow):
         self.connect('motion-notify-event', on_mouse_moved)
         # Center
         self.connect('realize', on_realize)  # On Wayland, monitor = None --> ERROR
-    
+
     def set_ui(self):
         self.set_default_icon(GdkPixbuf.Pixbuf.new_from_file_at_scale(
             filename=os.path.join(IMAGES_PATH, 'normal.png'),
@@ -1795,7 +1797,6 @@ class Preferences(Gtk.ApplicationWindow):
         btn_accept = Gtk.Button(label=(_('Accept')), valign=Gtk.Align.END, halign=Gtk.Align.END)
         btn_accept.set_name('accept')
         btn_accept.connect("clicked", self.manage_events)
-
 
         label_version = Gtk.Label(label='', halign=Gtk.Align.START)
         label_version.set_name('version')
@@ -1858,8 +1859,8 @@ class Preferences(Gtk.ApplicationWindow):
             event_close_box.set_halign(Gtk.Align.END)
             event_close_box.set_valign(Gtk.Align.START)
             event_close_box.connect('button-press-event', self.manage_events)
-            
-            #close_box.add(check)
+
+            # close_box.add(check)
             close_box.add(event_close_box)
             win_grid.attach(close_box, 4, 0, 1, 4)
 
@@ -1882,9 +1883,6 @@ class Preferences(Gtk.ApplicationWindow):
 
         if self.min_resolution:
             buttons_box.set_name('smaller_label')
-
-
-        
 
     # NOTEBOOK ***************************************************************
 
@@ -1962,7 +1960,7 @@ class Preferences(Gtk.ApplicationWindow):
             win = Preferences()
             win.connect("destroy", Gtk.main_quit)
             win.show_all()
-            
+
         elif name == 'accept':
             self.apply_conf()
 
@@ -2033,73 +2031,76 @@ class Preferences(Gtk.ApplicationWindow):
         mode = config.get('CONFIGURATION', 'modo_actual')
 
         self.animations(mode)
-        
+
         reboot_indicators(mode)
-        
+
         # Settings application
         command = 'pkexec slimbookbattery-pkexec apply'
         subprocess.Popen(command, shell=True, stdin=None, stdout=None, close_fds=True)
-        
+
     def check_linux_tools(self):
         cmd = "apt list --installed linux-tools-$(uname -r) | grep linux-tools-$(uname -r)"
         code, output = subprocess.getstatusoutput(cmd)
-        show_bool = config.getboolean('CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True
-        
+        show_bool = config.getboolean(
+            'CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True
+
         data = {
             'title': _('Linux-tools installation'),
-            'info':  _("You have not installed linux-tools for your kernel version, which is recommended.\nIf you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same."),
-            'btn_label' :_('Install'),
+            'info': _("You have not installed linux-tools for your kernel version, which is recommended.\nIf you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same."),
+            'btn_label': _('Install'),
             'command_lbl': _("Installing linux-tools for your kernel version, make sure that you have internet connection.\n"),
-            'command': "sudo apt install linux-tools-$(uname -r)\n", 
+            'command': "sudo apt install linux-tools-$(uname -r)\n",
             'show_var': 'linux-tools-alert'
         }
-        
+
         def show_alert(parent=None, title=None):
             dialog = PreferencesDialog(self, data)
             dialog.connect("destroy", self.close_dialog)
             dialog.show_all()
 
-        if code != 0 and show_bool and VTE_VERSION[0]==0:
+        if code != 0 and show_bool and VTE_VERSION[0] == 0:
             show_alert()
         else:
             pass
+
     def close_dialog(self, dialog):
         dialog.close()
         self.active = True
-       
+
+
 class TerminalWin(Gtk.Window):
 
     def __init__(self, parent, data):
         mytitle = data.get('title')
-        command_lbl = Gtk.Label(label = data.get('command_lbl'))
+        command_lbl = Gtk.Label(label=data.get('command_lbl'))
         command = data.get('command')
-        
+
         gi.require_version('Vte', '2.91')
         from gi.repository import GLib, Vte
-        
+
         Gtk.Window.__init__(self, title=mytitle)
-        self.set_default_size(600, 300) 
-        
+        self.set_default_size(600, 300)
+
         self.set_decorated(False)
         self.set_position(Gtk.WindowPosition.CENTER)
-        
+
         self.set_name('terminal')
-        
+
         self.button_close = Gtk.Button(label="Close")
         self.button_close.set_halign(Gtk.Align.END)
         self.button_close.connect("clicked", self.close_win)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         box.pack_start(command_lbl, False, True, 0)
-        
+
         self.terminal = Vte.Terminal()
         self.terminal.spawn_sync(
-            Vte.PtyFlags.DEFAULT, #PtyFlags
-            os.environ['HOME'], #Dir
-            ["/bin/bash"], 
-            [], 
+            Vte.PtyFlags.DEFAULT,  # PtyFlags
+            os.environ['HOME'],  # Dir
+            ["/bin/bash"],
+            [],
             GLib.SpawnFlags.DO_NOT_REAP_CHILD,
-            None, #at least None is required
+            None,  # at least None is required
             None,
         )
 
@@ -2110,7 +2111,7 @@ class TerminalWin(Gtk.Window):
         box.pack_start(scroller, False, True, 2)
         box.pack_start(self.button_close, False, True, 0)
         self.add(box)
-        
+
         self.terminal.show()
         self.InputToTerm(command)
 
@@ -2125,25 +2126,26 @@ class TerminalWin(Gtk.Window):
 
     def InputToTerm(self, command):
         def first_letter(s):
-                m = re.search(r'[a-z]', s, re.I)
-                if m is not None:
-                    return m.start()                  
-                return -1
+            m = re.search(r'[a-z]', s, re.I)
+            if m is not None:
+                return m.start()
+            return -1
 
         # Check vte version
-        if VTE_VERSION[0]==0:
+        if VTE_VERSION[0] == 0:
             version = str.split('Version: ')[1]
-            version = version[0:first_letter(version)-1]
+            version = version[0:first_letter(version) - 1]
             self.feed(command, version)
         else:
             print('Failed to get current Vte version:', exit, str)
 
-    def close_win(self, button=None): 
+    def close_win(self, button=None):
         self.close()
         self.destroy()
 
+
 class PreferencesDialog(Gtk.Dialog):
-	
+
     def __init__(self, parent, data):
 
         info = data.get('info')
@@ -2152,16 +2154,16 @@ class PreferencesDialog(Gtk.Dialog):
         self.show_bool = True
 
         Gtk.Dialog.__init__(self,
-			title='',
-            parent=parent,
-            flags=0)
+                            title='',
+                            parent=parent,
+                            flags=0)
 
-        # self.set_modal(True)  
-        self.set_transient_for(parent) 
+        # self.set_modal(True)
+        self.set_transient_for(parent)
 
-        self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)     
+        self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
         self.get_style_context().add_class("bg-color")
-        self.set_default_size(500, 0)     
+        self.set_default_size(500, 0)
         self.set_decorated(False)
         self.set_name('warn')
 
@@ -2172,7 +2174,7 @@ class PreferencesDialog(Gtk.Dialog):
 
         self.textview = Gtk.TextView()
         self.textbuffer = self.textview.get_buffer()
-        self.textbuffer.set_text( info )
+        self.textbuffer.set_text(info)
         self.textview.set_wrap_mode(Gtk.WrapMode(2))
         self.textview.set_pixels_inside_wrap(5)
         self.textview.set_pixels_above_lines(6)
@@ -2184,32 +2186,32 @@ class PreferencesDialog(Gtk.Dialog):
         hbox = Gtk.HBox(spacing=5)
         hbox.set_border_width(5)
         hbox.set_margin_top(10)
-        
+
         button_show = Gtk.CheckButton(label=_("Don't show again"))
         button_show.connect("clicked", self.not_show)
         hbox.pack_start(button_show, True, True, 0)
-        
+
         button_install = Gtk.Button(label=btn_label)
         button_install.connect("clicked", self.on_button_ok, data)
         hbox.pack_start(button_install, True, True, 0)
-         
+
         button_close = Gtk.Button(label=_("Cancel"))
         button_close.connect("button-press-event", self.on_button_close)
         hbox.pack_start(button_close, True, True, 0)
 
-        vbox.pack_start(hbox, True, True, 0)   
-        
+        vbox.pack_start(hbox, True, True, 0)
+
         self.active = True
-    
+
     def on_button_ok(self, button, data):
 
-        def show_terminal(data):     
+        def show_terminal(data):
             win = TerminalWin(self, data)
             win.connect("delete-event", Gtk.main_quit)
             win.show_all()
 
         show_terminal(data)
-    
+
     def not_show(self, button):
         if button.get_active():
             self.show_bool = False
@@ -2218,24 +2220,26 @@ class PreferencesDialog(Gtk.Dialog):
 
     def on_button_close(self, button, event=None):
         print('Setting', self.show_var, 'to', self.show_bool)
-        
+
         if not self.show_bool:
             config.set('CONFIGURATION', self.show_var, str(self.show_bool))
             with open(CONFIG_FILE, 'w') as configfile:
-                config.write(configfile)   
+                config.write(configfile)
         self.destroy()
-        
+
+
 def reboot_indicators(mode=None):
 
     # Reboots battery indicator
     exit, msg = utils.reboot_process(
-                    'slimbookbatteryindicator.py', # program to kill 
-                    os.path.join(CURRENT_PATH, 'slimbookbatteryindicator.py'), # Path to start indicator
-                )
-    if exit != 0: logger.error(msg)
-    
-    #If sync active, reboot tdp indicator
-    if config.getboolean('TDP', 'saving_tdpsync'):     
+        'slimbookbatteryindicator.py',  # program to kill
+        os.path.join(CURRENT_PATH, 'slimbookbatteryindicator.py'),  # Path to start indicator
+    )
+    if exit != 0:
+        logger.error(msg)
+
+    # If sync active, reboot tdp indicator
+    if config.getboolean('TDP', 'saving_tdpsync'):
         logger.info('\n{}[TDP SETTINGS]{}'.format(Colors.GREEN, Colors.ENDC))
         logger.info('Battery Mode: {}'.format(mode))
 
@@ -2243,14 +2247,15 @@ def reboot_indicators(mode=None):
         if config.getboolean('CONFIGURATION', 'application_on'):
             tdp_utils.set_mode(mode)
             exit, msg = tdp_utils.reboot_indicator()
-            if exit != 0: logger.error(msg)          
+            if exit != 0:
+                logger.error(msg)
         else:
             logger.info('App off, not changing {} mode configuration.'.format(tdp_controller))
-            
+
     else:
         logger.info('TDP Sync not active')
-      
-   
+
+
 if __name__ == "__main__":
     logger.setLevel(logging.ERROR)
     handler = logging.StreamHandler(sys.stdout)
