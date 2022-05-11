@@ -16,10 +16,10 @@ def get_tdp_controller():
         code, msg = subprocess.getstatusoutput("cat /proc/cpuinfo | grep 'model name' | head -n1")
         if code == 0:
             if 'intel' in msg.lower():
-                print('Intel detected')
+                # print('Intel detected')
                 tdp_controller = 'slimbookintelcontroller'
             elif 'amd' in msg.lower():
-                print('AMD detected')
+                # print('AMD detected')
                 tdp_controller = 'slimbookamdcontroller'
             else:
                 print('Could not find TDP controller for your processor')

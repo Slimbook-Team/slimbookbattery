@@ -34,36 +34,45 @@ CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 if CURRENT_PATH not in sys.path:
     sys.path = [CURRENT_PATH] + sys.path
 import utils
-
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-
-std_handler = logging.StreamHandler(sys.stdout)
-std_handler.setLevel(logging.DEBUG)
-std_formatter = logging.Formatter('%(message)s')
-std_handler.setFormatter(std_formatter)
-
-file_handler = None
-try:
-    file_handler = logging.FileHandler('/var/slimbookbattery.log')
-except PermissionError:
-    logger.critical('Cannot open log file /var/slimbookbattery.log, using /tmp/slimbookbattery.log')
-    file_handler = logging.FileHandler('/tmp/slimbookbattery.log')
-if file_handler:
-    file_handler.setLevel(logging.ERROR)
-    file_formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
-    file_handler.setFormatter(file_formatter)
-    logger.addHandler(std_handler)
-
-logger.debug('******************************************************************************')
-USER_NAME = utils.get_user(from_file='/tmp/slimbookbattery.user')
-logger.info('\x1b[6;30;42mSlimbookBattery-Commandline, executed as: {}\x1b[0m'.format(USER_NAME))
-
+USER_NAME = utils.get_user()
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
+
 TLP_CONF = utils.get_tlp_conf_file()[0]
 print('Using ', TLP_CONF)
+
+def get_logger(logger_name, create_file=False):
+
+        log = logging.getLogger(logger_name)
+        log.setLevel(level=logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+
+        if create_file:
+            try:            
+                fh = logging.FileHandler('/var/log/slimbookbattery.log')
+            except PermissionError:
+                log.critical(
+                    'Cannot open log file /var/slimbookbattery.log, using /tmp/slimbookbattery.log')
+                fh = logging.FileHandler('/tmp/slimbookbattery.log')
+            if fh:
+                fh.setLevel(level=logging.ERROR)
+                fh.setFormatter(formatter)
+
+            log.addHandler(fh)
+
+        # console handler
+        ch = logging.StreamHandler()
+        ch.setLevel(level=logging.ERROR)
+        ch.setFormatter(formatter)
+        log.addHandler(ch)
+        return log 
+
+logger = get_logger(USER_NAME, True)
+
+logger.debug('******************************************************************************')
+
+logger.info('\x1b[6;30;42mSlimbookBattery-Commandline, executed as: {}\x1b[0m'.format(USER_NAME))
 
 logger.debug("Username: {} - Homedir: {}".format(USER_NAME, HOMEDIR))
 

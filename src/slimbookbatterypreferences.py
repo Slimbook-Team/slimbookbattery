@@ -80,7 +80,6 @@ if not os.path.isfile(CONFIG_FILE):
 
 config.read(CONFIG_FILE)
 
-
 class Colors:  # You may need to change color settings
     RED = '\033[31m'
     ENDC = '\033[m'
@@ -89,7 +88,6 @@ class Colors:  # You may need to change color settings
     YELLOW = '\033[33m'
     BLUE = '\033[34m'
     BOLD = "\033[;1m"
-
 
 class BasePageGrid(Gtk.Grid):
     tab_name = None
@@ -151,7 +149,6 @@ class BasePageGrid(Gtk.Grid):
             Save options to storage
         """
         pass
-
 
 class InfoPageGrid(BasePageGrid):
     tab_name = _('Information')
@@ -388,7 +385,6 @@ class InfoPageGrid(BasePageGrid):
             logger.info(_('Report file canceled'))
         save_dialog.destroy()
 
-
 class BatteryGrid(BasePageGrid):
     tab_name = _('Battery')
     GRID_KWARGS = {
@@ -594,7 +590,6 @@ class BatteryGrid(BasePageGrid):
 
             label = self.content[label_name]
             label.set_label(content)
-
 
 class GeneralGrid(BasePageGrid):
     tab_name = _('General')
@@ -887,7 +882,6 @@ class GeneralGrid(BasePageGrid):
                 os.remove(autostart_path)
 
             config.set('CONFIGURATION', 'autostart', '0')
-
 
 class SettingsGrid(BasePageGrid):
     GRID_KWARGS = {
@@ -1684,7 +1678,6 @@ class Preferences(Gtk.ApplicationWindow):
         self.set_resizable(False)
 
         splash = os.path.join(CURRENT_PATH, 'splash.py')
-
         self.child_process = subprocess.Popen(splash, stdout=subprocess.PIPE)
 
         self.general_page_grid = None
@@ -1697,30 +1690,8 @@ class Preferences(Gtk.ApplicationWindow):
             logger.exception('Unexpected error')
             self.child_process.terminate()
 
-        self.check_linux_tools()
-
-        self.check_tlp_version()
-
-    def check_tlp_version(self):
-        def show_alert(parent=None, title=None):
-
-            data = {
-                'title': _('Get last TLP version'),
-                'info': _('We recommend you to add TLP repository, to get the last version of TLP ;)'),
-                'btn_label': _('Add repository'),
-                'command_lbl': _("Adding linrunner/TLP oficial repository.\nMake sure you have internet connection.\n"),
-                'command': "sudo add-apt-repository ppa:linrunner/tlp && sudo apt-get update && sudo apt-get install tlp\n",
-                'show_var': 'add-tlp-repository-alert'
-            }
-
-            dialog = PreferencesDialog(self, data)
-            dialog.connect("destroy", self.close_dialog)
-            dialog.show_all()
-
-        cmd = 'cat /etc/apt/sources.lis.d/* | grep "tlp"'
-        code, str = subprocess.getstatusoutput(cmd)
-        if not utils.get_version(TLP_VERSION) >= utils.get_version('1.5') and config.getboolean('CONFIGURATION', 'add-tlp-repository-alert') and not code == 0 and VTE_VERSION[0] == 0:
-            show_alert()
+        if VTE_VERSION[0] == 0:
+            self.check_recommendations()
 
     def set_draggable(self):
         def on_realize(widget):
@@ -2038,29 +2009,54 @@ class Preferences(Gtk.ApplicationWindow):
         command = 'pkexec slimbookbattery-pkexec apply'
         subprocess.Popen(command, shell=True, stdin=None, stdout=None, close_fds=True)
 
-    def check_linux_tools(self):
-        cmd = "apt list --installed linux-tools-$(uname -r) | grep linux-tools-$(uname -r)"
-        code, output = subprocess.getstatusoutput(cmd)
-        show_bool = config.getboolean(
-            'CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True
+    def check_recommendations(self):
+        def show_alert(data):
+                dialog = PreferencesDialog(self, data)
+                dialog.connect("destroy", self.close_dialog)
+                dialog.show_all()
 
-        data = {
-            'title': _('Linux-tools installation'),
-            'info': _("You have not installed linux-tools for your kernel version, which is recommended.\nIf you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same."),
-            'btn_label': _('Install'),
-            'command_lbl': _("Installing linux-tools for your kernel version, make sure that you have internet connection.\n"),
-            'command': "sudo apt install linux-tools-$(uname -r)\n",
-            'show_var': 'linux-tools-alert'
-        }
+        def check_linux_tools():
+            
+            if not utils.check_package_installed('linux-tools-$(uname -r)'):
+            
+                pkg_man, command, package = utils.get_package_manager(), utils.get_install_command(), utils.get_package_name('linux-tools-$(uname -r)')
+                print(pkg_man, command, package)
+                if pkg_man and command and package:
+                    cmd = "{pkg_man} {cmd} {package_name}".format(pkg_man = pkg_man, cmd = command, package_name = package)
+                    code, output = subprocess.getstatusoutput(cmd)
 
-        def show_alert(parent=None, title=None):
-            dialog = PreferencesDialog(self, data)
-            dialog.connect("destroy", self.close_dialog)
-            dialog.show_all()
+                    show_bool = config.getboolean(
+                        'CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True 
 
-        if code != 0 and show_bool and VTE_VERSION[0] == 0:
-            show_alert()
-        else:
+                    data = {
+                        'title': _('Linux-tools installation'),
+                        'info': _("You have not installed linux-tools for your kernel version, which is recommended.\nIf you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same."),
+                        'btn_label': _('Install'),
+                        'command_lbl': _("Installing linux-tools for your kernel version, make sure that you have internet connection.\n"),
+                        'command': "sudo {}".format(cmd),
+                        'show_var': 'linux-tools-alert'
+                    }
+
+                    if code != 0 and show_bool and VTE_VERSION[0] == 0:
+                        show_alert(data)
+                    
+
+        def check_tlp_version():
+            data = {
+                'title': _('Get last TLP version'),
+                'info': _('We recommend you to add TLP repository, to get the last version of TLP ;)'),
+                'btn_label': _('Add repository'),
+                'command_lbl': _("Adding linrunner/TLP oficial repository.\nMake sure you have internet connection.\n"),
+                'command': "sudo add-apt-repository ppa:linrunner/tlp && sudo apt-get update && sudo apt-get install tlp\n",
+                'show_var': 'add-tlp-repository-alert'
+            }
+
+            cmd = 'cat /etc/apt/sources.list.d/* | grep "tlp"'
+            code, str = subprocess.getstatusoutput(cmd)
+            if not utils.get_version(TLP_VERSION) >= utils.get_version('1.5') and config.getboolean('CONFIGURATION', 'add-tlp-repository-alert') and not code == 0 and VTE_VERSION[0] == 0:
+                show_alert(data) 
+
+        if check_linux_tools() and check_tlp_version():
             pass
 
     def close_dialog(self, dialog):
@@ -2088,7 +2084,7 @@ class TerminalWin(Gtk.Window):
 
         self.button_close = Gtk.Button(label="Close")
         self.button_close.set_halign(Gtk.Align.END)
-        self.button_close.connect("clicked", self.close_win)
+        self.button_close.connect("clicked", self.close_win, parent)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         box.pack_start(command_lbl, False, True, 0)
@@ -2117,7 +2113,6 @@ class TerminalWin(Gtk.Window):
 
     def feed(self, command, version, wait_until_done=True):
         command += '\n'
-        print(command)
         if utils.get_version('0.60') > utils.get_version(version):
             length = len(command)
             self.terminal.feed_child(command, length)
@@ -2133,13 +2128,17 @@ class TerminalWin(Gtk.Window):
 
         # Check vte version
         if VTE_VERSION[0] == 0:
-            version = str.split('Version: ')[1]
-            version = version[0:first_letter(version) - 1]
-            self.feed(command, version)
+            try:
+                version = VTE_VERSION[1][VTE_VERSION[1].find('Version:')+8:]
+                version = version[0:first_letter(version)]
+                self.feed(command, version)
+            except Exception:
+                print('Failed to get current Vte version (except):', VTE_VERSION[0], VTE_VERSION[1])
         else:
-            print('Failed to get current Vte version:', exit, str)
+            print('Failed to get current Vte version:', VTE_VERSION[0], VTE_VERSION[1])
 
-    def close_win(self, button=None):
+    def close_win(self, button=None, parent=None):
+        parent.close()
         self.close()
         self.destroy()
 
