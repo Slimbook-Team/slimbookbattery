@@ -2180,7 +2180,6 @@ class PreferencesDialog(Gtk.Dialog):
         self.textview.set_pixels_above_lines(6)
         self.textview.set_editable(False)
         self.textview.set_cursor_visible(False)
-        # self.textbuffer.get_style_context().add_class("text")
         vbox.pack_start(self.textview, True, True, 0)
 
         hbox = Gtk.HBox(spacing=5)
@@ -2263,6 +2262,10 @@ if __name__ == "__main__":
     formatter = logging.Formatter('%(asctime)s - %(lineno)d - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    logging.basicConfig(filename = "/home/slimbook/Escritorio/logfile.log",
+                    filemode = "w",
+                    format = formatter, 
+                    level = logging.ERROR)
 
     win = Preferences()
     win.connect("destroy", Gtk.main_quit)
