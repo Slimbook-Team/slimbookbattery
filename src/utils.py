@@ -1,10 +1,31 @@
 import getpass
 import gettext
-import os
+import os, sys
 import subprocess
 import locale
+import logging
 
 from pkg_resources import parse_version as parse_version
+
+# logger = logging.getLogger()
+# logger.setLevel(logging.ERROR)
+# handler = logging.StreamHandler(sys.stdout)
+# handler.setLevel(logging.ERROR)
+# formatter = logging.Formatter('%(asctime)s - %(lineno)d - %(levelname)s - %(message)s')
+# handler.setFormatter(formatter)
+# logger.addHandler(handler)
+# logging.basicConfig(filename = "/home/slimbook/Escritorio/logfile.log",
+#                 filemode = "w",
+#                 format = formatter, 
+#                 level = logging.ERROR)
+
+import logging
+log = logging.basicConfig(filename='slimbookbattery.log', format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+
+# log.debug('This message should go to the log file')
+# log.info('So should this')
+# log.warning('And this, too')
+# log.error('And non-ASCII stuff, too, like Øresund and Malmö')
 
 def get_user(from_file=None):
     try:
@@ -21,8 +42,13 @@ def get_user(from_file=None):
         if 'SUDO_USER' in os.environ and os.environ['SUDO_USER'] != 'root':
             user_name = os.environ['SUDO_USER']
         else:
-            user_name = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
-
+            var = 10  
+            while var > 0:              
+                var = var -1
+                user_name = subprocess.getoutput('last -wn1 | head -n 1 | cut -f 1 -d " "')
+                log.debug("Username:", user_name)
+                if user_name != 'reboot':
+                    break
     return user_name
 
 def get_languages():
@@ -45,7 +71,6 @@ def get_tlp_conf_file():
         version=res.split(' ')[1]
     else :
         version='1.3' # Most common    
-
     try:
         if parse_version(version)>= parse_version('1.3'):
             file='/etc/tlp.conf'
@@ -94,3 +119,4 @@ def reboot_process(process_name, path):
     else:
         return (1, 'Process launch path does not exist')
    
+get_user()

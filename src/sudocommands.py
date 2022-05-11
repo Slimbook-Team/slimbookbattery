@@ -62,7 +62,6 @@ logger.info('\x1b[6;30;42mSlimbookBattery-Commandline, executed as: {}\x1b[0m'.f
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
-
 TLP_CONF = utils.get_tlp_conf_file()[0]
 print('Using ', TLP_CONF)
 
@@ -76,7 +75,6 @@ _ = utils.load_translation('sudocommands')
 
 msg_graphics = _('Graphics settings have been modified, changes will be applied on restart.')
 
-
 class Colors:  # You may need to change color settings
     RED = '\033[31m'
     ENDC = '\033[m'
@@ -85,7 +83,6 @@ class Colors:  # You may need to change color settings
     YELLOW = '\033[33m'
     BLUE = '\033[34m'
     BOLD = "\033[;1m"
-
 
 MAPPING_MODES = {
     '1': {
@@ -134,6 +131,7 @@ def main(args):  # Args will be like --> command_name value
         battery_mode = config.get('CONFIGURATION', 'modo_actual')
 
         if args[1] == "apply":  # Applies selected mode conf and turns on/off tlp
+            brightness_settings(battery_mode)
             required_reboot = mode_settings(battery_mode)
             
             if required_reboot == 1:
@@ -237,11 +235,14 @@ def mode_settings(mode):
     graphics_before = ''
 
     # Checking graphics
-    stout = subprocess.getoutput('prime-select query')
-    nvidia = subprocess.getstatusoutput("prime-select " + stout + "| grep -i 'profile is already set'")
-    if nvidia[0] == 0:  #
+    stout = subprocess.getstatusoutput('prime-select query')
+    print('Checking graphics...')
+    # nvidia = subprocess.getstatusoutput("prime-select " + stout + "| grep -i 'profile is already set'")
+    if stout[0] == 0:  #
         graficaNvidia = True
         graphics_before = stout
+
+    print(stout)
 
     # If nvidia driver is not installed or does not work, we use TLP
     if not graficaNvidia:
@@ -388,8 +389,6 @@ def mode_settings(mode):
     if mode in MAPPING_MODES:
         logger.info(MAPPING_MODES[mode]['full_text'])
         mode_name = MAPPING_MODES[mode]['mode_name']
-
-    brightness_settings(mode)  # Executed by indicator
 
     logger.info("\n{}[COPY TLP CUSTOM SETTINGS]{}".format(Colors.GREEN, Colors.ENDC))
     custom_file = os.path.join(HOMEDIR, ".config/slimbookbattery/custom/", mode_name)
@@ -560,5 +559,4 @@ def update_config(filepath, variable, value):
 
 
 if __name__ == "__main__":
-    # Se obtiene las variables que se le pasa desde el archivo /usr/share/slimbookface/slimbookface
     main(sys.argv)

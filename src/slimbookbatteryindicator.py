@@ -62,7 +62,7 @@ ICONS= {
     "3": "performance_normal",
     "0": "disabled_normal",
 }
-
+                                                            
 APP_INDICATOR_ID = 'Slimbook Battery Indicator'
 
 ICONS_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images', 'indicator'))
