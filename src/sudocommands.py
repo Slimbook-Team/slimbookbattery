@@ -63,7 +63,7 @@ def get_logger(logger_name, create_file=False):
 
         # console handler
         ch = logging.StreamHandler()
-        ch.setLevel(level=logging.ERROR)
+        ch.setLevel(level=logging.DEBUG)
         ch.setFormatter(formatter)
         log.addHandler(ch)
         return log 
