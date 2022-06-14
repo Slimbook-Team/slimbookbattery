@@ -988,6 +988,7 @@ class SettingsGrid(BasePageGrid):
             'label': _('CPU scaling governor saving profile:'),
             'type': 'governor',
             'intel_pstate': INTEL_GOV,
+            'amd-pstate': CPUFREQ_GOV,
             'acpi-cpufreq': CPUFREQ_GOV,
             'intel_cpufreq': CPUFREQ_GOV,
         },
@@ -1130,7 +1131,7 @@ class SettingsGrid(BasePageGrid):
         governor_driver = None
 
         for governor_driver in governors:
-            if governor_driver not in ['intel_pstate', 'acpi-cpufreq', 'intel_cpufreq']:
+            if governor_driver not in ['intel_pstate', 'acpi-cpufreq', 'intel_cpufreq', 'amd-pstate']:
                 governor_driver = None
                 break
 
@@ -1239,7 +1240,7 @@ class SettingsGrid(BasePageGrid):
                 button.set_adjustment(Gtk.Adjustment.new(0, 0, 100, 5, 5, 0))
                 button.set_digits(0)
                 button.set_hexpand(True)
-                button.connect('change-value', self.manage_events)
+                button.connect('button-release-event', self.manage_events)
 
                 button_on_off = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.END)
                 name = '{}_switch'.format(data.get('name'))
@@ -1362,7 +1363,7 @@ class SettingsGrid(BasePageGrid):
                     active_mode = values.index('powersave')
                 else:
                     active_mode = values.index('performance')
-        elif governor in ['acpi-cpufreq', 'intel_cpufreq']:
+        elif governor in ['acpi-cpufreq', 'intel_cpufreq', 'amd-pstate']:
             values = list(dict(self.CPUFREQ_GOV).values())
             if gov_mode in values:
                 active_mode = values.index(gov_mode)
@@ -1685,10 +1686,21 @@ class Preferences(Gtk.ApplicationWindow):
         self.mid_page_grid = None
         self.high_page_grid = None
         try:
+            
             self.set_ui()
         except Exception:
             logger.exception('Unexpected error')
-            self.child_process.terminate()
+            os.system('pkexec slimbookbattery-pkexec restore')
+            config.read(CONFIG_FILE)
+     
+            try:
+                for children in self.get_children():
+                    print(children)
+                self.remove(children)
+                self.set_ui()
+            except Exception:
+                logger.exception('Unexpected error')
+                self.child_process.terminate()
 
         if VTE_VERSION[0] == 0:
             self.check_recommendations()
@@ -1926,11 +1938,16 @@ class Preferences(Gtk.ApplicationWindow):
         elif name == 'restore':
             os.system('pkexec slimbookbattery-pkexec restore')
             config.read(CONFIG_FILE)
-            self.hide()
+            
+            for children in self.get_children():
+                print(children)
+            self.remove(children)
+            self.set_ui()
+            # self.hide()
 
-            win = Preferences()
-            win.connect("destroy", Gtk.main_quit)
-            win.show_all()
+            # win = Preferences()
+            # win.connect("destroy", Gtk.main_quit)
+            # win.show_all()
 
         elif name == 'accept':
             self.apply_conf()

@@ -1,3 +1,17 @@
+slimbookbattery (4.0.7beta) focal; urgency=medium
+
+  * Added new amd-pstate governor
+  * Automatic config check if there is an error loading ui.
+  * Changed brightness bar event to fix setting value in 1 click.
+
+ -- slimbook <dev@slimbook.es>  Tue, 14 Jun 2022 13:58:04 +0200
+
+slimbookbattery (4.0.6beta) focal; urgency=medium
+
+  * Version 4.0.5 corrections
+
+ -- slimbook <dev@slimbook.es>  Mon, 16 May 2022 13:58:04 +0200
+
 slimbookbattery (4.0.5beta) focal; urgency=low
 
   * Added warning window to add tlp repository and linux-tools
