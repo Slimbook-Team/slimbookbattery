@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2021-10-01 16:57+0200\n"
+"POT-Creation-Date: 2022-03-29 12:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,43 +15,35 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: slimbookbatteryindicator.py:161
-msgid "It seems that you have been connected to AC for at least 15 days, we recommend you to disconnect your charger, and discharge battery"
-msgstr ""
-
-#: slimbookbatteryindicator.py:220
+#: slimbookbatteryindicator.py:110
 msgid "Energy Saving"
 msgstr ""
 
-#: slimbookbatteryindicator.py:226
+#: slimbookbatteryindicator.py:115
 msgid "Balanced"
 msgstr ""
 
-#: slimbookbatteryindicator.py:232
+#: slimbookbatteryindicator.py:120
 msgid "Maximum Performance"
 msgstr ""
 
-#: slimbookbatteryindicator.py:238
+#: slimbookbatteryindicator.py:125
 msgid "Off"
 msgstr ""
 
-#: slimbookbatteryindicator.py:244
+#: slimbookbatteryindicator.py:130
 msgid "Advanced mode"
 msgstr ""
 
-#: slimbookbatteryindicator.py:248
+#: slimbookbatteryindicator.py:134
 msgid "Exit"
 msgstr ""
 
-#: slimbookbatteryindicator.py:407
-msgid "Slimbook Battery"
+#: slimbookbatteryindicator.py:152
+msgid "Medium performance"
 msgstr ""
 
-#: slimbookbatteryindicator.py:410
-msgid "The changes have been applied, but it is necessary to restart so that some of them may take effect. Do you want to restart?"
-msgstr ""
-
-#: slimbookbatteryindicator.py:415
-msgid "System will not restart"
+#: slimbookbatteryindicator.py:253
+msgid "It seems that you have been connected to AC for at least 15 days, we recommend you to disconnect your charger, and discharge battery"
 msgstr ""
 

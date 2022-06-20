@@ -1,0 +1,13 @@
+bin/* /usr/bin/
+bin/* /usr/share/slimbookbattery/bin/
+debian/changelog /usr/share/slimbookbattery/
+slimbookbattery.desktop /usr/share/applications/
+src/* /usr/share/slimbookbattery/src/
+images/* /usr/share/slimbookbattery/images/
+images/slimbookbattery.png /usr/share/pixmaps/
+src/configuration/custom/* /usr/share/slimbookbattery/custom/
+src/configuration/default/* /usr/share/slimbookbattery/default/
+policykit/* /usr/share/polkit-1/actions/
+debian/changelog /usr/share/slimbookbattery/src/
+LICENSE /usr/share/slimbookbattery/
+udev-rules/* /etc/udev/rules.d

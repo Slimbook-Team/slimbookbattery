@@ -19,12 +19,35 @@ stack>grid>grid, scrolledwindow grid{
     padding-top: 10px;
 }
 
-window notebook{
-    margin-left: 90px;
-    margin-right: 90px;
-    margin-top: 30px;
-    margin-bottom: 10px;
-}
+#decorated notebook{
+    margin-left: 55px;
+    margin-right: 55px;
+    margin-top: 40px;
+    margin-bottom: 0px;
+} 
 #smaller_label label {
     font-size: small;
+}
+
+#terminal {
+    padding: 20px;
+}
+
+#terminal label{
+    color: black;
+}
+#terminal {
+    background-color: white;
+}
+
+#terminal box, #warn>box{
+    padding: 10px;
+}
+
+vte-terminal {
+    padding: 10px;
+}
+
+#warn>box *{
+    background-color: transparent;
 }

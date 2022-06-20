@@ -78,7 +78,7 @@ msgid "Actual energy mode:"
 msgstr "Modo actual de energía:"
 
 #: preferences.py:264
-msgid "Working mode in case of battery failure"
+msgid "Working mode in case of battery failure:"
 msgstr "En caso de fallo en la batería, trabajar en modo:"
 
 #: preferences.py:282
@@ -95,7 +95,7 @@ msgstr "Hibernar después de estar 3 horas en suspensión:"
 
 #: preferences.py:325 preferences.py:773 preferences.py:1228
 msgid "Battery mode parameters (disabled when you connect AC power):"
-msgstr "Parametros en modo batería (desactivados al cargar batería):"
+msgstr "Parámetros en modo batería (desactivados al cargar batería):"
 
 #: preferences.py:335 preferences.py:782 preferences.py:1237
 msgid "Limit CPU profile:"
@@ -103,7 +103,7 @@ msgstr "Perfil de limitación de la CPU:"
 
 #: preferences.py:345 preferences.py:792 preferences.py:1247
 msgid "Note: this setting affects to performance"
-msgstr "Nota: este parametro afecta al rendimiento"
+msgstr "Nota: éste parámetro afecta al rendimiento"
 
 #: preferences.py:354 preferences.py:801 preferences.py:1256
 #: preferences.py:2950 preferences.py:3084 preferences.py:3265
@@ -511,3 +511,61 @@ msgstr "Sincroniza el TDP de la CPU con el modo de batería:"
 
 msgid "Note: power save can cause an unstable wifi connection."
 msgstr "Nota: el ahorro de energía puede causar inestabilidad en la conexión wi-fi."
+
+#: slimbookbatterypreferences.py:2033
+msgid "Linux-tools installation"
+msgstr "Instalación de Linux-tools"
+
+#: slimbookbatterypreferences.py:2049
+msgid ""
+"Installing linux-tools for your kernel version, make sure that you have internet connection.\n"
+msgstr "Instalando linux-tools para tu versión de kernel, asegurate de estar conectad@ a internet. \n"
+
+#: slimbookbatterypreferences.py:2169
+msgid ""
+"You have not installed linux-tools for your kernel version, which is recommended.\n"
+"If you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same."
+msgstr ""
+"Se ha detectado que linux-tools no esta instalado para tu versión de kernel, lo cual es recomendable\n"
+"Si quieres instalarlo, haz click en el botón 'Instalar', si no, puedes cerrar esta ventana."
+
+#: slimbookbatterypreferences.py:2183
+msgid "Don't show again"
+msgstr "No volver a mostrar"
+
+#: slimbookbatterypreferences.py:2187
+msgid "Install"
+msgstr "Instalar"
+
+#: slimbookbatterypreferences.py:312
+msgid "Contact with us if you find something wrong. "
+msgstr "Contacta con nosotros si encuentras algun error."
+
+#: slimbookbatterypreferences.py:313
+msgid ""
+"\n"
+"We would appreciate that you attach the file that is generated"
+msgstr ""
+"\n"
+"Será de ayuda adjuntar el fichero generado"
+
+#: slimbookbatterypreferences.py:1719
+msgid "Get last TLP version"
+msgstr "Obtener la última versión de TLP"
+
+#: slimbookbatterypreferences.py:1720
+msgid "We recommend you to add TLP repository, to get the last version of TLP ;)"
+msgstr "Te recomendamos añadir el repositorio de TLP, para obtener la última versión de TLP"
+
+#: slimbookbatterypreferences.py:1721
+msgid "Add repository"
+msgstr "Añadir repositorio"
+
+#: slimbookbatterypreferences.py:1722
+msgid ""
+"Adding linrunner/TLP oficial repository.\n"
+"Make sure you have internet connection.\n"
+msgstr ""
+
+"Añadiendo el repositorio oficial de linrunner/TLP.\n"
+"Asegúrate de estar conectado a Internet.\n"

@@ -20,9 +20,11 @@ USER_NAME = utils.get_user()
 HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
-DEFAULT_CONF = os.path.join(CURRENT_PATH, 'slimbookbattery.conf')
+DEFAULT_CONF = os.path.join(CURRENT_PATH,'configuration', 'slimbookbattery.conf')
 CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
 CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
+
+UPDATES_DIR = os.path.join(CURRENT_PATH, 'updates')
 
 uid, gid = pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
 
@@ -39,24 +41,33 @@ def main():
     else:
         logger.info('Configuration folder ({}) found!'.format(CONFIG_FOLDER))
 
-    config_folder_stat = os.stat(CONFIG_FOLDER)
-    logger.debug("uid={} file_uid={}".format(uid, config_folder_stat.st_uid))
-    f_uid = config_folder_stat.st_uid
-    f_gid = config_folder_stat.st_gid
-    if not uid == f_uid or not gid == f_gid:
-        logger.info('Setting folder ownership')
+    tlp_conf = utils.get_tlp_conf_file()[0]
+    if not os.path.exists(tlp_conf):
+        shutil.copyfile(os.path.join(CURRENT_PATH, 'configuration', 'default', 'equilibrado'), tlp_conf)
 
-        for dir_path, dir_name, filenames in os.walk(CONFIG_FOLDER):
+
+    set_ownership(CONFIG_FOLDER)
+    set_ownership(UPDATES_DIR)
+
+    check_config_file()
+    check_tlp_files()
+
+def set_ownership(folder):
+    folder_stat = os.stat(folder)
+    logger.debug("Folder {}\nUser uid={}\nFolder uid={}".format(folder, uid, folder_stat.st_uid))
+    f_uid = folder_stat.st_uid
+    f_gid = folder_stat.st_gid
+
+    if not uid == f_uid or not gid == f_gid:
+        #logger.info('Setting {} ownership').format(folder)
+
+        for dir_path, dir_name, filenames in os.walk(folder):
             logger.debug(dir_path)
             os.chown(dir_path, uid, gid)
             for filename in filenames:
                 file_path = os.path.join(dir_path, filename)
                 logger.debug(file_path)
                 os.chown(file_path, uid, gid)
-
-    check_config_file()
-    check_tlp_files()
-
 
 def check_config_file():
     logger.info('Checking Slimbook Battery Configuration')
@@ -100,6 +111,9 @@ def check_config_file():
 # Checks if the user's default config files exist an if they are like the app version's default files.
 # If files or directories don't exist they are created.
 def check_tlp_files():
+    
+    
+    
     logger.info("Checking Slimbook Battery's TLP Configuration")
 
     incidences = False

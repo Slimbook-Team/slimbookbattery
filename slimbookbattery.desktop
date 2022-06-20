@@ -1,8 +1,8 @@
 [Desktop Entry]
 Name=Slimbook Battery
-Version=4.0.3
+Version=4.0.7beta
 Exec=slimbookbattery
-Comment=Show notifications of your battery states and manage energy!
+Comment=Show notifications of your battery status and manage energy!
 Icon=/usr/share/pixmaps/slimbookbattery.png
 Type=Application
 Terminal=false
