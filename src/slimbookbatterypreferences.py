@@ -2030,33 +2030,7 @@ class Preferences(Gtk.ApplicationWindow):
         def show_alert(data):
                 dialog = PreferencesDialog(self, data)
                 dialog.connect("destroy", self.close_dialog)
-                dialog.show_all()
-
-        def check_linux_tools():
-            
-            if not utils.check_package_installed('linux-tools-$(uname -r)'):
-            
-                pkg_man, command, package = utils.get_package_manager(), utils.get_install_command(), utils.get_package_name('linux-tools-$(uname -r)')
-                print(pkg_man, command, package)
-                if pkg_man and command and package:
-                    cmd = "{pkg_man} {cmd} {package_name}".format(pkg_man = pkg_man, cmd = command, package_name = package)
-                    code, output = subprocess.getstatusoutput(cmd)
-
-                    show_bool = config.getboolean(
-                        'CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True 
-
-                    data = {
-                        'title': _('Linux-tools installation'),
-                        'info': _("You have not installed linux-tools for your kernel version, which is recommended.\nIf you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same."),
-                        'btn_label': _('Install'),
-                        'command_lbl': _("Installing linux-tools for your kernel version, make sure that you have internet connection.\n"),
-                        'command': "sudo {}".format(cmd),
-                        'show_var': 'linux-tools-alert'
-                    }
-
-                    if code != 0 and show_bool and VTE_VERSION[0] == 0:
-                        show_alert(data)
-                    
+                dialog.show_all()   
 
         def check_tlp_version():
             data = {
@@ -2073,7 +2047,7 @@ class Preferences(Gtk.ApplicationWindow):
             if not utils.get_version(TLP_VERSION) >= utils.get_version('1.5') and config.getboolean('CONFIGURATION', 'add-tlp-repository-alert') and not code == 0 and VTE_VERSION[0] == 0:
                 show_alert(data) 
 
-        if check_linux_tools() and check_tlp_version():
+        if check_tlp_version():
             pass
 
     def close_dialog(self, dialog):

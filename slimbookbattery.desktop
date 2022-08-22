@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Slimbook Battery
-Version=4.0.7beta
+Version=4.0.8beta
 Exec=slimbookbattery
 Comment=Show notifications of your battery status and manage energy!
 Icon=/usr/share/pixmaps/slimbookbattery.png
