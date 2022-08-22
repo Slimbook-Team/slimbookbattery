@@ -988,6 +988,7 @@ class SettingsGrid(BasePageGrid):
             'label': _('CPU scaling governor saving profile:'),
             'type': 'governor',
             'intel_pstate': INTEL_GOV,
+            'amd-pstate': CPUFREQ_GOV,
             'acpi-cpufreq': CPUFREQ_GOV,
             'intel_cpufreq': CPUFREQ_GOV,
         },
@@ -1130,7 +1131,7 @@ class SettingsGrid(BasePageGrid):
         governor_driver = None
 
         for governor_driver in governors:
-            if governor_driver not in ['intel_pstate', 'acpi-cpufreq', 'intel_cpufreq']:
+            if governor_driver not in ['intel_pstate', 'acpi-cpufreq', 'intel_cpufreq', 'amd-pstate']:
                 governor_driver = None
                 break
 
@@ -1239,7 +1240,7 @@ class SettingsGrid(BasePageGrid):
                 button.set_adjustment(Gtk.Adjustment.new(0, 0, 100, 5, 5, 0))
                 button.set_digits(0)
                 button.set_hexpand(True)
-                button.connect('change-value', self.manage_events)
+                button.connect('button-release-event', self.manage_events)
 
                 button_on_off = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.END)
                 name = '{}_switch'.format(data.get('name'))
@@ -1362,7 +1363,7 @@ class SettingsGrid(BasePageGrid):
                     active_mode = values.index('powersave')
                 else:
                     active_mode = values.index('performance')
-        elif governor in ['acpi-cpufreq', 'intel_cpufreq']:
+        elif governor in ['acpi-cpufreq', 'intel_cpufreq', 'amd-pstate']:
             values = list(dict(self.CPUFREQ_GOV).values())
             if gov_mode in values:
                 active_mode = values.index(gov_mode)
@@ -1685,10 +1686,21 @@ class Preferences(Gtk.ApplicationWindow):
         self.mid_page_grid = None
         self.high_page_grid = None
         try:
+            
             self.set_ui()
         except Exception:
             logger.exception('Unexpected error')
-            self.child_process.terminate()
+            os.system('pkexec slimbookbattery-pkexec restore')
+            config.read(CONFIG_FILE)
+     
+            try:
+                for children in self.get_children():
+                    print(children)
+                self.remove(children)
+                self.set_ui()
+            except Exception:
+                logger.exception('Unexpected error')
+                self.child_process.terminate()
 
         if VTE_VERSION[0] == 0:
             self.check_recommendations()
@@ -1926,11 +1938,16 @@ class Preferences(Gtk.ApplicationWindow):
         elif name == 'restore':
             os.system('pkexec slimbookbattery-pkexec restore')
             config.read(CONFIG_FILE)
-            self.hide()
+            
+            for children in self.get_children():
+                print(children)
+            self.remove(children)
+            self.set_ui()
+            # self.hide()
 
-            win = Preferences()
-            win.connect("destroy", Gtk.main_quit)
-            win.show_all()
+            # win = Preferences()
+            # win.connect("destroy", Gtk.main_quit)
+            # win.show_all()
 
         elif name == 'accept':
             self.apply_conf()
@@ -2013,33 +2030,7 @@ class Preferences(Gtk.ApplicationWindow):
         def show_alert(data):
                 dialog = PreferencesDialog(self, data)
                 dialog.connect("destroy", self.close_dialog)
-                dialog.show_all()
-
-        def check_linux_tools():
-            
-            if not utils.check_package_installed('linux-tools-$(uname -r)'):
-            
-                pkg_man, command, package = utils.get_package_manager(), utils.get_install_command(), utils.get_package_name('linux-tools-$(uname -r)')
-                print(pkg_man, command, package)
-                if pkg_man and command and package:
-                    cmd = "{pkg_man} {cmd} {package_name}".format(pkg_man = pkg_man, cmd = command, package_name = package)
-                    code, output = subprocess.getstatusoutput(cmd)
-
-                    show_bool = config.getboolean(
-                        'CONFIGURATION', 'linux-tools-alert') if config.has_option('CONFIGURATION', 'linux-tools-alert') else True 
-
-                    data = {
-                        'title': _('Linux-tools installation'),
-                        'info': _("You have not installed linux-tools for your kernel version, which is recommended.\nIf you want to install it, click the 'Install' button below, otherwise, you can close this window, and everything will remain the same."),
-                        'btn_label': _('Install'),
-                        'command_lbl': _("Installing linux-tools for your kernel version, make sure that you have internet connection.\n"),
-                        'command': "sudo {}".format(cmd),
-                        'show_var': 'linux-tools-alert'
-                    }
-
-                    if code != 0 and show_bool and VTE_VERSION[0] == 0:
-                        show_alert(data)
-                    
+                dialog.show_all()   
 
         def check_tlp_version():
             data = {
@@ -2056,7 +2047,7 @@ class Preferences(Gtk.ApplicationWindow):
             if not utils.get_version(TLP_VERSION) >= utils.get_version('1.5') and config.getboolean('CONFIGURATION', 'add-tlp-repository-alert') and not code == 0 and VTE_VERSION[0] == 0:
                 show_alert(data) 
 
-        if check_linux_tools() and check_tlp_version():
+        if check_tlp_version():
             pass
 
     def close_dialog(self, dialog):
