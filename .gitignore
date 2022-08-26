@@ -5,7 +5,7 @@ src/configuration/default/tlp
 # Main branch
 development
 deploy.sh
-debian/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
