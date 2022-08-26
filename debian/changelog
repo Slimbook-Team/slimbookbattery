@@ -1,3 +1,10 @@
+slimbookbattery (4.0.8beta) focal; urgency=medium
+
+  * Removed linux-tools window
+  * New logo
+
+ -- slimbook <dev@slimbook.es>  Mon, 22 Aug 2022 13:58:04 +0200
+
 slimbookbattery (4.0.7beta) focal; urgency=medium
 
   * Added new amd-pstate governor
