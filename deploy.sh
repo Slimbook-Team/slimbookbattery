@@ -33,12 +33,12 @@ then
 else
 	if $python_pck_installer install -r requirements.txt;
 	then
-    echo $DONE"... done"
-    echo -n $RESET
-  else
-    echo $WARN"... ERROR: could not install dependencies via pip"
-    echo -n $RESET
-    exit 1
+		echo $DONE"... done"
+		echo -n $RESET
+	else
+		echo $WARN"... ERROR: could not install dependencies via pip"
+		echo -n $RESET
+		exit 1
   fi
 fi
 
