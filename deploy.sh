@@ -19,39 +19,29 @@ echo "CTRL-C to exit"$RESET
 read
 
 echo 
-echo $INFO$BOLD"Checkng dependencies..."
+echo $INFO$BOLD"Checking dependencies..."
 echo -n $RESET
 #Used python binary
 python="python3"
 python_pck_installer="pip3"
-#Parse entire repository looking for python import string
-python_packages=$(grep -Re "^import" * | awk '{print $2}' | sort -u)
-echo $INFO"Checking Python dependencies..."
-echo -n $RESET"Dependencies are: $python $python_pck_installer"
-echo $python_packages
+
 if [ ! $python ] && [ ! $python_pck_installer ];
 then
 	echo $WARN$BOLD"Please install $python and $python_pck_installer"
 	echo -n $RESET
 	exit 1
-else 
-	for package in $python_packages; do
-		if ! $($python -c "import $package" &> /dev/null);
-		then
-			echo $INFO"Installing \"$python_pck_installer $package\"..."
-			echo -n $RESET
-			if $python_pck_installer install $package; 
-			then
-				echo $DONE"... done"
-				echo -n $RESET
-			else
-				echo $WARN"... ERROR: could not install $package. Try to install manually and run this script again"
-				echo -n $RESET
-				exit 1
-			fi
-		fi
-	done  
+else
+	if $python_pck_installer install -r requirements.txt;
+	then
+    echo $DONE"... done"
+    echo -n $RESET
+  else
+    echo $WARN"... ERROR: could not install dependencies via pip"
+    echo -n $RESET
+    exit 1
+  fi
 fi
+
 echo $INFO"Check system dependencies..."
 echo -n $RESET
 system_dependencies="libindicator-gtk3 libappindicator-gtk3 libgirepository tlp tlp-rdw libnotify-bin cron"
