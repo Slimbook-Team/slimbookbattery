@@ -1,2 +1,2 @@
 configparser
-gi
+PyGObject
