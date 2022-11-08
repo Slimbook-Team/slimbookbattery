@@ -3,54 +3,56 @@
 
 #DEBHELPER#
 
+shopt -s globstar
+
 echo "Debian postinst $1 :"
 
-if python3 /usr/share/slimbookbattery/src/check_config.py; then
-  echo 'Configuration OK'
+
+if [[ $(python3 /usr/share/slimbookbattery/src/check_config.py) ]]; then
+	echo "Configuration OK"
 fi
 
-if chmod -R 766 /home/*/.config/slimbookbattery; then
-  echo 'Read/Write permissions given to config files.'
 
-fi
-
-if chmod -R 755 /usr/share/slimbookbattery/src/*.sh; then
-  echo 'Exec permissions given.'
+if [[ $(chmod -R 766 /home/*/.config/slimbookbattery) ]]; then
+	echo "Read/Write permissions given to config files."
 
 fi
 
-if chmod -R 755 /usr/share/slimbookbattery/src/*.py; then
-  echo 'Exec permissions given to src.'
+
+if [[ $(chmod -R 755 /usr/share/slimbookbattery/src/**/*.sh) ]]; then
+	echo "Exec permissions given."
 
 fi
 
-# Enabling tlp.service
-if sudo systemctl enable tlp.service; then
-  echo 'Tlp service enabled'
+
+if [[ $(chmod -R 755 /usr/share/slimbookbattery/src/**/*.py) ]]; then
+	echo "Exec permissions given to src."
 fi
 
-echo 'Checking users autostart files'
-for user in $(ls /home)
-do
-  echo 
-  echo $user
 
-  if test -f /home/$user/.config/autostart/slimbookbattery-autostart.desktop; then
-      echo "Restoring /home/$user/.config/autostart/slimbookbattery-autostart.desktop"
-      cp /usr/share/slimbookbattery/src/slimbookbattery-autostart.desktop /home/$user/.config/autostart/slimbookbattery-autostart.desktop
-  fi
+if [[ $(sudo systemctl enable tlp.service) ]]; then
+	echo "TLP service enabled!"
+fi
 
+
+echo "Checking autostart files for users..."
+for user in $(ls /home); do
+	echo -e "\n$user"
+
+	filename="slimbookbattery-autostart.desktop"
+	root_path="/usr/share/slimbookbattery/src"
+	user_path="/home/$user/.config/autostart"
+
+	if [[ $(test -d "$user_path") ]]; then
+		if [[ ! $(test -f "$user_path/$filename") ]]; then
+			echo "Creating $user_path/$filename"
+			cp "$root_path/$filename" "$user_path/$filename"
+		fi
+	fi
 done
 
-files=(
-/lib/systemd/system/slimbookbattery.service
-)
 
-# Checks if files exist and removes them
-for file in ${files[@]}; do
-  if test -f $file; then
-    rm $file
-  fi
-done
+rm -f /lib/systemd/system/slimbookbattery.service
 
-exit 0
+
+echo "Debian postinst completed."
