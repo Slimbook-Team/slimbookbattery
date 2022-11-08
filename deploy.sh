@@ -1,11 +1,16 @@
 #!/bin/bash
-#Prepare terminal output formatting
+
+###############################################################################
+
+# Prepare terminal output formatting.
+
 INFO=""
 WARN=""
 DONE=""
 BOLD=""
 RESET=""
-if $(tput -V &> /dev/null); then
+
+if [[ $(command -v tput) ]]; then
 	INFO=$(tput setaf 3)
 	WARN=$(tput setaf 1)
 	DONE=$(tput setaf 2)
@@ -13,118 +18,183 @@ if $(tput -V &> /dev/null); then
 	RESET=$(tput sgr0)
 fi
 
-echo $INFO$BOLD"This script will deploy SlimbookBattery in your system (replacing previous installation if exists)"
-echo "Press ENTER to proceed"
-echo "CTRL-C to exit"$RESET
+
+print_info()
+{
+	echo -e $INFO"$@"$RESET
+}
+
+
+print_info_bold()
+{
+	echo -e $INFO$BOLD"$@"$RESET
+}
+
+
+print_warn()
+{
+	echo -e $WARN"$@"$RESET
+}
+
+
+print_warn_bold()
+{
+	echo -e $WARN$BOLD"$@"$RESET
+}
+
+
+print_done()
+{
+	echo -e $DONE"$@"$RESET
+}
+
+
+print_done_bold()
+{
+	echo -e $DONE$BOLD"$@"$RESET
+}
+
+
+print_bold()
+{
+	echo -e $BOLD"$@"$RESET
+}
+
+###############################################################################
+
+# Visible execution starts here.
+
+print_info_bold "
+This script will install SlimbookBattery in your system (replacing previous
+installation if exists).
+Press ENTER to proceed, or CTRL-C to exit.
+"
+
 read
 
-echo 
-echo $INFO$BOLD"Checkng dependencies..."
-echo -n $RESET
-#Used python binary
-python="python3"
-python_pck_installer="pip3"
-#Parse entire repository looking for python import string
-python_packages=$(grep -Re "^import" * | awk '{print $2}' | sort -u)
-echo $INFO"Checking Python dependencies..."
-echo -n $RESET"Dependencies are: $python $python_pck_installer"
-echo $python_packages
-if [ ! $python ] && [ ! $python_pck_installer ];
-then
-	echo $WARN$BOLD"Please install $python and $python_pck_installer"
-	echo -n $RESET
+###############################################################################
+
+# Install dependencies - both system and Python.
+
+# Check for Python (pip is generally installed automatically).
+if [[ ! $(command -v python3) ]]; then
+	print_warn_bold "Please install Python 3."
 	exit 1
-else 
-	for package in $python_packages; do
-		if ! $($python -c "import $package" &> /dev/null);
-		then
-			echo $INFO"Installing \"$python_pck_installer $package\"..."
-			echo -n $RESET
-			if $python_pck_installer install $package; 
-			then
-				echo $DONE"... done"
-				echo -n $RESET
+elif [[ ! $(command -v pip3) ]]; then
+	print_warn_bold "Please install pip3."
+	exit 1
+fi
+
+
+# This will be extended later depending on distro. Hence the trailing space.
+system_dependencies="tlp tlp-rdw libnotify-bin cron gobject-introspection "
+pkg_mgr_found="true"
+
+if [[ $(command -v apt) ]]; then
+	# Debian based distro.
+	system_dependencies+="libayatana-appindicator3-1"
+	pkg_install_cmd="sudo apt install"
+	pkg_search_cmd="dpkg-query -l"
+
+elif [[ $(command -v pacman) ]]; then
+	# Arch based distro.
+	system_dependencies+="libindicator-gtk3 libappindicator-gtk3"
+	pkg_install_cmd="sudo pacman -S"
+	pkg_search_cmd="sudo pacman -Qs"
+
+elif [[ $(command -v yum) ]]; then
+	# RPM based distro.
+	system_dependencies+="libindicator-gtk3 libappindicator-gtk3"
+	pkg_install_cmd="sudo yum install"
+	pkg_search_cmd="sudo yum list installed | grep"
+
+else
+	pkg_mgr_found="false"
+	print_info_bold "Cannot find a supported package manager." \
+			"\nAssuming the required dependencies are installed." \
+			"\nPress ENTER to proceed, or CTRL-C to exit."
+	read
+
+fi
+
+
+if [[ $pkg_mgr_found == "true" ]]; then
+	print_info_bold "Checking and installing the following system" \
+			"dependencies (if needed)..."
+	print_info "$system_dependencies\n"
+
+	for pkg in $system_dependencies; do
+		if [[ ! $(eval "$pkg_search_cmd $pkg") ]]; then
+			print_info "Trying to install $pkg..."
+			if [[ ! $(eval "$pkg_install_cmd $pkg") ]]; then
+				print_done "...Done installing $pkg!"
 			else
-				echo $WARN"... ERROR: could not install $package. Try to install manually and run this script again"
-				echo -n $RESET
+				print_warn_bold "ERROR: Could not install" \
+						"$pkg. Please install it" \
+						"manually."
 				exit 1
 			fi
 		fi
-	done  
-fi
-echo $INFO"Check system dependencies..."
-echo -n $RESET
-system_dependencies="libindicator-gtk3 libappindicator-gtk3 libgirepository tlp tlp-rdw libnotify-bin cron"
-echo $INFO"Detecting your distro package manager..."
-echo $RESET"Dependencies are: $system_dependencies"
-#Detect distro package manager
-packageinstall=""
-packagecheck=""
-if which pamac; then 		#Arch based distros
-	packageinstall="sudo pamac install"
-	packagecheck="sudo pamac search -i"
-elif which apt-get; then 	#Debian based distros
-	packageinstall="sudo apt-get install"
-	packagecheck="sudo apt-get list --installed | grep"
-elif which yum; then 		#CentOS based distros
-	packageinstall="sudo yum install"
-	packagecheck="sudo yum list installed | grep"
-fi
-echo $INFO"Looking for dependencie installed in your system..."
-echo -n $RESET
-for lib in $system_dependencies; do
-	if ! $packagecheck $lib;
-	then
-		echo $INFO"Trying to install $lib"
-		echo -n $RESET
-		if $packageinstall $lib*; then
-			echo $DONE"... done"
-			echo -n $RESET
-		else
-			echo $WARN$BOLD"Could not install package automatically: $lib. Try to install using your distro package manager"
-			echo -n $RESET
-			exit 1
-		fi
-	fi
-done
-echo $DONE$BOLD"... done"
-echo -n $RESET
+	done
 
-echo
-echo $INFO$BOLD"Deploying..."
-echo -n $RESET
-echo $INFO"Removing previously installed resources..."
-echo -n $RESET
+	print_info_bold "...Done installing system dependencies!\n"
+fi
+
+
+print_info_bold "Installing Python dependencies..."
+
+if [[ ! $(pip3 install -r requirements.txt) ]]; then
+	print_warn_bold "ERROR: Could not install Python dependencies."
+	exit 1
+fi
+
+print_info_bold "...Done installing Python dependencies!\n"
+
+###############################################################################
+
+# The main installation starts here.
+
+print_info_bold "Installing SlimbookBattery...\n"
+
+
+print_info "Removing previously installed resources..."
 sudo rm -rf /usr/share/slimbookbattery/
-echo $INFO"Creating folder structure..."
-echo -n $RESET
-#TODO remove needed to create folder structure manually
+print_info "...Done removing previously installed resources!\n"
+
+
+# TODO: Remove the need to create folder structure manually.
+print_info "Creating folder structure..."
 sudo mkdir /usr/share/slimbookbattery
 sudo mkdir /usr/share/slimbookbattery/images
 sudo mkdir /usr/share/slimbookbattery/changelog
 sudo mkdir /usr/share/slimbookbattery/src
 sudo mkdir /usr/share/slimbookbattery/bin
+print_info "...Done creating folder structure!\n"
+
+
+print_info "Copying contents..."
 while read line; do
 	sudo cp -vrf $line
 done < debian/install
-echo $INFO"Creating binary simlinks..."
-echo -n $RESET
+print_info "...Done copying contents!\n"
+
+
+print_info "Creating binary symlinks..."
 sudo rm /usr/bin/slimbookbattery /usr/bin/slimbookbattery-pkexec
 sudo cp -sv /usr/share/slimbookbattery/bin/* /usr/bin/
 sudo chmod +x /usr/share/slimbookbattery/bin/*
-echo $DONE$BOLD"... done"
-echo -n $RESET
+print_info "...Done creating binary symlinks!\n"
 
-echo
-echo $INFO$BOLD"Checking installation (post installation script and applying translations)"
-echo -n $RESET
+
+print_info_bold "Running post installation script and applying translations..."
 chmod +x debian/postinst
-if ./src/check_config.py && ./debian/postinst && ./replace.sh ; then
-	echo $DONE$BOLD"Done! SlimbookBattery properly deployed!"
-	echo -n $RESET
-	exit 0
+
+if [[ $(./src/check_config.py && ./debian/postinst) ]]; then
+	print_done_bold "...Done installing SlimbookBattery!"
 else
-	echo $WARN$BOLD"ERROR: See below otput, could not check your installation porperly"
-	echo -n $RESET
+	print_warn_bold "ERROR: See the output, could not check your" \
+			"installation porperly"
 	exit 1
 fi
+
+###############################################################################
