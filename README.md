@@ -55,7 +55,11 @@ Run command:
 
 		./deploy.sh
 
-	It will deploy SlimbookBattery in your system, check and install Python dependencies prepare all.
+	It will deploy SlimbookBattery in your system, check and install Python dependencies, and prepare everything.
+
+  To uninstall it, just run instead:
+
+    ./deploy.sh uninstall
 <br />
 
 
