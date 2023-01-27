@@ -63,7 +63,10 @@ def set_ownership(folder):
 
         for dir_path, dir_name, filenames in os.walk(folder):
             logger.debug(dir_path)
-            os.chown(dir_path, uid, gid)
+            try:
+                os.chown(dir_path, uid, gid)
+            except:
+                logger.warning(f"Failed to change owner of file {dir_path}")
             for filename in filenames:
                 file_path = os.path.join(dir_path, filename)
                 logger.debug(file_path)
@@ -111,9 +114,7 @@ def check_config_file():
 # Checks if the user's default config files exist an if they are like the app version's default files.
 # If files or directories don't exist they are created.
 def check_tlp_files():
-    
-    
-    
+
     logger.info("Checking Slimbook Battery's TLP Configuration")
 
     incidences = False
