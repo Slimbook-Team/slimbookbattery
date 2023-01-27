@@ -65,12 +65,25 @@ print_bold()
 # Visible execution starts here.
 
 print_info_bold "
-This script will install SlimbookBattery in your system (replacing previous
-installation if exists).
+This script will install or uninstall SlimbookBattery in your system
+(replacing previous installation if exists).
 Press ENTER to proceed, or CTRL-C to exit.
 "
 
 read
+
+## Remove old versions
+
+print_info "Removing previously installed resources..."
+sudo rm -rf /usr/share/slimbookbattery/
+sudo rm -f /usr/bin/slimbookbattery /usr/bin/slimbookbattery-pkexec
+print_info "...Done removing previously installed resources!\n"
+
+if [ "$#" -eq 1 ] ; then
+	if [ "$1" == "uninstall" ] ; then
+		exit
+	fi
+fi
 
 ###############################################################################
 
@@ -156,12 +169,6 @@ print_info_bold "...Done installing Python dependencies!\n"
 
 print_info_bold "Installing SlimbookBattery...\n"
 
-
-print_info "Removing previously installed resources..."
-sudo rm -rf /usr/share/slimbookbattery/
-print_info "...Done removing previously installed resources!\n"
-
-
 # TODO: Remove the need to create folder structure manually.
 print_info "Creating folder structure..."
 sudo mkdir /usr/share/slimbookbattery
@@ -180,8 +187,6 @@ print_info "...Done copying contents!\n"
 
 
 print_info "Creating binary symlinks..."
-sudo rm /usr/bin/slimbookbattery /usr/bin/slimbookbattery-pkexec
-sudo cp -sv /usr/share/slimbookbattery/bin/* /usr/bin/
 sudo chmod +x /usr/share/slimbookbattery/bin/*
 print_info "...Done creating binary symlinks!\n"
 
