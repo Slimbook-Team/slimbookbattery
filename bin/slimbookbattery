@@ -39,7 +39,7 @@ def main():
         sys.stderr.write("Slimbook Battery requires TLP\n")
         exit(1)
 
-    pgrep = subprocess.getoutput(f"pgrep -f slimbookbatterypreferences")
+    pgrep = subprocess.getoutput("pgrep -f slimbookbatterypreferences")
     num_proc_running = pgrep.split('\n')
     if len(num_proc_running) > 1:
         sys.stdout.write("Slimbook Battery is in execution\n")
