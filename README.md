@@ -51,11 +51,11 @@ Run command:
 
 
 * ## From this repository-source   
-	Donwload entire repo. Navigate to it in a terminal. And run deploy.sh script:
+	Donwload entire repo. Navigate to it in a terminal. And run deploy.sh script as root:
 
-		./deploy.sh
+		sudo ./deploy.sh
 
-	It will deploy SlimbookBattery in your system, check and install Python dependencies prepare all.
+	It will check and install all system and Python dependencies, and deploy SlimbookBattery in your system.
 <br />
 
 
