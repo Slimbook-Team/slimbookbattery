@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import argparse
@@ -39,17 +39,14 @@ def main():
         sys.stderr.write("Slimbook Battery requires TLP\n")
         exit(1)
 
-    pgrep = subprocess.getoutput("pgrep slimbookbatterypreferences")
+    pgrep = subprocess.getoutput("pgrep -f slimbookbatterypreferences")
     num_proc_running = pgrep.split('\n')
     if len(num_proc_running) > 1:
         sys.stdout.write("Slimbook Battery is in execution\n")
     elif args.minimize:
-        indicator_py = os.path.join('/usr/share/slimbookbattery/src/slimbookbatteryindicator.py')
-        os.system('python3 {}'.format(indicator_py))
+        subprocess.run(['/usr/bin/env', 'python3', '/usr/share/slimbookbattery/src/slimbookbatteryindicator.py'])
     else:
-        preference_py = os.path.join('/usr/share/slimbookbattery/src/slimbookbatterypreferences.py')
-        os.system('python3 {}'.format(preference_py))
-
+        subprocess.run(['/usr/bin/env', 'python3', '/usr/share/slimbookbattery/src/slimbookbatterypreferences.py'])
 
 if __name__ == "__main__":
     main()
