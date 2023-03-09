@@ -42,7 +42,7 @@ from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 logger = logging.getLogger()
 
 USER_NAME = utils.get_user()
-HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
+HOMEDIR = os.path.expanduser(f'~{USER_NAME}')
 SESSION_TYPE = os.environ.get('XDG_SESSION_TYPE')
 
 VTE_VERSION = subprocess.getstatusoutput('apt show gir1.2-vte-2.91 | grep Version')
@@ -366,10 +366,7 @@ class InfoPageGrid(BasePageGrid):
 
         response = save_dialog.run()
         if response == 1:
-            path = os.path.join(
-                save_dialog.get_filename(),
-                'report_{}.txt'.format(time.strftime("%d-%m-%y_%H:%M"))
-            )
+            path = os.path.join(save_dialog.get_filename(), f'report_{time.strftime("%d-%m-%y_%H:%M")}.txt')
             desktop = os.environ.get("XDG_CURRENT_DESKTOP")
 
             cmd = "pkexec slimbookbattery-pkexec report {path} {desktop} {user_home}".format(
@@ -513,10 +510,10 @@ class BatteryGrid(BasePageGrid):
                 set_time_to_header = True
 
             if 'header' not in data and not set_time_to_header:
-                logger.error('Mapping not found for {}: {}'.format(content, data))
+                logger.error(f'Mapping not found for {content}: {data}')
                 continue
 
-            header.set_markup('<b>{}</b>'.format(data.get('header', '')))
+            header.set_markup(f"<b>{data.get('header', '')}</b>")
             header.set_halign(Gtk.Align.START)
 
             if set_time_to_header:
@@ -550,15 +547,15 @@ class BatteryGrid(BasePageGrid):
 
         data = self.TIME_TO_MAPPING.get(battery_data.get('state'), {})
         if self.time_to_header and data.get('header'):
-            self.time_to_header.set_markup('<b>{}</b>'.format(data.get('header', '')))
+            self.time_to_header.set_markup(f"<b>{data.get('header', '')}</b>")
         if data.get('filter') in ['time to empty', 'time to full']:
             content = battery_data.get(data.get('filter'))
             if content:
                 time_to = content.split()
                 if time_to[1] == 'hours':
-                    content = '{}{}'.format(time_to[0], _(' hours'))
+                    content = f"{time_to[0]}{_(' hours')}"
                 else:
-                    content = '{}{}'.format(time_to[0], _(' min'))
+                    content = f"{time_to[0]}{_(' min')}"
                 self.content['time_to'].set_label(content)
         return True
 
@@ -573,7 +570,7 @@ class BatteryGrid(BasePageGrid):
             if 'mapping' in data:
                 data = data.get('mapping', {}).get(content, {})
                 if self.time_to_header:
-                    self.time_to_header.set_markup('<b>{}</b>'.format(data.get('header', '')))
+                    self.time_to_header.set_markup(f"<b>{data.get('header', '')}</b>")
 
             content = _('Unknown')
             if 'filter' in data:
@@ -582,9 +579,9 @@ class BatteryGrid(BasePageGrid):
                     if data.get('filter') in ['time to empty', 'time to full']:
                         time_to = content.split()
                         if time_to[1] == 'hours':
-                            content = '{}{}'.format(time_to[0], _(' hours'))
+                            content = f"{time_to[0]}{_(' hours')}"
                         else:
-                            content = '{}{}'.format(time_to[0], _(' min'))
+                            content = f"{time_to[0]}{_(' min')}"
             elif 'text' in data:
                 content = data.get('text')
 
@@ -722,7 +719,7 @@ class GeneralGrid(BasePageGrid):
             self.content['saving_tdpsync'] = button
             self.grid.attach(button, self.CONTENT, row, 1, 1)
 
-            code, msg = subprocess.getstatusoutput('which ' + tdp_controller)
+            code, msg = subprocess.getstatusoutput(f'which {tdp_controller}')
             if code != 0:
                 logger.error('TDP Controller not installed')
                 button.set_sensitive(False)
@@ -787,7 +784,7 @@ class GeneralGrid(BasePageGrid):
             buttons_grid.attach(toggle, column, 2, 1, 1)
             if not base_toggle:
                 base_toggle = toggle
-            self.content['modo_actual_{}'.format(data.get('value'))] = toggle
+            self.content[f"modo_actual_{data.get('value')}"] = toggle
 
     def complete_values(self):
         for field in ['saving_tdpsync']:
@@ -816,7 +813,7 @@ class GeneralGrid(BasePageGrid):
             logger.error('WorkMode: Not found')
 
         current_mode = config.get('CONFIGURATION', 'modo_actual')
-        button = self.content['modo_actual_{}'.format(current_mode)]
+        button = self.content[f'modo_actual_{current_mode}']
         button.set_active(True)
 
     def manage_events(self, button, *args):
@@ -846,12 +843,11 @@ class GeneralGrid(BasePageGrid):
             work_mode = model[active][1]
 
             if work_mode and work_mode != self.work_mode:
-                logger.info('Setting workmode {} ...'.format(work_mode))
+                logger.info(f'Setting workmode {work_mode} ...')
                 self.work_mode = work_mode
 
-                code, msg = subprocess.getstatusoutput(
-                    'pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE {}'.format(work_mode)
-                )
+                code, msg = subprocess.getstatusoutput(f'pkexec slimbookbattery-pkexec change_config TLP_DEFAULT_MODE {work_mode}')
+
                 if code != 0:
                     logger.error(msg)
 
@@ -1243,7 +1239,7 @@ class SettingsGrid(BasePageGrid):
                 button.connect('button-release-event', self.manage_events)
 
                 button_on_off = Gtk.Switch(halign=Gtk.Align.END, valign=Gtk.Align.END)
-                name = '{}_switch'.format(data.get('name'))
+                name = f"{data.get('name')}_switch"
                 button_on_off.set_name(name)
                 button_on_off.connect('notify::active', self.manage_events)
                 self.content[name] = button_on_off
@@ -1342,9 +1338,9 @@ class SettingsGrid(BasePageGrid):
         }.items():
             line = content[content.find(search):]
             line = line[:line.find('\n')]
-            button_bluetooth = self.content['bluetooth_{}'.format(key)]
+            button_bluetooth = self.content[f'bluetooth_{key}']
             button_bluetooth.set_active('bluetooth' in line)
-            button_wifi = self.content['wifi_{}'.format(key)]
+            button_wifi = self.content[f'wifi_{key}']
             button_wifi.set_active('wifi' in line)
 
         button = self.content['governor']
@@ -1447,18 +1443,14 @@ class SettingsGrid(BasePageGrid):
             if '{search}={value}'.format(search=search, value=value) not in content:
                 cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
                 code, msg = subprocess.getstatusoutput(cmd)
-                logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                    self.custom_file, search, value, code, msg
-                ))
+                logger.info(f'[{self.custom_file}] Setting {search} saving to "{value}" --> Exit({code}): {msg}')
 
         value = config.getint('SETTINGS', self.SECTION_MAPPING[self.custom_file]['limit_cpu'])
         for search, value in self.CPU_LIMIT[value].items():
             if '{search}={value}'.format(search=search, value=value) not in content:
                 cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
                 code, msg = subprocess.getstatusoutput(cmd)
-                logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                    self.custom_file, search, value, code, msg
-                ))
+                logger.info(f'[{self.custom_file}] Setting {search} saving to "{value}" --> Exit({code}): {msg}')
 
         for key, search_items in {
             'sound': 'SOUND_POWER_SAVE_ON_BAT',
@@ -1483,36 +1475,30 @@ class SettingsGrid(BasePageGrid):
                     if search in content:
                         cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
                         code, msg = subprocess.getstatusoutput(cmd)
-                        logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                            self.custom_file, search, value, code, msg
-                        ))
+                        logger.info(f'[{self.custom_file}] Setting {search} saving to "{value}" --> Exit({code}): {msg}')
 
         for key, search in {
             'disabled': 'DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE',
             'os': 'DEVICES_TO_DISABLE_ON_STARTUP',
         }.items():
             value = []
-            button_bluetooth = self.content['bluetooth_{}'.format(key)]
+            button_bluetooth = self.content[f'bluetooth_{key}']
             if button_bluetooth.get_active():
                 value.append('bluetooth')
-            button_wifi = self.content['wifi_{}'.format(key)]
+            button_wifi = self.content[f'wifi_{key}']
             if button_wifi.get_active():
                 value.append('wifi')
             value = ' '.join(value)
             cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
             code, msg = subprocess.getstatusoutput(cmd)
-            logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                self.custom_file, search, value, code, msg
-            ))
+            logger.info(f'[{self.custom_file}] Setting {search} saving to "{value}" --> Exit({code}): {msg}')
 
         button = self.content['wifi_lan']
         value = 'wifi' if button.get_active() else ''
         for search in ['DEVICES_TO_DISABLE_ON_LAN_CONNECT', 'DEVICES_TO_ENABLE_ON_LAN_DISCONNECT']:
             cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
             code, msg = subprocess.getstatusoutput(cmd)
-            logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                self.custom_file, search, value, code, msg
-            ))
+            logger.info(f'[{self.custom_file}] Setting {search} saving to "{value}" --> Exit({code}): {msg}')
 
         button = self.content['usb_list']
         for key, search in {
@@ -1524,9 +1510,7 @@ class SettingsGrid(BasePageGrid):
                 if search in content:
                     cmd = base_cmd.format(search=search, value=value, file=self.custom_file_path)
                     code, msg = subprocess.getstatusoutput(cmd)
-                    logger.info('[{}] Setting {} saving to "{}" --> Exit({}): {}'.format(
-                        self.custom_file, search, value, code, msg
-                    ))
+                    logger.info(f'[{self.custom_file}] Setting {search} saving to "{value}" --> Exit({code}): {msg}')
 
 
 class CyclesGrid(BasePageGrid):
@@ -1649,11 +1633,11 @@ class Preferences(Gtk.ApplicationWindow):
             for file in os.listdir(UPDATES_DIR):
 
                 process = os.path.join(UPDATES_DIR, file)
-                proc = subprocess.Popen('bash {}'.format(process), shell=True)
+                proc = subprocess.Popen(f'bash {process}', shell=True)
 
                 # Wait for child process to terminate. Returns returncode attribute.
                 proc.wait()
-                logger.info('\n{} returned exit code {}.'.format(process, proc.returncode))
+                logger.info(f'\n{process} returned exit code {proc.returncode}.')
 
                 if proc.returncode == 0:
                     try:
@@ -1686,13 +1670,13 @@ class Preferences(Gtk.ApplicationWindow):
         self.mid_page_grid = None
         self.high_page_grid = None
         try:
-            
+
             self.set_ui()
         except Exception:
             logger.exception('Unexpected error')
             os.system('pkexec slimbookbattery-pkexec restore')
             config.read(CONFIG_FILE)
-     
+
             try:
                 for children in self.get_children():
                     print(children)
@@ -1793,7 +1777,7 @@ class Preferences(Gtk.ApplicationWindow):
             version = desk_config.get('Desktop Entry', 'Version')
         else:
             version = 'Unknown'
-        label_version.set_markup('<span font="10">Version: {}</span>'.format(version))
+        label_version.set_markup(f'<span font="10">Version: {version}</span>')
 
         win_grid.attach(label_version, 0, 5, 1, 1)
 
@@ -1878,10 +1862,7 @@ class Preferences(Gtk.ApplicationWindow):
         notebook.set_tab_pos(Gtk.PositionType.TOP)
         win_grid.attach(notebook, 0, 1, 5, 4)
 
-        logger.debug("{}{} {}{}".format(
-            _('Width: '), display_width,
-            _(' Height: '), display_height
-        ))
+        logger.debug(f"{_('Width: ')}{display_width} {_(' Height: ')}{display_height}")
 
         # CREATE TABS
         self.general_page_grid = GeneralGrid(self)
@@ -1969,20 +1950,20 @@ class Preferences(Gtk.ApplicationWindow):
         if config.has_option('CONFIGURATION', 'style'):
             style = config.get('CONFIGURATION', 'style')
 
-        provider_file = '{}/css/{}-style.css'.format(CURRENT_PATH, style)
+        provider_file = f'{CURRENT_PATH}/css/{style}-style.css'
         provider = Gtk.CssProvider()
         screen = Gdk.Screen.get_default()
         context = Gtk.StyleContext()
         provider.load_from_path(provider_file)
         context.add_provider_for_screen(screen, provider,
                                         Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        logger.debug("Loading CSS - {}".format(style))
+        logger.debug(f"Loading CSS - {style}")
 
     def animations(self, mode):
         check_desktop = 'gnome' in os.environ.get("XDG_CURRENT_DESKTOP", '').lower()
 
         if check_desktop:
-            logger.info('Setting mode ' + mode + ' animations')
+            logger.info(f'Setting mode {mode} animations')
             if mode == '0':  # Application off
                 logger.info('Animations Active')
                 os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
@@ -2229,8 +2210,8 @@ def reboot_indicators(mode=None):
 
     # If sync active, reboot tdp indicator
     if config.getboolean('TDP', 'saving_tdpsync'):
-        logger.info('\n{}[TDP SETTINGS]{}'.format(Colors.GREEN, Colors.ENDC))
-        logger.info('Battery Mode: {}'.format(mode))
+        logger.info(f'\n{Colors.GREEN}[TDP SETTINGS]{Colors.ENDC}')
+        logger.info(f'Battery Mode: {mode}')
 
         # Mode settings & reboot
         if config.getboolean('CONFIGURATION', 'application_on'):
@@ -2239,7 +2220,7 @@ def reboot_indicators(mode=None):
             if exit != 0:
                 logger.error(msg)
         else:
-            logger.info('App off, not changing {} mode configuration.'.format(tdp_controller))
+            logger.info(f'App off, not changing {tdp_controller} mode configuration.')
 
     else:
         logger.info('TDP Sync not active')

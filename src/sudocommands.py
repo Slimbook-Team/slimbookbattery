@@ -35,7 +35,7 @@ if CURRENT_PATH not in sys.path:
     sys.path = [CURRENT_PATH] + sys.path
 import utils
 USER_NAME = utils.get_user()
-HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
+HOMEDIR = os.path.expanduser(f'~{USER_NAME}')
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -72,9 +72,9 @@ logger = get_logger(USER_NAME, True)
 
 logger.debug('******************************************************************************')
 
-logger.info('\x1b[6;30;42mSlimbookBattery-Commandline, executed as: {}\x1b[0m'.format(USER_NAME))
+logger.info(f'\x1b[6;30;42mSlimbookBattery-Commandline, executed as: {USER_NAME}\x1b[0m')
 
-logger.debug("Username: {} - Homedir: {}".format(USER_NAME, HOMEDIR))
+logger.debug(f"Username: {USER_NAME} - Homedir: {HOMEDIR}")
 
 config_file = os.path.join(HOMEDIR, '.config/slimbookbattery/slimbookbattery.conf')
 config = ConfigParser()
@@ -132,8 +132,8 @@ def main(args):  # Args will be like --> command_name value
     arguments = ''
     for argument in range(len(args)):
         if argument != 0:
-            arguments = arguments + ' ' + (args[argument])
-    logger.debug("Arguments: {}".format(arguments))
+            arguments = f'{arguments} {args[argument]}'
+    logger.debug(f"Arguments: {arguments}")
 
     if (len(args)) > 1:
 
@@ -159,7 +159,7 @@ def main(args):  # Args will be like --> command_name value
                 pwnam = pwd.getpwnam(USER_NAME)
                 uid, gid = pwnam.pw_uid, pwnam.pw_gid
             except Exception:
-                logger.error('Failed to get user id/gid: {}'.format(USER_NAME))
+                logger.error(f'Failed to get user id/gid: {USER_NAME}')
                 exit(5)
 
             for mode in modes:
@@ -185,9 +185,7 @@ def main(args):  # Args will be like --> command_name value
             brightness_settings(battery_mode)
 
         if args[1] == "report":
-            os.system(
-                "sudo python3 " + CURRENT_PATH + "/slimbookbattery-report.py " + args[2] + ' ' + args[3] + ' ' + args[
-                    4])
+            os.system(f"sudo python3 {CURRENT_PATH}/slimbookbattery-report.py {args[2]} {args[3]} {args[4]}")
 
         if args[1] == "restart_tlp":
             logger.info('Restarting TLP...')
@@ -226,7 +224,7 @@ def notify(msg):
 
 
 def change_config(args):  # For general page options
-    logger.info('\n{}[CHANGE CONFIGURATION]{}'.format(Colors.GREEN, Colors.ENDC))
+    logger.info(f'\n{Colors.GREEN}[CHANGE CONFIGURATION]{Colors.ENDC}')
     files = [TLP_CONF,
              os.path.join(HOMEDIR, '.config/slimbookbattery/custom/ahorrodeenergia'),
              os.path.join(HOMEDIR, '.config/slimbookbattery/custom/equilibrado'),

@@ -51,7 +51,7 @@ def gen_report(filepath, xdg_current_desktop, user_home):
         f.write('#IMPORTANT TLP STADISTICS\n')
         f.write(subprocess.getoutput("tlp-stat -c -s") + '\n\n')
         f.write('#SLIMBOOK BATTERY CONFIGURATION FILE\n')
-        f.write(subprocess.getoutput("cat {}/.config/slimbookbattery/slimbookbattery.conf".format(user_home)) + '\n\n')
+        f.write(subprocess.getoutput(f"cat {user_home}/.config/slimbookbattery/slimbookbattery.conf") + '\n\n')
 
 
 if __name__ == "__main__":
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         user_path = os.path.expanduser("~")
     else:
         if not os.path.isdir(user_path):
-            user_path = os.path.expanduser("~{}".format(user_path))
+            user_path = os.path.expanduser(f"~{user_path}")
         if not os.path.isdir(user_path):
             parser.exit(1, 'Home path not found')
 

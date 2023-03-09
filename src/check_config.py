@@ -17,7 +17,7 @@ import utils
 
 USER_NAME = utils.get_user()
 
-HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
+HOMEDIR = os.path.expanduser(f'~{USER_NAME}')
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_CONF = os.path.join(CURRENT_PATH,'configuration', 'slimbookbattery.conf')
@@ -37,9 +37,9 @@ def main():
         os.umask(0)
         os.makedirs(CONFIG_FOLDER, mode=0o766)  # creates with perms
         os.chown(CONFIG_FOLDER, uid, gid)  # set user:group
-        logger.info(subprocess.getoutput('ls -la ' + CONFIG_FOLDER))
+        logger.info(subprocess.getoutput(f'ls -la {CONFIG_FOLDER}'))
     else:
-        logger.info('Configuration folder ({}) found!'.format(CONFIG_FOLDER))
+        logger.info(f'Configuration folder ({CONFIG_FOLDER}) found!')
 
     tlp_conf = utils.get_tlp_conf_file()[0]
     if not os.path.exists(tlp_conf):
@@ -54,7 +54,7 @@ def main():
 
 def set_ownership(folder):
     folder_stat = os.stat(folder)
-    logger.debug("Folder {}\nUser uid={}\nFolder uid={}".format(folder, uid, folder_stat.st_uid))
+    logger.debug(f"Folder {folder}\nUser uid={uid}\nFolder uid={folder_stat.st_uid}")
     f_uid = folder_stat.st_uid
     f_gid = folder_stat.st_gid
 
@@ -80,7 +80,7 @@ def check_config_file():
         incidences = False
 
         for section in default_config.sections():
-            logger.info('Checking section: {} ...'.format(section))
+            logger.info(f'Checking section: {section} ...')
             if not config.has_section(section):
                 incidences = True
                 config.add_section(section)
@@ -89,7 +89,7 @@ def check_config_file():
             for var in default_config.options(section):
                 if not config.has_option(section, var):
                     incidences = True
-                    logger.info('Not found: {}'.format(var))
+                    logger.info(f'Not found: {var}')
                     config.set(section, var, default_config.get(section, var))
 
         if incidences:
@@ -132,12 +132,12 @@ def check_tlp_files():
 
         # If user default is different from app default -- updates
         if os.path.isfile(usr_default_file) and os.path.isfile(app_default_file):
-            logger.info('Checking {}'.format(file))
-            if subprocess.getstatusoutput('diff {} {}'.format(app_default_dir, usr_default_dir))[0] != 0:
+            logger.info(f'Checking {file}')
+            if subprocess.getstatusoutput(f'diff {app_default_dir} {usr_default_dir}')[0] != 0:
                 logger.info('Default files have changed, updating:')
                 incidences = True
         else:
-            logger.info('{} does not exist.'.format(usr_default_file))
+            logger.info(f'{usr_default_file} does not exist.')
             incidences = True
 
     if incidences:
@@ -171,5 +171,5 @@ if __name__ == '__main__':
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    logger.info('Config check executed as {}'.format(USER_NAME))
+    logger.info(f'Config check executed as {USER_NAME}')
     main()

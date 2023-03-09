@@ -14,11 +14,11 @@ if CURRENT_PATH not in sys.path:
 import utils
 
 USER_NAME = utils.get_user()
-HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
+HOMEDIR = os.path.expanduser(f'~{USER_NAME}')
 
 _ = utils.load_translation('preferences')
 
-config_file = HOMEDIR + '/.config/slimbookbattery/slimbookbattery.conf'
+config_file = f'{HOMEDIR}/.config/slimbookbattery/slimbookbattery.conf'
 
 config = configparser.ConfigParser()
 config.read(config_file)

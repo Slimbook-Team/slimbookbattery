@@ -96,7 +96,7 @@ def get_user(from_file=None):
 
     if from_file and os.path.exists(from_file):
         exit_code, candidate = subprocess.getstatusoutput(
-            'cat {} | tail -n 1 | cut -f 2 -d "@"'.format(from_file))
+            f'cat {from_file} | tail -n 1 | cut -f 2 -d "@"')
         if exit_code != 0:
             user_name = candidate
 
@@ -109,7 +109,7 @@ def get_user(from_file=None):
                 var = var - 1
                 user_name = subprocess.getoutput(
                     'last -wn1 | head -n 1 | cut -f 1 -d " "')
-                logger.debug("Username: {}".format(user_name))
+                logger.debug(f"Username: {user_name}")
                 if user_name != 'reboot':
                     break
     return user_name
@@ -155,8 +155,7 @@ def get_package_name(apt_package_name):
                     logger.info(PACKAGES[pkg_name][pkg_manager])
                     return PACKAGES[pkg_name][pkg_manager]
 
-    logger.error(
-        "No package-name found for {}, in {}".format(apt_package_name, pkg_man))
+    logger.error(f"No package-name found for {apt_package_name}, in {pkg_man}")
     return None
 
 def check_package_installed(package_name):
@@ -166,7 +165,7 @@ def check_package_installed(package_name):
         if pkg_man:
             try:
                 cmd = PKG_MANAGERS[pkg_man]['get_app_list_cmd']
-                if subprocess.getstatusoutput("{} {} | grep {}".format(pkg_man, cmd, pkg_name))[0] == 0:
+                if subprocess.getstatusoutput(f"{pkg_man} {cmd} | grep {pkg_name}")[0] == 0:
                     return True
             except Exception:
                 print(Exception)
@@ -246,18 +245,18 @@ def get_display_resolution():
     return dimensions
 
 def reboot_process(process_name, path):
-    process = subprocess.getoutput('pgrep -f ' + process_name)
+    process = subprocess.getoutput(f"{pkg_man} {cmd} | grep {pkg_name}")
     # If it finds a process, kills it
     if len(process.split('\n')) > 0:
         proc_list = process.split('\n')
         print('Processes: ', proc_list)
         for i in range(len(proc_list)):
             try:
-                subprocess.getstatusoutput('kill -9 ' + proc_list[i])
+                subprocess.getstatusoutput(f'kill -9 {proc_list[i]}')
             except:
                 print('Killing process failed')
     if os.path.isfile(path):
-        if os.system('python3 {} &'.format(path)) == 0:
+        if os.system(f'python3 {path} &') == 0:
             return (0, 'Process killed & launched')
     else:
         return (1, 'Process launch path does not exist')

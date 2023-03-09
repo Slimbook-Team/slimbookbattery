@@ -37,7 +37,7 @@ try:
     from gi.repository import AyatanaAppIndicator3 as AppIndicator3
 except:
     gi.require_version('AppIndicator3', '0.1')
-    from gi.repository import AppIndicator3 as AppIndicator3 
+    from gi.repository import AppIndicator3 as AppIndicator3
 # We want load first current location
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 if CURRENT_PATH not in sys.path:
@@ -50,7 +50,7 @@ sys.path.insert(1, srcpath)
 _ = utils.load_translation('slimbookbattery')
 
 USER_NAME = utils.get_user()
-HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
+HOMEDIR = os.path.expanduser(f'~{USER_NAME}')
 
 CONFIG_FILE = os.path.join(HOMEDIR,'.config','slimbookbattery','slimbookbattery.conf')
 config = configparser.ConfigParser()
@@ -62,11 +62,11 @@ ICONS= {
     "3": "performance_normal",
     "0": "disabled_normal",
 }
-                                                            
+
 APP_INDICATOR_ID = 'Slimbook Battery Indicator'
 
 ICONS_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '..', 'images', 'indicator'))
-                                        
+
 logger = logging.getLogger()   
 
 class Indicator(Gtk.Application):
@@ -77,8 +77,7 @@ class Indicator(Gtk.Application):
         
         self.app = 'show_proc'
 
-        self.indicator = AppIndicator3.Indicator.new('show_proc', ICONS_PATH+"/normal.png", AppIndicator3.IndicatorCategory.OTHER)
-        			                                 
+        self.indicator = AppIndicator3.Indicator.new('show_proc', f"{ICONS_PATH}/normal.png", AppIndicator3.IndicatorCategory.OTHER)
         self.indicator.set_icon_theme_path(os.path.join(CURRENT_PATH, '..', 'images', 'indicator'))
 
         self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
@@ -86,7 +85,7 @@ class Indicator(Gtk.Application):
         self.indicator.set_title('Slimbook Battery')
 
         self.indicator.set_menu(self.get_menu())
-        
+
         if config.getboolean('CONFIGURATION', 'plug_warn'):
             check_plug()
 
@@ -243,7 +242,7 @@ def check_plug():
                 with open(CONFIG_FILE, 'w') as configfile:
                     config.write(configfile)
 
-        logger.info('Time since last time disconnection: {} days'.format(last_plug))
+        logger.info(f'Time since last time disconnection: {last_plug} days')
     else:
         logger.debug('No date saved')
 
@@ -256,8 +255,8 @@ def animations(mode):
     exitcode, stdout = subprocess.getstatusoutput('echo $XDG_CURRENT_DESKTOP | grep -i gnome')
 
     if exitcode == 0:
-        logger.info('Setting mode {} animations'.format(mode))
-        
+        logger.info(f'Setting mode {mode} animations')
+
         MODES = {
             "0": True,
             "1": config.getboolean('SETTINGS', 'ahorro_animations'),
@@ -269,7 +268,7 @@ def animations(mode):
         except:
             logger.error('Mode not found')
             animations = True
-        
+
         if animations:
             logger.debug('Animations Active')
             os.system('dconf write /org/gnome/desktop/interface/enable-animations true')
@@ -280,10 +279,10 @@ def animations(mode):
             os.system('dconf write /org/gnome/desktop/interface/enable-animations false')
             os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-app-switch false')
             os.system('dconf write /org/gnome/shell/extensions/dash-to-panel/animate-window-launch false')
-            
-       
+
+
     else:
-        logger.error('Not Gnome desktop {} {}'.format(exitcode, stdout))
+        logger.error(f'Not Gnome desktop {exitcode} {stdout}')
 
 def update_config(section, variable, value):
     # We change our variable: config.set(section, variable, value)
@@ -293,7 +292,7 @@ def update_config(section, variable, value):
     with open(CONFIG_FILE, 'w') as configfile:
         config.write(configfile)
 
-    logger.info("- Variable |{}| updated in .conf, current value: {}".format(variable, value))
+    logger.info(f"- Variable |{variable}| updated in .conf, current value: {value}")
 
 if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)

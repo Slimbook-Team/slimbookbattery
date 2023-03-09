@@ -2,7 +2,7 @@ import os, subprocess, utils
 from configparser import ConfigParser
 
 USER_NAME = utils.get_user(from_file='/tmp/slimbookbattery.user')
-HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
+HOMEDIR = os.path.expanduser(f'~{USER_NAME}')
 BATT_CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
 BATT_CONFIG_FILE = os.path.join(BATT_CONFIG_FOLDER, 'slimbookbattery.conf')
 battery_conf = ConfigParser()
@@ -28,8 +28,8 @@ def get_tdp_controller():
 
 tdp_controller = get_tdp_controller()
 
-TDP_CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/{}'.format(tdp_controller))
-TDP_CONFIG_FILE = os.path.join(TDP_CONFIG_FOLDER, '{}.conf'.format(tdp_controller))
+TDP_CONFIG_FOLDER = os.path.join(HOMEDIR, f'.config/{tdp_controller}')
+TDP_CONFIG_FILE = os.path.join(TDP_CONFIG_FOLDER, f'{tdp_controller}.conf')
 tdp_conf = ConfigParser()
 tdp_conf.read(TDP_CONFIG_FILE)
 
@@ -46,7 +46,7 @@ def set_mode(mode):
     try:
         print('Updating TDP mode ...')
         tdp_conf.set('CONFIGURATION', 'mode', tdp_mode)
-        print('  TDP changed to {}'.format(tdp_conf.get('CONFIGURATION', 'mode')))
+        print(f"  TDP changed to {tdp_conf.get('CONFIGURATION', 'mode')}")
 
         # Autostart settings
         print('\nUpdating TDP autostart ...')
@@ -58,12 +58,12 @@ def set_mode(mode):
         tdp_conf.write(configfile)
         configfile.close()
 
-        print('Actual TDP Mode: {}'.format(tdp_conf.get('CONFIGURATION', 'mode')))
+        print(f"Actual TDP Mode: {tdp_conf.get('CONFIGURATION', 'mode')}")
     except Exception as e:
         print('Could not sync TDP', e)
 
 def reboot_indicator():
-    indicator = '{}indicator.py'.format(tdp_controller)
+    indicator = f'{tdp_controller}indicator.py'
     indicator_full_path = os.path.join('/usr/share/', tdp_controller, 'src', indicator)
     exit, msg = utils.reboot_process(
                 indicator, 
