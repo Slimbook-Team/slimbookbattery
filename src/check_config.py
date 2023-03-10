@@ -58,7 +58,7 @@ def set_ownership(folder):
     f_uid = folder_stat.st_uid
     f_gid = folder_stat.st_gid
 
-    if not uid == f_uid or not gid == f_gid:
+    if uid != f_uid or gid != f_gid:
         #logger.info('Setting {} ownership').format(folder)
 
         for dir_path, dir_name, filenames in os.walk(folder):

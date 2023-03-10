@@ -726,16 +726,9 @@ class GeneralGrid(BasePageGrid):
                 button.set_state(False)
 
                 if tdp_controller == 'slimbookintelcontroller':
-                    if lang == 'es':
-                        link = INTEL_ES
-                    else:
-                        link = INTEL_EN
+                    link = INTEL_ES if lang == 'es' else INTEL_EN
                 else:
-                    if lang == 'es':
-                        link = AMD_ES
-                    else:
-                        link = AMD_EN
-
+                    link = AMD_ES if lang == 'es' else AMD_EN
                 if link:
                     row += 1
                     label = Gtk.Label()
@@ -828,9 +821,8 @@ class GeneralGrid(BasePageGrid):
         elif name == 'autostart':
             self.autostart_initial = button.get_active()
 
-        else:
-            if args:
-                config.set('CONFIGURATION', 'modo_actual', args[0])
+        elif args:
+            config.set('CONFIGURATION', 'modo_actual', args[0])
 
     def save_selection(self):
 
@@ -1166,10 +1158,7 @@ class SettingsGrid(BasePageGrid):
 
     def setup(self):
         row = self.setup_battery_column()
-        if self.parent.min_resolution:
-            row = row + 1
-        else:
-            row = 1
+        row = row + 1 if self.parent.min_resolution else 1
         self.setup_persist_column(row)
 
     def setup_fields(self, start, fields, label_col, button_col):
@@ -1353,22 +1342,20 @@ class SettingsGrid(BasePageGrid):
             values = list(dict(self.INTEL_GOV).values())
             if gov_mode in values:
                 active_mode = values.index(gov_mode)
+            # Setting default mode to save energy
+            elif self.custom_file == 'ahorrodeenergia':
+                active_mode = values.index('powersave')
             else:
-                # Setting default mode to save energy
-                if self.custom_file == 'ahorrodeenergia':
-                    active_mode = values.index('powersave')
-                else:
-                    active_mode = values.index('performance')
+                active_mode = values.index('performance')
         elif governor in ['acpi-cpufreq', 'intel_cpufreq', 'amd-pstate']:
             values = list(dict(self.CPUFREQ_GOV).values())
             if gov_mode in values:
                 active_mode = values.index(gov_mode)
+            # Setting default mode
+            elif self.custom_file == 'ahorrodeenergia':
+                active_mode = values.index('powersave')
             else:
-                # Setting default mode
-                if self.custom_file == 'ahorrodeenergia':
-                    active_mode = values.index('powersave')
-                else:
-                    active_mode = values.index('ondemand')
+                active_mode = values.index('ondemand')
 
         if active_mode is not None:
             button.set_active(active_mode)
@@ -1386,7 +1373,7 @@ class SettingsGrid(BasePageGrid):
         )
 
         button = self.content['usb']
-        usb_autosuspend = bool('USB_AUTOSUSPEND=1' in content)
+        usb_autosuspend = 'USB_AUTOSUSPEND=1' in content
         button.set_active(usb_autosuspend)
 
         button = self.content['usb_list']
@@ -2025,7 +2012,7 @@ class Preferences(Gtk.ApplicationWindow):
 
             cmd = 'cat /etc/apt/sources.list.d/* | grep "tlp"'
             code, str = subprocess.getstatusoutput(cmd)
-            if not utils.get_version(TLP_VERSION) >= utils.get_version('1.5') and config.getboolean('CONFIGURATION', 'add-tlp-repository-alert') and not code == 0 and VTE_VERSION[0] == 0:
+            if not utils.get_version(TLP_VERSION) >= utils.get_version('1.5') and config.getboolean('CONFIGURATION', 'add-tlp-repository-alert') and code != 0 and VTE_VERSION[0] == 0:
                 show_alert(data) 
 
         if check_tlp_version():
@@ -2094,15 +2081,13 @@ class TerminalWin(Gtk.Window):
     def InputToTerm(self, command):
         def first_letter(s):
             m = re.search(r'[a-z]', s, re.I)
-            if m is not None:
-                return m.start()
-            return -1
+            return m.start() if m is not None else -1
 
         # Check vte version
         if VTE_VERSION[0] == 0:
             try:
                 version = VTE_VERSION[1][VTE_VERSION[1].find('Version:')+8:]
-                version = version[0:first_letter(version)]
+                version = version[:first_letter(version)]
                 self.feed(command, version)
             except Exception:
                 print('Failed to get current Vte version (except):', VTE_VERSION[0], VTE_VERSION[1])
@@ -2183,10 +2168,7 @@ class PreferencesDialog(Gtk.Dialog):
         show_terminal(data)
 
     def not_show(self, button):
-        if button.get_active():
-            self.show_bool = False
-        else:
-            self.show_bool = True
+        self.show_bool = not button.get_active()
 
     def on_button_close(self, button, event=None):
         print('Setting', self.show_var, 'to', self.show_bool)

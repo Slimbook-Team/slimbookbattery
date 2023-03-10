@@ -13,19 +13,18 @@ files = {
 
 def create_dict(file):
     # Diccionario con los valores del archovo nuevo
-    d = dict()
+    d = {}
     with open(os.path.join(CURRENT_PATH, file), "r") as f:
         res = ''
-        for line in f.readlines():
-            
+        for line in f:
+
             if line.startswith('msgid'):
                 res = res + line.strip()[line.find('"')+1: -1]
-                
+
             elif line.startswith('msgstr') or line.startswith('#'):        
                 if not res.startswith('Project') and len(res)>0:   
                     d[res] = ''
                 res = ''
-                pass
             else:
                 res = res + line.strip()[line.find('"')+1: -1]
 

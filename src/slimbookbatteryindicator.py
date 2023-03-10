@@ -214,7 +214,7 @@ class Indicator(Gtk.Application):
 
 def check_plug():
     last = config.get('CONFIGURATION', 'plugged')
-    if not last == '':
+    if last != '':
         last = last.split('-')
         last_date = []
         for value in last:

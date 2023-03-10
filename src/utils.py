@@ -106,7 +106,7 @@ def get_user(from_file=None):
         else:
             var = 10
             while var > 0:
-                var = var - 1
+                var -= 1
                 user_name = subprocess.getoutput(
                     'last -wn1 | head -n 1 | cut -f 1 -d " "')
                 logger.debug(f"Username: {user_name}")
@@ -117,7 +117,7 @@ def get_user(from_file=None):
 # Returns pkg_man, install_cmd, and package name if it is provided as an argument
 
 def get_install_command(package_manager=None):
-    pkg_man = package_manager if package_manager else get_package_manager()
+    pkg_man = package_manager or get_package_manager()
     if pkg_man:
         try:
             command = PKG_MANAGERS[pkg_man]['install_command']
@@ -183,10 +183,7 @@ def get_os_info():
 
     if OS_INFO['ID']:
         id = OS_INFO['ID']
-        if OS_INFO['ID_LIKE']:
-            id_like = OS_INFO['ID_LIKE']
-        else:
-            id_like = None
+        id_like = OS_INFO['ID_LIKE'] or None
     else:
         id = None
     return id, id_like
@@ -255,8 +252,7 @@ def reboot_process(process_name, path):
                 subprocess.getstatusoutput(f'kill -9 {proc_list[i]}')
             except:
                 print('Killing process failed')
-    if os.path.isfile(path):
-        if os.system(f'python3 {path} &') == 0:
-            return (0, 'Process killed & launched')
-    else:
-        return (1, 'Process launch path does not exist')
+    if not os.path.isfile(path):
+            return (1, 'Process launch path does not exist')
+    if os.system(f'python3 {path} &') == 0:
+        return (0, 'Process killed & launched')
