@@ -64,6 +64,12 @@ print_bold()
 
 # Visible execution starts here.
 
+# Must be run as root.
+if [ "$EUID" -ne 0 ]; then
+	print_warn_bold "ERROR: Please run this script as root."
+	exit 1
+fi
+
 print_info_bold "
 This script will install SlimbookBattery in your system (replacing previous
 installation if exists).
@@ -90,23 +96,23 @@ fi
 system_dependencies="tlp tlp-rdw libnotify-bin cron gobject-introspection "
 pkg_mgr_found="true"
 
-if [[ $(command -v apt) ]]; then
+if [[ $(command -v apt-get) ]]; then
 	# Debian based distro.
 	system_dependencies+="libayatana-appindicator3-1"
-	pkg_install_cmd="sudo apt install"
+	pkg_install_cmd="apt-get install -y"
 	pkg_search_cmd="dpkg-query -l"
 
 elif [[ $(command -v pacman) ]]; then
 	# Arch based distro.
 	system_dependencies+="libindicator-gtk3 libappindicator-gtk3"
-	pkg_install_cmd="sudo pacman -S"
-	pkg_search_cmd="sudo pacman -Qs"
+	pkg_install_cmd="pacman -S"
+	pkg_search_cmd="pacman -Qs"
 
 elif [[ $(command -v yum) ]]; then
 	# RPM based distro.
 	system_dependencies+="libindicator-gtk3 libappindicator-gtk3"
-	pkg_install_cmd="sudo yum install"
-	pkg_search_cmd="sudo yum list installed | grep"
+	pkg_install_cmd="yum install"
+	pkg_search_cmd="yum list installed | grep"
 
 else
 	pkg_mgr_found="false"
@@ -124,9 +130,11 @@ if [[ $pkg_mgr_found == "true" ]]; then
 	print_info "$system_dependencies\n"
 
 	for pkg in $system_dependencies; do
-		if [[ ! $(eval "$pkg_search_cmd $pkg") ]]; then
+		eval "$pkg_search_cmd $pkg >/dev/null 2>&1"
+		if [[ $? -ne 0 ]]; then
 			print_info "Trying to install $pkg..."
-			if [[ ! $(eval "$pkg_install_cmd $pkg") ]]; then
+			eval "$pkg_install_cmd $pkg >/dev/null 2>&1"
+			if [[ $? -eq 0 ]]; then
 				print_done "...Done installing $pkg!"
 			else
 				print_warn_bold "ERROR: Could not install" \
@@ -152,37 +160,39 @@ print_info_bold "...Done installing Python dependencies!\n"
 
 ###############################################################################
 
-# The main installation starts here.
+# The main installation starts here. Will exit on failure.
 
 print_info_bold "Installing SlimbookBattery...\n"
-
+set -e
 
 print_info "Removing previously installed resources..."
-sudo rm -rf /usr/share/slimbookbattery/
+rm -rf /usr/bin/slimbookbattery*
+rm -rf /usr/share/slimbookbattery/
 print_info "...Done removing previously installed resources!\n"
 
 
 # TODO: Remove the need to create folder structure manually.
 print_info "Creating folder structure..."
-sudo mkdir /usr/share/slimbookbattery
-sudo mkdir /usr/share/slimbookbattery/images
-sudo mkdir /usr/share/slimbookbattery/changelog
-sudo mkdir /usr/share/slimbookbattery/src
-sudo mkdir /usr/share/slimbookbattery/bin
+mkdir /usr/share/slimbookbattery
+mkdir /usr/share/slimbookbattery/bin
+mkdir /usr/share/slimbookbattery/custom
+mkdir /usr/share/slimbookbattery/default
+mkdir /usr/share/slimbookbattery/images
+mkdir /usr/share/slimbookbattery/src
 print_info "...Done creating folder structure!\n"
 
 
 print_info "Copying contents..."
 while read line; do
-	sudo cp -vrf $line
+	cp -vrf $line
 done < debian/install
 print_info "...Done copying contents!\n"
 
 
 print_info "Creating binary symlinks..."
-sudo rm /usr/bin/slimbookbattery /usr/bin/slimbookbattery-pkexec
-sudo cp -sv /usr/share/slimbookbattery/bin/* /usr/bin/
-sudo chmod +x /usr/share/slimbookbattery/bin/*
+rm /usr/bin/slimbookbattery /usr/bin/slimbookbattery-pkexec
+cp -sv /usr/share/slimbookbattery/bin/* /usr/bin/
+chmod +x /usr/share/slimbookbattery/bin/*
 print_info "...Done creating binary symlinks!\n"
 
 
