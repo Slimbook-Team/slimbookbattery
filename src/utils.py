@@ -117,13 +117,12 @@ def get_user(from_file=None):
 # Returns pkg_man, install_cmd, and package name if it is provided as an argument
 
 def get_install_command(package_manager=None):
-    pkg_man = package_manager or get_package_manager()
-    if pkg_man:
-        try:
-            command = PKG_MANAGERS[pkg_man]['install_command']
-            return command
-        except Exception as e:
-            logger.error("No distro install command found")
+    if pkg_man := package_manager or get_package_manager():
+            try:
+                command = PKG_MANAGERS[pkg_man]['install_command']
+                return command
+            except Exception as e:
+                logger.error("No distro install command found")
     return None
 
 def get_package_manager():
@@ -159,17 +158,15 @@ def get_package_name(apt_package_name):
     return None
 
 def check_package_installed(package_name):
-    pkg_name = get_package_name(package_name)
-    if pkg_name:
-        pkg_man = get_package_manager()
-        if pkg_man:
-            try:
-                cmd = PKG_MANAGERS[pkg_man]['get_app_list_cmd']
-                if subprocess.getstatusoutput(f"{pkg_man} {cmd} | grep {pkg_name}")[0] == 0:
-                    return True
-            except Exception:
-                print(Exception)
-                logger.error("Could not get list of installed apps.")
+    if pkg_name := get_package_name(package_name):
+        if pkg_man := get_package_manager():
+                try:
+                    cmd = PKG_MANAGERS[pkg_man]['get_app_list_cmd']
+                    if subprocess.getstatusoutput(f"{pkg_man} {cmd} | grep {pkg_name}")[0] == 0:
+                        return True
+                except Exception:
+                    print(Exception)
+                    logger.error("Could not get list of installed apps.")
     return False
 def get_os_info():
     subprocess.getstatusoutput('cat /etc/*-release')
