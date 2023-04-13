@@ -216,9 +216,7 @@ def check_plug():
     last = config.get('CONFIGURATION', 'plugged')
     if last != '':
         last = last.split('-')
-        last_date = []
-        for value in last:
-            last_date.append(int(value))
+        last_date = [int(value) for value in last]
 
         last_date = date(last_date[0], last_date[1], last_date[2])
 

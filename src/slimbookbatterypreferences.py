@@ -1313,10 +1313,7 @@ class SettingsGrid(BasePageGrid):
 
             if len(search.split(' & ')) > 1:
                 search = search.split(' & ')
-                active = True
-                for variable in search:
-                    if variable not in content:
-                        active = False
+                active = all(variable in content for variable in search)
                 button.set_active(active)
             else:
                 button.set_active(search in content)
