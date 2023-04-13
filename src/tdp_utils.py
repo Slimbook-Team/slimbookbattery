@@ -54,9 +54,8 @@ def set_mode(mode):
             tdp_conf.set('CONFIGURATION', 'autostart', 'on')
             print('TDP Autostart enabled')
 
-        configfile = open(TDP_CONFIG_FILE, 'w')
-        tdp_conf.write(configfile)
-        configfile.close()
+        with open(TDP_CONFIG_FILE, 'w') as configfile:
+            tdp_conf.write(configfile)
 
         print(f"Actual TDP Mode: {tdp_conf.get('CONFIGURATION', 'mode')}")
     except Exception as e:

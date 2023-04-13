@@ -102,7 +102,7 @@ class Indicator(Gtk.Application):
             mode = config.getint('CONFIGURATION', 'modo_actual')
             self.indicator.set_icon_full(ICONS.get(str(mode)), 'Mode')
         else:
-            self.indicator.set_icon_full(ICONS.get(str('0')), 'Icon disabled')
+            self.indicator.set_icon_full(ICONS.get('0'), 'Icon disabled')
 
     def get_menu(self):
         menu = Gtk.Menu()
