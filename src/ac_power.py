@@ -30,10 +30,8 @@ if cmd[0] == 0:
 
     if status == 'Discharging':
         config.set('CONFIGURATION', 'plugged', str(date.today()))
-        configfile = open(config_file, 'w')
-        config.write(configfile)
-        configfile.close()
-
+        with open(config_file, 'w') as configfile:
+            config.write(configfile)
 else:
     status = (_('Unknown'))
 

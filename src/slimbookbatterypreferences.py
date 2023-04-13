@@ -23,6 +23,7 @@ import configparser
 import logging
 import math
 import os
+import pathlib
 import re
 import shutil
 import subprocess
@@ -87,6 +88,7 @@ class Colors:  # You may need to change color settings
     CYAN = "\033[1;36m"
     YELLOW = '\033[33m'
     BLUE = '\033[34m'
+    BOLD = "\033[;1m"
     BOLD = "\033[;1m"
 
 class BasePageGrid(Gtk.Grid):
@@ -794,8 +796,7 @@ class GeneralGrid(BasePageGrid):
         button = self.content['autostart']
         button.set_active(self.autostart_initial)
 
-        with open(TLP_CONF) as f:
-            content = f.read()
+        content = pathlib.Path(TLP_CONF).read_text()
         if 'TLP_DEFAULT_MODE=AC' in content:
             self.content['working_failure'].set_active(0)
             self.work_mode = self.AC_MODE
@@ -1297,9 +1298,7 @@ class SettingsGrid(BasePageGrid):
                 )
             )
 
-        with open(self.custom_file_path) as f:
-            content = f.read()
-
+        content = pathlib.Path(self.custom_file_path).read_text()
         for key, search in {
             'sound': 'SOUND_POWER_SAVE_ON_BAT=1',
             'wifi_profile': 'WIFI_PWR_ON_BAT=on',
@@ -1413,9 +1412,7 @@ class SettingsGrid(BasePageGrid):
                 self.content[field].set_sensitive(button.get_active())
 
     def save_selection(self):
-        with open(self.custom_file_path) as f:
-            content = f.read()
-
+        content = pathlib.Path(self.custom_file_path).read_text()
         base_cmd = 'sed -i "/{search}=/ c{search}={value}" {file}'
 
         button = self.content['governor']
