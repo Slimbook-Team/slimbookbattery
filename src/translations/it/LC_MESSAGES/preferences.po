@@ -1,21 +1,23 @@
 # SLIMBOOK BATTERY
 # Copyright (C) 2019
 # This file is distributed under the same license as the SLIMBOOK BATTERY package.
-# SLIMBOOK <dev@slimbook.es>, 2019.
 #
-#, fuzzy
+# SLIMBOOK <dev@slimbook.es>, 2019.
+# Domenico Femia <domefemia@protonmail.com>, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: SLIMBOOK BATTERY 3.2beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-05-09 14:08+0200\n"
-"PO-Revision-Date: 2019-05-12 23:59+0200\n"
-"Last-Translator: Albano Battistella<>\n"
-"Language-Team: Italian <LL@li.org>\n"
+"PO-Revision-Date: 2023-04-14 16:51+0200\n"
+"Last-Translator: Domenico Femia <domefemia@protonmail.com>\n"
+"Language-Team: Italian <kde-i18n-it@kde.org>\n"
 "Language: Italian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 22.12.3\n"
 
 #: preferences.py:41
 msgid "Slimbook Battery Preferences"
@@ -31,11 +33,11 @@ msgstr "Viene visualizzata una finestra completa"
 
 #: preferences.py:84
 msgid "Width: "
-msgstr "Larghezza:"
+msgstr "Larghezza: "
 
 #: preferences.py:84
 msgid " Height: "
-msgstr "Altezza:"
+msgstr " Altezza: "
 
 #: preferences.py:86 preferences.py:94
 msgid "General"
@@ -55,7 +57,7 @@ msgstr "Bilanciato"
 
 #: preferences.py:158 preferences.py:166 preferences.py:242 preferences.py:2908
 msgid "Maximum Performance"
-msgstr "Massima Performance"
+msgstr "Performance Massime"
 
 #: preferences.py:176 preferences.py:184
 msgid "Battery"
@@ -86,8 +88,12 @@ msgid "Icon on the taskbar (require restart app):"
 msgstr "Icona sulla barra delle applicazioni (richiede il riavvio della app):"
 
 #: preferences.py:292
-msgid "Note: If you have the autostart activated and the icon hide, the app will be executed with the icon hide (once you restart the system)"
-msgstr "Se hai attivato l'avvio automatico e l'icona si nasconde, l'app sarà eseguita con l'icona nascondi (una volta riavviato il sistema)"
+msgid ""
+"Note: If you have the autostart activated and the icon hide, the app will be"
+" executed with the icon hide (once you restart the system)"
+msgstr ""
+"Se hai attivato l'avvio automatico e l'icona si nasconde, l'app sarà eseguita"
+" con l'icona nascondi (una volta riavviato il sistema)"
 
 #: preferences.py:309
 msgid "Hibernate system after 3 hours in suspension:"
@@ -95,7 +101,9 @@ msgstr "Sistema di ibernazione dopo 3 ore in sospensione:"
 
 #: preferences.py:325 preferences.py:773 preferences.py:1228
 msgid "Battery mode parameters (disabled when you connect AC power):"
-msgstr "Parametri della modalità batteria (disabilitati quando si collega l'alimentazione CA):"
+msgstr ""
+"Parametri della modalità batteria (disabilitati quando si collega"
+" l'alimentazione CA):"
 
 #: preferences.py:335 preferences.py:782 preferences.py:1237
 msgid "Limit CPU profile:"
@@ -142,11 +150,16 @@ msgstr "Profilo di risparmio energetico Wi-Fi:"
 
 #: preferences.py:448 preferences.py:903 preferences.py:1357
 msgid "Note: power save can cause an unstable wifi link."
-msgstr "Nota: il risparmio energetico può causare un collegamento wifi instabile"
+msgstr ""
+"Nota: il risparmio energetico può causare un collegamento wifi instabile"
 
 #: preferences.py:467 preferences.py:922 preferences.py:1376
 msgid "Bluetooth disabled when not in use:"
 msgstr "Bluetooth disabilitato quando non in uso:"
+
+#: preferences.py:341 preferences.py:1014 preferences.py:1485
+msgid "Disable animations:"
+msgstr "Disabilita animazioni:"
 
 #: preferences.py:482 preferences.py:937 preferences.py:1391
 msgid "Wi-Fi disabled when not in use:"
@@ -162,7 +175,8 @@ msgstr "Imposta la luminosità dello schermo:"
 
 #: preferences.py:517 preferences.py:972 preferences.py:1426
 msgid "Note: this option reduces the battery consumption considerably"
-msgstr "Nota: questa opzione riduce considerevolmente il consumo della batteria"
+msgstr ""
+"Nota: questa opzione riduce considerevolmente il consumo della batteria"
 
 #: preferences.py:539 preferences.py:995 preferences.py:1449
 msgid "Bluetooth does not boot on start:"
@@ -181,20 +195,30 @@ msgid "Autosuspend USB Ports:"
 msgstr "Spegnimento automatico delle porte USB:"
 
 #: preferences.py:596 preferences.py:1052 preferences.py:1506
-msgid "Note: Set autosuspend mode for all USB devices upon system start or a change of power source. Input devices like mice and keyboards as well as scanners are excluded by default"
-msgstr "Nota: imposta la modalità di sospensione automatica per tutti i dispositivi USB all'avvio del sistema o una modifica di alimentazione: Dispositivi di input come mouse e tastiere e scanner sono esclusi di default"
+msgid ""
+"Note: Set autosuspend mode for all USB devices upon system start or a change"
+" of power source. Input devices like mice and keyboards as well as scanners"
+" are excluded by default"
+msgstr ""
+"Nota: imposta la modalità di sospensione automatica per tutti i dispositivi"
+" USB all'avvio del sistema o una modifica di alimentazione: Dispositivi di"
+" input come mouse e tastiere e scanner sono esclusi di default"
 
 #: preferences.py:618 preferences.py:1073 preferences.py:1528
 msgid "Excluded USB IDs from USB autosuspend:"
 msgstr "ID USB esclusi dalla sospensione automatica USB:"
 
 #: preferences.py:647 preferences.py:1102 preferences.py:1557
-msgid "Note: You need to write in the Text Box the USB IDs (separate with spaces) to exclude from autosuspend"
-msgstr "Nota: è necessario scrivere nella casella di testo gli ID USB (separati da spazi) da escludere dalla sospensione automatica"
+msgid ""
+"Note: You need to write in the Text Box the USB IDs (separate with spaces) to"
+" exclude from autosuspend"
+msgstr ""
+"Nota: è necessario scrivere nella casella di testo gli ID USB (separati da"
+" spazi) da escludere dalla sospensione automatica"
 
 #: preferences.py:671 preferences.py:1126 preferences.py:1581
 msgid "Exclude bluetooth devices from USB autosuspend:"
-msgstr "Escludere dispositivi bluetooth dalla sospensione automatica USB:"
+msgstr "Escludi dispositivi bluetooth dalla sospensione automatica USB:"
 
 #: preferences.py:691 preferences.py:1146 preferences.py:1601
 msgid "Exclude phone devices from USB autosuspend:"
@@ -202,15 +226,17 @@ msgstr "Escludi dispositivi telefonici dalla sospensione automatica USB:"
 
 #: preferences.py:711 preferences.py:1166 preferences.py:1621
 msgid "Exclude printer devices from USB autosuspend:"
-msgstr "Escludere i dispositivi della stampante dalla sospensione automatica USB:"
+msgstr ""
+"Escludi i dispositivi della stampante dalla sospensione automatica USB:"
 
 #: preferences.py:731 preferences.py:1186 preferences.py:1641
 msgid "Exclude Ethernet devices from USB autosuspend:"
-msgstr "Escludere dispositivi Ethernet dalla sospensione automatica USB:"
+msgstr "Escludi dispositivi Ethernet dalla sospensione automatica USB:"
 
 #: preferences.py:751 preferences.py:1206 preferences.py:1661
 msgid "Disable USB autosuspend mode upon system shutdown:"
-msgstr "Disattiva la modalità di sospensione automatica USB all'arresto del sistema:"
+msgstr ""
+"Disattiva la modalità di sospensione automatica USB all'arresto del sistema:"
 
 #: preferences.py:1680
 msgid "Enable cycle alerts"
@@ -301,32 +327,56 @@ msgid "Last update of the battery information:"
 msgstr "Ultimo aggiornamento delle informazioni sulla batteria:"
 
 #: preferences.py:1942
-msgid "Slimbook Battery is a battery optimization application for portable devices and can increase the battery"
-msgstr "Slimbook Battery è un'applicazione di ottimizzazione della batteria per portatili dispositivi che possono aumentare la batteria"
+msgid ""
+"Slimbook Battery is a battery optimization application for portable devices"
+" and can increase the battery"
+msgstr ""
+"Slimbook Battery è un'applicazione di ottimizzazione della batteria per"
+" portatili dispositivi che possono aumentare la batteria"
 
 #: preferences.py:1942
-msgid "life up to 50%. For this purpose, the third-party software is used to manage and configure the system resources."
-msgstr "vita del 50%. A tale scopo, il software di terze parti viene utilizzato per gestire e configurare le risorse di sistema."
+msgid ""
+"life up to 50%. For this purpose, the third-party software is used to manage"
+" and configure the system resources."
+msgstr ""
+"vita del 50%. A tale scopo, il software di terze parti viene utilizzato per"
+" gestire e configurare le risorse di sistema."
 
 #: preferences.py:1947
-msgid "Special thanks to TLP (© 2019, linrunner), Nvidia, AMD and Intel for offering us the necessary tools to make it possible!"
-msgstr "Ringraziamenti speciali a TLP (© 2019, linrunner), Nvidia, AMD e Intel per offrirci gli strumenti necessari per aver reso questo possibile!"
+msgid ""
+"Special thanks to TLP (© 2019, linrunner), Nvidia, AMD and Intel for offering"
+" us the necessary tools to make it possible!"
+msgstr ""
+"Ringraziamenti speciali a TLP (© 2019, linrunner), Nvidia, AMD e Intel per"
+" offrirci gli strumenti necessari per aver reso questo possibile!"
 
 #: preferences.py:1952
-msgid "If this application has been useful to you, consider saying it in our social networks or even buy a SLIMBOOK ;)"
-msgstr "Se questa applicazione ti è stata utile, considera di dirlo nei nostri social networks o addirittura acquistare uno SLIMBOOK;)"
+msgid ""
+"If this application has been useful to you, consider saying it in our social"
+" networks or even buy a SLIMBOOK ;)"
+msgstr ""
+"Se questa applicazione ti è stata utile, considera di dirlo nei nostri social"
+" networks o addirittura acquistare uno SLIMBOOK;)"
 
 #: preferences.py:2002
 msgid "IMPORTANT NOTE:"
 msgstr "NOTE IMPORTANTI: "
 
 #: preferences.py:2002
-msgid " If you have any software, widget or application that changes the CPU profile, battery"
-msgstr "Se hai software, widget o applicazioni per cambiare il profilo della CPU, ottimizzazione della batteria"
+msgid ""
+" If you have any software, widget or application that changes the CPU"
+" profile, battery"
+msgstr ""
+"Se hai software, widget o applicazioni per cambiare il profilo della CPU,"
+" ottimizzazione della batteria"
 
 #: preferences.py:2002
-msgid "optimization or similar, it may affect the operation of this application. Use it under your responsibility."
-msgstr "o simili, può influenzare il funzionamento di questa applicazione. Usalo sotto la tua responsabilità"
+msgid ""
+"optimization or similar, it may affect the operation of this application. Use"
+" it under your responsibility."
+msgstr ""
+"o simili, può influenzare il funzionamento di questa applicazione. Usalo"
+" sotto la tua responsabilità"
 
 #: preferences.py:2015
 msgid "Visit SLIMBOOK website"
@@ -334,7 +384,9 @@ msgstr "Visita il sito web SLIMBOOK"
 
 #: preferences.py:2019
 msgid "strurlwebsite"
-msgstr "https://slimbook.es/tutoriales/aplicaciones-slimbook/100-slimbook-battery-3-optimiza-la-duracion-de-la-bateria-de-tu-ordenador-portatil"
+msgstr ""
+"https://slimbook.es/tutoriales/aplicaciones-slimbook/100-slimbook-battery-3-op"
+"timiza-la-duracion-de-la-bateria-de-tu-ordenador-portatil"
 
 #: preferences.py:2019
 msgid "Tutorial to learn to use Slimbook Battery"
@@ -345,8 +397,12 @@ msgid "Info:"
 msgstr "info:"
 
 #: preferences.py:2024
-msgid "Contact with us if you find something wrong. We would appreciate that you attach the file that is generated"
-msgstr "Contattaci se trovi qualcosa di sbagliato. Apprezzeremo che tu alleghi il file che viene generato"
+msgid ""
+"Contact with us if you find something wrong. We would appreciate that you"
+" attach the file that is generated"
+msgstr ""
+"Contattaci se trovi qualcosa di sbagliato. Apprezzeremo che tu alleghi il"
+" file che viene generato"
 
 #: preferences.py:2024
 msgid "by clicking the button below"
@@ -378,7 +434,7 @@ msgstr "Condividere:"
 
 #: preferences.py:2058
 msgid " --copy and redistribute the material in any medium or format"
-msgstr "- Copiare e ridistribuire il materiale in qualsiasi supporto o formato"
+msgstr " --copia e ridistribuisci il materiale in qualsiasi supporto o formato"
 
 #: preferences.py:2058
 msgid "Slimbook Copyright - License Creative Commons BY-NC-ND"
@@ -407,7 +463,7 @@ msgstr "Report File generato"
 
 #: preferences.py:2224
 msgid "Report file canceled, wrong password"
-msgstr  "File report cancellato, password errata"
+msgstr "File report cancellato, password errata"
 
 #: preferences.py:2226
 msgid "Report file canceled"
@@ -431,19 +487,23 @@ msgstr "Ripristina valori cancellati"
 
 #: preferences.py:3285
 msgid "Current mode : "
-msgstr "Modalità reale:"
+msgstr "Modalità corrente: "
 
 #: preferences.py:3286
 msgid "Autostart: "
-msgstr "Avvio automatico:"
+msgstr "Avvio automatico: "
 
 #: preferences.py:3288
 msgid "OnOff: "
-msgstr "Acceso spento:"
+msgstr "Acceso spento: "
 
 #: preferences.py:3379
-msgid "The changes have been applied, but it is necessary to restart so that some of them may take effect. "
-msgstr "Le modifiche sono state applicate, ma è necessario riavviare in modo che alcune di loro possano avere effetto."
+msgid ""
+"The changes have been applied, but it is necessary to restart so that some of"
+" them may take effect. "
+msgstr ""
+"Le modifiche sono state applicate, ma è necessario riavviare affinché alcune"
+" di esse possano avere effetto."
 
 #: preferences.py:3379
 msgid "Do you want to restart?"

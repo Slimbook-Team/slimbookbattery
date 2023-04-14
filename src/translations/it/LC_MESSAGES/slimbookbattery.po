@@ -1,41 +1,43 @@
 # SLIMBOOK BATTERY
 # Copyright (C) 2019
 # This file is distributed under the same license as the SLIMBOOK BATTERY package.
-# SLIMBOOK <dev@slimbook.es>, 2019.
 #
-#, fuzzy
+# SLIMBOOK <dev@slimbook.es>, 2019.
+# Domenico Femia <domefemia@protonmail.com>, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: SLIMBOOK BATTERY 3.2beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-05-09 14:08+0200\n"
-"PO-Revision-Date: 2019-05-13 20:30+0100\n"
-"Last-Translator: Albano Battistella <>\n"
-"Language-Team: Italian <LL@li.org>\n"
+"PO-Revision-Date: 2023-04-14 16:55+0200\n"
+"Last-Translator: Domenico Femia <domefemia@protonmail.com>\n"
+"Language-Team: Italian <kde-i18n-it@kde.org>\n"
 "Language: Italian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 22.12.3\n"
 
 #: slimbookbattery.py:47
 msgid "File ahorrodeenergia exists in custom"
-msgstr "Il file esistente personalizzato e' di risparmio energetico"
+msgstr "Il file esistente personalizzato è di risparmio energetico"
 
 #: slimbookbattery.py:56
 msgid "File equilibrado exists in custom"
-msgstr "Il file esitente personalizzato e' bilanciato"
+msgstr "Il file esitente personalizzato è bilanciato"
 
 #: slimbookbattery.py:64
 msgid "File maximorendimiento exists in custom"
-msgstr "Il file esistente personalizzato e' di massime prestazioni"
+msgstr "Il file esistente personalizzato è di massime prestazioni"
 
 #: slimbookbattery.py:80
 msgid "File ahorrodeenergia exists in default"
-msgstr "Il file esistente di default e' risparmio energetico"
+msgstr "Il file esistente di default è risparmio energetico"
 
 #: slimbookbattery.py:88
 msgid "File equilibrado exists in default"
-msgstr "Il file esistente di default e' bilanciato"
+msgstr "Il file esistente di default è bilanciato"
 
 #: slimbookbattery.py:96
 msgid "File maximorendimiento exists in default"
@@ -43,11 +45,11 @@ msgstr "Il file esistente di default è di  massime prestazioni"
 
 #: slimbookbattery.py:114
 msgid "strconfigfilecheck"
-msgstr "Il file di configurazione e' corretto"
+msgstr "Il file di configurazione è corretto"
 
 #: slimbookbattery.py:146
 msgid "The user introduces password correctly"
-msgstr "L'utente ha introdotto la password correttamente"
+msgstr "L'utente ha inserito la password correttamente"
 
 #: slimbookbattery.py:148 slimbookbattery.py:453 slimbookbattery.py:482
 #: slimbookbattery.py:508 slimbookbattery.py:533 slimbookbattery.py:634
@@ -116,7 +118,7 @@ msgstr "Avvisi disabilitati"
 
 #: slimbookbattery.py:388
 msgid "High battery level (Remaining "
-msgstr "Livello batteria alto (rimanente"
+msgstr "Livello batteria alto (Rimanente "
 
 #: slimbookbattery.py:388 slimbookbattery.py:396
 msgid " Warning "
@@ -132,11 +134,11 @@ msgstr "secondi"
 
 #: slimbookbattery.py:391
 msgid "High battery. Disconnect your power supply."
-msgstr "Batteria alta.Disconnetti il tuo alimentatore."
+msgstr "Batteria alta. Disconnetti il tuo alimentatore."
 
 #: slimbookbattery.py:396
 msgid "Critical battery level (Remaining "
-msgstr "Livello critico della batteria (rimanente "
+msgstr "Livello critico della batteria (Rimanente "
 
 #: slimbookbattery.py:399
 msgid "Low battery. Connect your power supply."
@@ -154,8 +156,12 @@ msgid "Alert!"
 msgstr "Allarme!"
 
 #: slimbookbattery.py:694
-msgid "The changes have been applied, but it is necessary to restart so that some of them may take effect."
-msgstr "Le modifiche sono state applicate, ma è necessario riavviare in modo che alcune di loro abbiano effetto.\nVuoi riavviare?"
+msgid ""
+"The changes have been applied, but it is necessary to restart so that some of"
+" them may take effect."
+msgstr ""
+"Le modifiche sono state applicate, ma è necessario riavviare in modo che"
+" alcune di loro abbiano effetto.\nVuoi riavviare?"
 
 #: slimbookbattery.py:663
 msgid "System will not restart"
