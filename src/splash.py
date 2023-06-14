@@ -7,28 +7,29 @@ import gi
 
 import utils
 
-gi.require_version('Gtk', '3.0')
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GdkPixbuf
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
-IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, '../images'))
+IMAGES_PATH = os.path.normpath(os.path.join(CURRENT_PATH, "../images"))
 
 
 class Splash(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Slimbook Battery")
         # self.set_skip_taskbar_hint(True) # Evita que se muestre icono en taskbar
-        main_grid = Gtk.Grid(row_spacing=10,
-                             column_homogeneous=True,
-                             row_homogeneous=True)
+        main_grid = Gtk.Grid(
+            row_spacing=10, column_homogeneous=True, row_homogeneous=True
+        )
         self.add(main_grid)
-        self.set_name('splash_dialog')
+        self.set_name("splash_dialog")
 
         pix_buffer = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'normal.png'),
+            filename=os.path.join(IMAGES_PATH, "normal.png"),
             width=825,
             height=225,
-            preserve_aspect_ratio=True)
+            preserve_aspect_ratio=True,
+        )
 
         self.set_default_icon(pix_buffer)
 
@@ -50,15 +51,17 @@ class Splash(Gtk.Window):
 
         # set content for the spash window
         pix_buffer = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            filename=os.path.join(IMAGES_PATH, 'slimbook_splash.png'),
+            filename=os.path.join(IMAGES_PATH, "slimbook_splash.png"),
             width=width,
             height=height,
-            preserve_aspect_ratio=True
+            preserve_aspect_ratio=True,
         )
 
         logo = Gtk.Image.new_from_pixbuf(pix_buffer)
 
-        pix_buffer_animation = GdkPixbuf.PixbufAnimation.new_from_file(os.path.join(IMAGES_PATH, "splash.gif"))
+        pix_buffer_animation = GdkPixbuf.PixbufAnimation.new_from_file(
+            os.path.join(IMAGES_PATH, "splash.gif")
+        )
         image = Gtk.Image()
         image.set_from_animation(pix_buffer_animation)
         image.set_size_request(10, 10)
@@ -77,6 +80,6 @@ def splash_window():
     window.show_all()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     splash_window()
     Gtk.main()

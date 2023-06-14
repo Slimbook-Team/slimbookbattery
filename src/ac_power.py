@@ -14,27 +14,25 @@ if CURRENT_PATH not in sys.path:
 import utils
 
 USER_NAME = utils.get_user()
-HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
+HOMEDIR = os.path.expanduser(f"~{USER_NAME}")
 
-_ = utils.load_translation('preferences')
+_ = utils.load_translation("preferences")
 
-config_file = HOMEDIR + '/.config/slimbookbattery/slimbookbattery.conf'
+config_file = f"{HOMEDIR}/.config/slimbookbattery/slimbookbattery.conf"
 
 config = configparser.ConfigParser()
 config.read(config_file)
 
-cmd = (subprocess.getstatusoutput("cat /sys/class/power_supply/BAT0/status"))
+cmd = subprocess.getstatusoutput("cat /sys/class/power_supply/BAT0/status")
 
 if cmd[0] == 0:
     status = cmd[1]
 
-    if status == 'Discharging':
-        config.set('CONFIGURATION', 'plugged', str(date.today()))
-        configfile = open(config_file, 'w')
-        config.write(configfile)
-        configfile.close()
-
+    if status == "Discharging":
+        config.set("CONFIGURATION", "plugged", str(date.today()))
+        with open(config_file, "w") as configfile:
+            config.write(configfile)
 else:
-    status = (_('Unknown'))
+    status = _("Unknown")
 
 print(status)

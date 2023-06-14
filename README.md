@@ -20,7 +20,7 @@ This means that this application it's not only compatible with SLIMBOOK computer
 
 The application implements three different energy modes: «energy saving», «balanced» and «maximum performance». Each energy mode comes with default values but the user is allowed to change the most important values, to adjust or avoid errors in their hardware.
 
-The energy save applications like TLP are based on "If I i'm not using it and consumes, I better turn it off". In this way the consumption of resources is reduced when the computer uses the battery. Slimbook Battery 4 uses this premise as a source of energy saving.
+The energy save applications like TLP are based on "If I'm not using it and consumes, I better turn it off". In this way the consumption of resources is reduced when the computer uses the battery. Slimbook Battery 4 uses this premise as a source of energy saving.
 
 
 ![Captura de pantalla de 2021-10-01 12-58-49](https://user-images.githubusercontent.com/18195266/135992289-d05ac9eb-5c00-4525-8641-e09efee8608f.png)
@@ -51,7 +51,7 @@ Run command:
 
 
 * ## From this repository-source   
-	Donwload entire repo. Navigate to it in a terminal. And run deploy.sh script as root:
+	Download entire repo. Navigate to it in a terminal. And run deploy.sh script as root:
 
 		sudo ./deploy.sh
 

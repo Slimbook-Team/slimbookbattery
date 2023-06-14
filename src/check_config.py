@@ -17,14 +17,14 @@ import utils
 
 USER_NAME = utils.get_user()
 
-HOMEDIR = os.path.expanduser('~{}'.format(USER_NAME))
+HOMEDIR = os.path.expanduser(f"~{USER_NAME}")
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
-DEFAULT_CONF = os.path.join(CURRENT_PATH,'configuration', 'slimbookbattery.conf')
-CONFIG_FOLDER = os.path.join(HOMEDIR, '.config/slimbookbattery')
-CONFIG_FILE = os.path.join(CONFIG_FOLDER, 'slimbookbattery.conf')
+DEFAULT_CONF = os.path.join(CURRENT_PATH, "configuration", "slimbookbattery.conf")
+CONFIG_FOLDER = os.path.join(HOMEDIR, ".config/slimbookbattery")
+CONFIG_FILE = os.path.join(CONFIG_FOLDER, "slimbookbattery.conf")
 
-UPDATES_DIR = os.path.join(CURRENT_PATH, 'updates')
+UPDATES_DIR = os.path.join(CURRENT_PATH, "updates")
 
 uid, gid = pwd.getpwnam(USER_NAME).pw_uid, pwd.getpwnam(USER_NAME).pw_gid
 
@@ -33,18 +33,20 @@ logger = logging.getLogger()
 
 def main():
     if not os.path.isdir(CONFIG_FOLDER):
-        logger.info('Creating config folder ...')
+        logger.info("Creating config folder ...")
         os.umask(0)
         os.makedirs(CONFIG_FOLDER, mode=0o766)  # creates with perms
         os.chown(CONFIG_FOLDER, uid, gid)  # set user:group
-        logger.info(subprocess.getoutput('ls -la ' + CONFIG_FOLDER))
+        logger.info(subprocess.getoutput(f"ls -la {CONFIG_FOLDER}"))
     else:
-        logger.info('Configuration folder ({}) found!'.format(CONFIG_FOLDER))
+        logger.info(f"Configuration folder ({CONFIG_FOLDER}) found!")
 
     tlp_conf = utils.get_tlp_conf_file()[0]
     if not os.path.exists(tlp_conf):
-        shutil.copyfile(os.path.join(CURRENT_PATH, 'configuration', 'default', 'equilibrado'), tlp_conf)
-
+        shutil.copyfile(
+            os.path.join(CURRENT_PATH, "configuration", "default", "equilibrado"),
+            tlp_conf,
+        )
 
     set_ownership(CONFIG_FOLDER)
     set_ownership(UPDATES_DIR)
@@ -52,14 +54,15 @@ def main():
     check_config_file()
     check_tlp_files()
 
+
 def set_ownership(folder):
     folder_stat = os.stat(folder)
-    logger.debug("Folder {}\nUser uid={}\nFolder uid={}".format(folder, uid, folder_stat.st_uid))
+    logger.debug(f"Folder {folder}\nUser uid={uid}\nFolder uid={folder_stat.st_uid}")
     f_uid = folder_stat.st_uid
     f_gid = folder_stat.st_gid
 
-    if not uid == f_uid or not gid == f_gid:
-        #logger.info('Setting {} ownership').format(folder)
+    if uid != f_uid or gid != f_gid:
+        # logger.info('Setting {} ownership').format(folder)
 
         for dir_path, dir_name, filenames in os.walk(folder):
             logger.debug(dir_path)
@@ -69,8 +72,9 @@ def set_ownership(folder):
                 logger.debug(file_path)
                 os.chown(file_path, uid, gid)
 
+
 def check_config_file():
-    logger.info('Checking Slimbook Battery Configuration')
+    logger.info("Checking Slimbook Battery Configuration")
     if os.path.isfile(CONFIG_FILE):
         config = configparser.ConfigParser()
         config.read(CONFIG_FILE)
@@ -80,30 +84,30 @@ def check_config_file():
         incidences = False
 
         for section in default_config.sections():
-            logger.info('Checking section: {} ...'.format(section))
+            logger.info(f"Checking section: {section} ...")
             if not config.has_section(section):
                 incidences = True
                 config.add_section(section)
-                logger.info('Section added')
+                logger.info("Section added")
 
             for var in default_config.options(section):
                 if not config.has_option(section, var):
                     incidences = True
-                    logger.info('Not found: {}'.format(var))
+                    logger.info(f"Not found: {var}")
                     config.set(section, var, default_config.get(section, var))
 
         if incidences:
             try:
-                with open(CONFIG_FILE, 'w') as configfile:
+                with open(CONFIG_FILE, "w") as configfile:
                     config.write(configfile)
-                logger.info('Incidences corrected.')
+                logger.info("Incidences corrected.")
             except Exception:
-                logger.exception('Incidences could not be corrected.')
+                logger.exception("Incidences could not be corrected.")
         else:
-            logger.info('Incidences not found.')
+            logger.info("Incidences not found.")
 
     else:
-        logger.info('Creating config file ...')
+        logger.info("Creating config file ...")
         shutil.copy(DEFAULT_CONF, CONFIG_FOLDER)
         os.chown(CONFIG_FILE, uid, gid)  # set user:group
 
@@ -111,17 +115,15 @@ def check_config_file():
 # Checks if the user's default config files exist an if they are like the app version's default files.
 # If files or directories don't exist they are created.
 def check_tlp_files():
-    
-    
-    
+
     logger.info("Checking Slimbook Battery's TLP Configuration")
 
     incidences = False
-    usr_custom_dir = os.path.join(CONFIG_FOLDER, 'custom/')
-    usr_default_dir = os.path.join(CONFIG_FOLDER, 'default/')
-    app_default_dir = os.path.join(CURRENT_PATH, '../default/')
+    usr_custom_dir = os.path.join(CONFIG_FOLDER, "custom/")
+    usr_default_dir = os.path.join(CONFIG_FOLDER, "default/")
+    app_default_dir = os.path.join(CURRENT_PATH, "../default/")
 
-    files = ['ahorrodeenergia', 'equilibrado', 'maximorendimiento']
+    files = ["ahorrodeenergia", "equilibrado", "maximorendimiento"]
 
     # Checks if default files are the same in the app folder and in the system,
     # if something changed all will be restored
@@ -132,20 +134,25 @@ def check_tlp_files():
 
         # If user default is different from app default -- updates
         if os.path.isfile(usr_default_file) and os.path.isfile(app_default_file):
-            logger.info('Checking {}'.format(file))
-            if subprocess.getstatusoutput('diff {} {}'.format(app_default_dir, usr_default_dir))[0] != 0:
-                logger.info('Default files have changed, updating:')
+            logger.info(f"Checking {file}")
+            if (
+                subprocess.getstatusoutput(f"diff {app_default_dir} {usr_default_dir}")[
+                    0
+                ]
+                != 0
+            ):
+                logger.info("Default files have changed, updating:")
                 incidences = True
         else:
-            logger.info('{} does not exist.'.format(usr_default_file))
+            logger.info(f"{usr_default_file} does not exist.")
             incidences = True
 
     if incidences:
-        logger.info('Resetting default and custom files ...')
+        logger.info("Resetting default and custom files ...")
 
         if os.path.isdir(app_default_dir):
             if not (os.path.isdir(usr_default_dir) and os.path.isdir(usr_custom_dir)):
-                logger.info('Creating directories')
+                logger.info("Creating directories")
                 os.makedirs(usr_default_dir, mode=0o766)
                 os.chown(usr_default_dir, uid, gid)  # set user:group
                 os.mkdir(usr_custom_dir, mode=0o766)
@@ -155,21 +162,25 @@ def check_tlp_files():
                 app_default_file = os.path.join(app_default_dir, file)
                 shutil.copy(app_default_file, usr_default_dir)
                 shutil.copy(app_default_file, usr_custom_dir)
-                os.chown(os.path.join(usr_default_dir, file), uid, gid)  # set user:group
+                os.chown(
+                    os.path.join(usr_default_dir, file), uid, gid
+                )  # set user:group
                 os.chown(os.path.join(usr_custom_dir, file), uid, gid)  # set user:group
         else:
-            logger.error('Base default file not found')
+            logger.error("Base default file not found")
     else:
-        logger.info('Incidences not found.')
+        logger.info("Incidences not found.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        "%(asctime)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s"
+    )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    logger.info('Config check executed as {}'.format(USER_NAME))
+    logger.info(f"Config check executed as {USER_NAME}")
     main()
