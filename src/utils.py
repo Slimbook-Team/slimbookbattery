@@ -1,8 +1,6 @@
 import getpass
 import gettext
 import os
-from re import sub
-import sys
 import subprocess
 import locale
 import logging
@@ -14,17 +12,16 @@ def get_logger(logger_name, create_file=False):
 
     log = logging.getLogger(logger_name)
     log.setLevel(level=logging.DEBUG)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(funcName)s:%(lineno)d - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(name)s - "
+                                  "%(funcName)s:%(lineno)d - "
+                                  "%(levelname)s - %(message)s")
 
     if create_file:
         try:
             fh = logging.FileHandler("/var/log/slimbookbattery.log")
         except PermissionError:
-            log.critical(
-                "Cannot open log file /var/slimbookbattery.log, using /tmp/slimbookbattery.log"
-            )
+            log.critical("Cannot open log file /var/slimbookbattery.log, "
+                         "using /tmp/slimbookbattery.log")
             fh = logging.FileHandler("/tmp/slimbookbattery.log")
         if fh:
             fh.setLevel(level=logging.ERROR)
@@ -51,6 +48,7 @@ PKG_MANAGERS = {
         "install_command": "-i",
         "get_app_list_cmd": "-qa",
     },
+
     "zypper": {
         "distros": [
             "suse",
@@ -59,16 +57,19 @@ PKG_MANAGERS = {
         "install_command": "in",
         "get_app_list_cmd": None,
     },
+
     "apt": {
         "distros": ["ubuntu", "debian", "elementary"],
         "install_command": "install",
         "get_app_list_cmd": "list --installed",
     },
+
     "yum": {
         "distros": ["centos"],
         "install_command": "install",
         "get_app_list_cmd": None,
     },
+
     "pacman": {
         "distros": [
             "manjaro",
@@ -117,7 +118,7 @@ def get_user(from_file=None):
     return user_name
 
 
-# Returns pkg_man, install_cmd, and package name if it is provided as an argument
+# Returns pkg_man, install_cmd, & package name if it is provided as an argument
 
 
 def get_install_command(package_manager=None):
@@ -125,7 +126,7 @@ def get_install_command(package_manager=None):
         try:
             command = PKG_MANAGERS[pkg_man]["install_command"]
             return command
-        except Exception as e:
+        except Exception:
             logger.error("No distro install command found")
     return None
 
@@ -170,8 +171,9 @@ def check_package_installed(package_name):
             try:
                 cmd = PKG_MANAGERS[pkg_man]["get_app_list_cmd"]
                 if (
-                    subprocess.getstatusoutput(f"{pkg_man} {cmd} | grep {pkg_name}")[0]
-                    == 0
+                    subprocess.getstatusoutput(
+                        f"{pkg_man} {cmd} | grep {pkg_name}"
+                    )[0] == 0
                 ):
                     return True
             except Exception:
@@ -216,7 +218,7 @@ def get_tlp_conf_file():
 
     code, res = subprocess.getstatusoutput('tlp-stat --config | grep "TLP "')
     if code == 0:
-        res = res[res.find("TLP") : -1]
+        res = res[res.find("TLP"):-1]
         version = res.split(" ")[1]
     else:
         version = "1.3"  # Most common
@@ -256,7 +258,7 @@ def get_display_resolution():
 
 
 def reboot_process(process_name, path):
-    process = subprocess.getoutput(f"{pkg_man} {cmd} | grep {pkg_name}")
+    process = subprocess.getoutput(f"pgrep -f {process_name}")
     # If it finds a process, kills it
     if len(process.split("\n")) > 0:
         proc_list = process.split("\n")
@@ -264,7 +266,7 @@ def reboot_process(process_name, path):
         for i in range(len(proc_list)):
             try:
                 subprocess.getstatusoutput(f"kill -9 {proc_list[i]}")
-            except:
+            except Exception:
                 print("Killing process failed")
     if not os.path.isfile(path):
         return (1, "Process launch path does not exist")
