@@ -943,10 +943,11 @@ class SettingsGrid(BasePageGrid):
         "halign": Gtk.Align.CENTER,
     }
 
-    INTEL_GOV = [
+    EPP_GOV = [
         (1, "powersave"),
         (2, "performance"),
     ]
+
     CPUFREQ_GOV = [
         (1, "ondemand"),
         (2, "schedutil"),
@@ -1038,7 +1039,8 @@ class SettingsGrid(BasePageGrid):
             "name": "governor",
             "label": _("CPU scaling governor saving profile:"),
             "type": "governor",
-            "intel_pstate": INTEL_GOV,
+            "intel_pstate": EPP_GOV,
+            "amd-pstate-epp": EPP_GOV,
             "amd-pstate": CPUFREQ_GOV,
             "acpi-cpufreq": CPUFREQ_GOV,
             "intel_cpufreq": CPUFREQ_GOV,
@@ -1193,6 +1195,7 @@ class SettingsGrid(BasePageGrid):
                 "acpi-cpufreq",
                 "intel_cpufreq",
                 "amd-pstate",
+                "amd-pstate-epp",
             ]:
                 governor_driver = None
                 break
@@ -1427,8 +1430,8 @@ class SettingsGrid(BasePageGrid):
         line = line[: line.find("\n")]
         gov_mode = line[line.find("=") + 1 :]
         active_mode = None
-        if governor == "intel_pstate":
-            values = list(dict(self.INTEL_GOV).values())
+        if governor == "intel_pstate" or governor == "amd-pstate-epp":
+            values = list(dict(self.EPP_GOV).values())
             if gov_mode in values:
                 active_mode = values.index(gov_mode)
             # Setting default mode to save energy
