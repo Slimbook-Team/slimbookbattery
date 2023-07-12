@@ -1430,7 +1430,7 @@ class SettingsGrid(BasePageGrid):
         line = line[: line.find("\n")]
         gov_mode = line[line.find("=") + 1 :]
         active_mode = None
-        if governor == "intel_pstate" or governor == "amd-pstate-epp":
+        if governor == "intel_pstate" or governor == "amd-pstate-epp" or governor == "amd_pstate_epp":
             values = list(dict(self.EPP_GOV).values())
             if gov_mode in values:
                 active_mode = values.index(gov_mode)
