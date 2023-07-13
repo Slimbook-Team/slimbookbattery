@@ -1041,6 +1041,7 @@ class SettingsGrid(BasePageGrid):
             "type": "governor",
             "intel_pstate": EPP_GOV,
             "amd-pstate-epp": EPP_GOV,
+            "amd_pstate_epp": EPP_GOV,
             "amd-pstate": CPUFREQ_GOV,
             "acpi-cpufreq": CPUFREQ_GOV,
             "intel_cpufreq": CPUFREQ_GOV,
@@ -1196,6 +1197,7 @@ class SettingsGrid(BasePageGrid):
                 "intel_cpufreq",
                 "amd-pstate",
                 "amd-pstate-epp",
+                "amd_pstate_epp",
             ]:
                 governor_driver = None
                 break
