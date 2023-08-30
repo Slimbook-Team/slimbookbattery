@@ -246,7 +246,7 @@ msgid "Learn more about TDP Controller"
 msgstr ""
 
 #: slimbookbatterypreferences.py:770
-msgid "Actual energy mode:"
+msgid "Current energy mode:"
 msgstr ""
 
 #: slimbookbatterypreferences.py:986

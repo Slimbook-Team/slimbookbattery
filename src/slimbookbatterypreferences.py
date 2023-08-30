@@ -804,7 +804,7 @@ class GeneralGrid(BasePageGrid):
         buttons_grid.set_name("radio_grid")
         self.grid.attach(buttons_grid, 0, row, 5, 3)
 
-        label = Gtk.Label(label=_("Actual energy mode:").upper())
+        label = Gtk.Label(label=_("Current energy mode:").upper())
         label.set_name("modes")
         buttons_grid.attach(label, 0, 0, 3, 1)
 

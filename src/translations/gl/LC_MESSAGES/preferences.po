@@ -75,7 +75,7 @@ msgid "Autostart application:"
 msgstr "Iniciar co arrinque do sistema:"
 
 #: preferences.py:235
-msgid "Actual energy mode:"
+msgid "Current energy mode:"
 msgstr "Modo actual de enerxía:"
 
 #: preferences.py:264
