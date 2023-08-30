@@ -98,19 +98,21 @@ pkg_mgr_found="true"
 
 if [[ $(command -v apt-get) ]]; then
 	# Debian based distro.
-	system_dependencies+="libayatana-appindicator3-1"
+	system_dependencies+="libayatana-appindicator3-1 python3-gi"
 	pkg_install_cmd="apt-get install -y"
 	pkg_search_cmd="dpkg-query -l"
 
 elif [[ $(command -v pacman) ]]; then
 	# Arch based distro.
 	system_dependencies+="libindicator-gtk3 libappindicator-gtk3"
+	system_dependencies+="python-gobject"
 	pkg_install_cmd="pacman -S"
 	pkg_search_cmd="pacman -Qs"
 
 elif [[ $(command -v yum) ]]; then
 	# RPM based distro.
 	system_dependencies+="libindicator-gtk3 libappindicator-gtk3"
+	system_dependencies+="python3-gobject"
 	pkg_install_cmd="yum install"
 	pkg_search_cmd="yum list installed | grep"
 
@@ -147,16 +149,6 @@ if [[ $pkg_mgr_found == "true" ]]; then
 
 	print_info_bold "...Done installing system dependencies!\n"
 fi
-
-
-print_info_bold "Installing Python dependencies..."
-
-if [[ ! $(pip3 install -r requirements.txt) ]]; then
-	print_warn_bold "ERROR: Could not install Python dependencies."
-	exit 1
-fi
-
-print_info_bold "...Done installing Python dependencies!\n"
 
 ###############################################################################
 
